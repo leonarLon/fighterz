@@ -1,0 +1,49 @@
+-- Helpers dos testes pgTAP. Incluído no início de cada teste com \ir (tudo é desfeito no rollback).
+create extension if not exists pgtap with schema extensions;
+create schema tests;
+grant usage on schema tests to anon, authenticated;
+
+-- Cria um usuário pelo mesmo caminho do cadastro real (trigger handle_new_user).
+create function tests.create_user(
+  p_username text,
+  p_birth_date date default '1990-01-01',
+  p_accepted_terms boolean default true
+) returns uuid
+language plpgsql
+as $$
+declare
+  v_id uuid := gen_random_uuid();
+begin
+  insert into auth.users (instance_id, id, aud, role, email, raw_user_meta_data, created_at, updated_at)
+  values ('00000000-0000-0000-0000-000000000000', v_id, 'authenticated', 'authenticated',
+          p_username || '@test.local',
+          jsonb_build_object('username', p_username, 'display_name', initcap(p_username),
+                             'birth_date', p_birth_date, 'accepted_terms', p_accepted_terms),
+          now(), now());
+  return v_id;
+end;
+$$;
+
+create function tests.authenticate_as(p_user_id uuid) returns void
+language sql
+as $$
+  select set_config('role', 'authenticated', true),
+         set_config('request.jwt.claims',
+                    jsonb_build_object('sub', p_user_id, 'role', 'authenticated')::text, true);
+$$;
+
+create function tests.as_anon() returns void
+language sql
+as $$
+  select set_config('role', 'anon', true),
+         set_config('request.jwt.claims', '{"role":"anon"}', true);
+$$;
+
+create function tests.as_postgres() returns void
+language sql
+as $$
+  select set_config('role', 'postgres', true),
+         set_config('request.jwt.claims', '', true);
+$$;
+
+grant execute on all functions in schema tests to anon, authenticated;

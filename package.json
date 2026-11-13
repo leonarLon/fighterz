@@ -1,0 +1,32 @@
+{
+  "name": "figtherz",
+  "private": true,
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev": "npm run dev -w web",
+    "build": "npm run build -w web",
+    "lint": "npm run lint -w web",
+    "test": "npm run test --workspaces --if-present",
+    "db:start": "supabase start",
+    "db:stop": "supabase stop",
+    "db:reset": "supabase db reset",
+    "db:test": "supabase test db",
+    "db:types": "supabase gen types typescript --local > packages/core/src/db/types.ts",
+    "test:e2e": "npm run test:e2e -w web",
+    "typecheck": "npm run typecheck -w web && tsc --noEmit -p packages/core"
+  },
+  "devDependencies": {
+    "supabase": "^2"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "overrides": {
+    "@typescript-eslint/typescript-estree": {
+      "minimatch": "^11.0.8"
+    }
+  }
+}
