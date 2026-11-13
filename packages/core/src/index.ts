@@ -6,3 +6,6 @@ export * from './domain/theme';
 export * from './schemas/auth';
 export * from './schemas/profile';
 export type { Database, Tables, TablesInsert, TablesUpdate, Enums } from './db/types';
+export * from './domain/media';
+export * from './domain/text';
+export * from './schemas/social';

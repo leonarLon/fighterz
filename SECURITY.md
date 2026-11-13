@@ -40,7 +40,7 @@ Toda ação administrativa gera registro em `moderation_actions` ou `admin_audit
 | Upload malicioso | Validação de MIME **e** assinatura (magic bytes), limites de tamanho no bucket, reencode de imagem no cliente (remove EXIF/GPS), nomes gerados (UUID), servir com `Content-Disposition` adequado |
 | SSRF nas URLs de usuário | Servidor **não** busca URLs fornecidas por usuário. Links externos só são exibidos, e vídeo externo só por allowlist (YouTube/Vimeo) via embed |
 | Vazamento de segredo | `.env*` no `.gitignore`, `.env.example` sem valores, varredura com `gitleaks` (MIT) no pre-commit |
-| Mídia privada | Bucket privado + URL assinada de 60 s gerada após checagem de permissão |
+| Mídia privada | Bucket privado único (`post-media`) + URL assinada de 1 h, emitida só se a RLS do Storage permitir ver o post (aprovado em 13/11/2026) |
 | Enumeração de usuários | Mensagens genéricas em login/recuperação |
 | Abuso de serviços públicos (OSM/Nominatim/ViaCEP) | Proxy no servidor, fila e cache. Ver `COST_ZERO_POLICY.md` |
 

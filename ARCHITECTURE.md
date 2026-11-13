@@ -111,7 +111,7 @@ Ver seção 6.
 | Validação no servidor | Políticas do Storage limitam bucket, tamanho, MIME e pasta do dono | Idem |
 
 - Reprodução: `<video preload="metadata" playsinline muted>` com autoplay só quando ≥ 60% visível (IntersectionObserver), pausando ao sair da tela. `Range requests` do Storage dão o carregamento progressivo.
-- Mídia de **perfil privado** fica em bucket privado com URL assinada de curta duração, gerada após checar permissão.
+- Toda mídia de post fica num bucket privado único, servida por URL assinada de 1 h, gerada após checar permissão (decisão de 13/11/2026).
 - Vídeos longos: incentivar link externo (YouTube) no post.
 
 ## 7. Segurança (resumo; detalhes em `SECURITY.md`)

@@ -236,10 +236,15 @@ Todas as políticas serão cobertas por testes pgTAP do tipo "usuário A **não*
 |---|---|---|---|
 | `avatars` | público leitura | 2 MB, image/webp,jpeg,png | `{uid}/...` |
 | `covers` | público leitura | 4 MB | `{uid}/...` ou `academy/{id}/...` |
-| `post-media` | público leitura **apenas** para posts públicos | 25 MB, image/webp, video/mp4, video/webm | `{uid}/{post_id}/...` |
-| `post-media-private` | URL assinada (60 s) após checagem | 25 MB | idem |
+| `post-media` | **privado**. Leitura por URL assinada (1 h), emitida só se a RLS permitir ver o post | 25 MB, image/webp, image/jpeg (vídeo fora do MVP) | `{uid}/{post_id}/{posição}-{aleatório}.webp` |
+
+> **Implementado na Fase 3 e aprovado em 13/11/2026:** um único bucket privado em vez de `post-media` + `post-media-private`. Assim um post que muda de visibilidade, ou o perfil que fica privado, não exige mover arquivos: a política de SELECT do Storage reaproveita `can_view_post()`. A validade de 1 h (e não 60 s) evita imagens quebradas durante a leitura de uma página do feed. `avatars` e `covers` ainda não foram criados.
 
 Escrita sempre restrita a `(storage.foldername(name))[1] = auth.uid()::text`.
 
-## 7. Funções RPC planejadas
+## 7. Funções RPC
+
+**Implementadas na Fase 3:** `get_home_feed`, `get_profile_posts`, `get_saved_posts`, `get_explore`, `search_profiles`, `create_post` (post + mídias + marcações numa transação), `delete_post`, `delete_comment`, `mark_all_notifications_read`, além das views `post_cards`, `comment_cards` e `notification_cards` (`security_invoker`). Feed e Explorar são `security definer` com filtro explícito equivalente à RLS: filtram primeiro por índice e só montam os cards da página. Com a RLS avaliada linha a linha, a página do meio do feed passava de 300 ms; agora fica em ~3–9 ms com 1.000 posts. Soft delete de post e de comentário só por função, porque um UPDATE direto deixaria a linha invisível pela própria política de SELECT. `posts.academy_id`, `unit_id` e `event_id` entram nas Fases 4 e 5, junto com as tabelas de destino.
+
+**Planejadas:**
 `get_home_feed`, `get_explore`, `get_profile_page`, `get_academy_page`, `get_teacher_schedule` (todas as academias do professor), `search_global`, `search_units_nearby(lat, lng, radius_km, filtros)`, `create_checkin(... , share_to_feed)`, `confirm_promotion`, `respond_membership`, `toggle_like`, `delete_my_account`, `export_my_data` (LGPD).

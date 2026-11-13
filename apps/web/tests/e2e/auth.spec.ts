@@ -4,7 +4,8 @@ import { createConfirmedUser, formAlert, linkFromEmail, signInViaUi, signOutViaU
 test.describe("cadastro e login", () => {
   test("jornada completa: cadastro, confirmação, perfil, tema, sair, entrar e excluir conta", async ({ page, context }) => {
     const user = await createConfirmedUser(page, "jornada");
-    await expect(page.getByRole("heading", { name: /Olá, Atleta/ })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Início" })).toBeVisible();
+    await expect(page.getByText("Seu feed ainda está vazio")).toBeVisible();
 
     // Editar perfil
     await page.goto("/perfil");

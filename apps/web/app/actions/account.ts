@@ -2,7 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import { deleteAccountSchema, parseThemePreference, profileUpdateSchema } from "@figtherz/core";
+import { POST_MEDIA_BUCKET, deleteAccountSchema, parseThemePreference, profileUpdateSchema } from "@figtherz/core";
 import { createClient } from "@/lib/supabase/server";
 import { getCurrentUser, requireUser } from "@/lib/auth";
 import { fromZodError, text, type FormState } from "@/lib/form-state";
@@ -76,6 +76,15 @@ export async function deleteAccount(_prev: FormState, formData: FormData): Promi
     password: parsed.data.password,
   });
   if (authError) return { status: "error", fieldErrors: { password: ["Senha incorreta."] } };
+
+  // LGPD: apaga as mídias do usuário no Storage antes de apagar a conta (a política só permite a própria pasta).
+  const bucket = supabase.storage.from(POST_MEDIA_BUCKET);
+  const { data: folders } = await bucket.list(user.id, { limit: 1000 });
+  for (const folder of folders ?? []) {
+    const { data: files } = await bucket.list(`${user.id}/${folder.name}`, { limit: 100 });
+    const paths = (files ?? []).map((file) => `${user.id}/${folder.name}/${file.name}`);
+    if (paths.length) await bucket.remove(paths);
+  }
 
   const { error } = await supabase.rpc("delete_my_account");
   if (error) return { status: "error", message: "Não foi possível excluir a conta. Tente novamente." };

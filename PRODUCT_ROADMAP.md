@@ -27,7 +27,7 @@
 - Layout: barra inferior (mobile), menu lateral (desktop).
 - **Aceite:** pgTAP + Vitest + Playwright verdes. Usuário cria conta, edita perfil e troca tema, e o tema persiste.
 
-### Fase 3: Rede social
+### Fase 3: Rede social ✅ (aceita em 13/11/2026)
 - Posts (texto, até 10 imagens, 1 vídeo ≤ 60 s), mídia otimizada no cliente, worker FFmpeg opcional.
 - Feed cronológico por cursor, curtidas, comentários + respostas, salvos, seguir/privado/solicitações, compartilhar (link + Web Share), marcações com aprovação, Explorar, notificações com Realtime, bloqueio e denúncia básica.
 - **Aceite:** feed com 1.000 posts de seed carrega a 1ª página em < 300 ms local, sem N+1. Curtida dupla impossível.

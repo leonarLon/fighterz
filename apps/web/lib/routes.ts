@@ -7,6 +7,8 @@ export const routes = {
   notifications: "/notificacoes",
   profileEdit: "/perfil",
   settings: "/configuracoes",
+  saved: "/salvos",
+  post: (id: string) => `/p/${id}`,
   profile: (username: string) => `/u/${encodeURIComponent(username)}`,
   signIn: "/entrar",
   signUp: "/cadastro",
@@ -24,6 +26,7 @@ export const PROTECTED_PREFIXES = [
   routes.notifications,
   routes.profileEdit,
   routes.settings,
+  routes.saved,
   routes.resetPassword,
 ];
 
