@@ -134,7 +134,7 @@ function CommentItem({
 
   return (
     <article className="flex gap-3" aria-label={`Comentário de ${comment.author.displayName}`}>
-      <Avatar name={comment.author.displayName} size="sm" />
+      <Avatar name={comment.author.displayName} path={comment.author.avatarPath} size="sm" />
       <div className="min-w-0 flex-1">
         <div className="rounded-md bg-bg px-3 py-2">
           <p className="text-sm">

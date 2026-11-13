@@ -14,7 +14,7 @@ export default async function NotificationsPage() {
   const [{ data }, { data: mentions }] = await Promise.all([
     supabase
       .from("notification_cards")
-      .select("id, type, read_at, created_at, post_id, comment_id, actor_id, actor_username, actor_display_name, post_excerpt, academy_slug, academy_name, event_id, event_title, event_status")
+      .select("id, type, read_at, created_at, post_id, comment_id, actor_id, actor_username, actor_display_name, actor_avatar_path, post_excerpt, academy_slug, academy_name, event_id, event_title, event_status")
       .order("created_at", { ascending: false })
       .limit(100),
     supabase.from("post_mentions").select("post_id, status").eq("user_id", user.id),
@@ -28,7 +28,9 @@ export default async function NotificationsPage() {
     createdAt: n.created_at!,
     postId: n.post_id,
     commentId: n.comment_id,
-    actor: n.actor_id ? { id: n.actor_id, username: n.actor_username ?? "", displayName: n.actor_display_name ?? "" } : null,
+    actor: n.actor_id
+      ? { id: n.actor_id, username: n.actor_username ?? "", displayName: n.actor_display_name ?? "", avatarPath: n.actor_avatar_path }
+      : null,
     excerpt: n.post_excerpt,
     academy: n.academy_slug ? { slug: n.academy_slug, name: n.academy_name ?? "" } : null,
     event: n.event_id ? { id: n.event_id, title: n.event_title ?? "", cancelled: n.event_status === "cancelled" } : null,

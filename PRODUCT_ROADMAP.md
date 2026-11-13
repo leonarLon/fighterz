@@ -43,8 +43,9 @@
 ### Fase 6: Administração e segurança (aceita em 13/11/2026)
 - Painel admin (usuários, professores, academias, unidades, posts, denúncias, modalidades, eventos, verificações, configurações), moderação com histórico, suspensão, auditoria, revisão completa de RLS.
 
-### Fase 7: Finalização
+### Fase 7: Finalização (implementada em 13/11/2026, aguardando aceite)
 - Acessibilidade (axe), performance, testes completos, documentação, preparo de deploy gratuito (**com sua autorização**), plano do app Expo.
+- **Feito:** vídeo em posts (pedido do usuário em 13/11/2026; até 60 s / 25 MB, sem transcodificação), foto de perfil, purga após 30 dias e limpeza de órfãos, CSP com nonce, medição de desempenho (consultas principais < 10 ms com o cache aquecido), mídia e professores de demonstração, checklist de publicação (`DEPLOYMENT.md` §8) e plano mobile (`MOBILE_PLAN.md`).
 
 ## MVP sugerido (para validar com pessoas reais o quanto antes)
 Fases 2 + 3 (sem vídeo) + 4 = **rede social + página de professor/academia com grade e mapa**. É o núcleo diferencial. Jornada e eventos vêm em seguida.

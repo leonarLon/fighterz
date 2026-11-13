@@ -2,7 +2,7 @@
 
 import { useEffect, useId, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { ImagePlus, X } from "lucide-react";
+import { Film, ImagePlus, X } from "lucide-react";
 import {
   CAPTION_MAX,
   MAX_IMAGES_PER_POST,
@@ -14,15 +14,17 @@ import {
 import { createPost } from "@/app/actions/posts";
 import { createClient } from "@/lib/supabase/client";
 import { ImageError, prepareImage } from "@/lib/image-processing";
+import { VideoError, prepareVideo } from "@/lib/video-processing";
 import { Button } from "@/components/ui/button";
 import { FieldShell, InputField, SelectField } from "@/components/ui/field";
 import { FormMessage } from "@/components/ui/form-message";
 
-type Draft = { key: string; file: File; preview: string; alt: string };
+type Draft = { key: string; file: File; preview: string; alt: string; kind: "image" | "video" };
 
 export function Composer({ userId, martialArts }: { userId: string; martialArts: { id: string; name: string }[] }) {
   const router = useRouter();
   const fileInput = useRef<HTMLInputElement>(null);
+  const videoInput = useRef<HTMLInputElement>(null);
   const altHelpId = useId();
   const [caption, setCaption] = useState("");
   const [visibility, setVisibility] = useState<(typeof VISIBILITIES)[number]>("public");
@@ -35,6 +37,20 @@ export function Composer({ userId, martialArts }: { userId: string; martialArts:
 
   useEffect(() => () => drafts.forEach((d) => URL.revokeObjectURL(d.preview)), [drafts]);
 
+  const hasVideo = drafts.some((d) => d.kind === "video");
+
+  function addVideo(files: FileList | null) {
+    const file = files?.[0];
+    if (videoInput.current) videoInput.current.value = "";
+    if (!file) return;
+    if (drafts.length > 0) {
+      setStatus({ kind: "error", message: "Um post tem até 10 fotos ou um vídeo. Remova as fotos para enviar um vídeo." });
+      return;
+    }
+    setStatus({ kind: "idle" });
+    setDrafts([{ key: crypto.randomUUID(), file, preview: URL.createObjectURL(file), alt: "", kind: "video" }]);
+  }
+
   function addFiles(files: FileList | null) {
     if (!files) return;
     const room = MAX_IMAGES_PER_POST - drafts.length;
@@ -42,7 +58,7 @@ export function Composer({ userId, martialArts }: { userId: string; martialArts:
     if (files.length > room) setStatus({ kind: "error", message: `Até ${MAX_IMAGES_PER_POST} fotos por post.` });
     setDrafts((current) => [
       ...current,
-      ...picked.map((file) => ({ key: crypto.randomUUID(), file, preview: URL.createObjectURL(file), alt: "" })),
+      ...picked.map((file) => ({ key: crypto.randomUUID(), file, preview: URL.createObjectURL(file), alt: "", kind: "image" as const })),
     ]);
     if (fileInput.current) fileInput.current.value = "";
   }
@@ -50,16 +66,51 @@ export function Composer({ userId, martialArts }: { userId: string; martialArts:
   async function submit(event: React.FormEvent) {
     event.preventDefault();
     if (!caption.trim() && drafts.length === 0) {
-      setStatus({ kind: "error", message: "Escreva algo ou adicione uma foto." });
+      setStatus({ kind: "error", message: "Escreva algo ou adicione uma foto ou vídeo." });
       return;
     }
     setStatus({ kind: "idle" });
     const postId = crypto.randomUUID();
     const supabase = createClient();
     const media = [];
+    const uploaded: string[] = [];
 
     try {
       for (const [position, draft] of drafts.entries()) {
+        if (draft.kind === "video") {
+          setProgress("Conferindo o vídeo…");
+          const video = await prepareVideo(draft.file);
+          const random = crypto.randomUUID().slice(0, 8);
+          const path = postMediaPath(userId, postId, 0, random, video.ext);
+          setProgress("Enviando o vídeo…");
+          const { error } = await supabase.storage
+            .from(POST_MEDIA_BUCKET)
+            .upload(path, video.file, { contentType: video.contentType, upsert: false });
+          if (error) throw new VideoError("Falha ao enviar o vídeo. Verifique sua conexão e tente de novo.");
+          uploaded.push(path);
+          let thumbnail: string | undefined;
+          if (video.poster) {
+            const posterPath = `${userId}/${postId}/0-${random}-poster.webp`;
+            const { error: posterError } = await supabase.storage
+              .from(POST_MEDIA_BUCKET)
+              .upload(posterPath, video.poster, { contentType: "image/webp", upsert: false });
+            if (!posterError) {
+              thumbnail = posterPath;
+              uploaded.push(posterPath);
+            }
+          }
+          media.push({
+            type: "video" as const,
+            path,
+            thumbnail,
+            durationMs: video.durationMs,
+            width: video.width,
+            height: video.height,
+            size: video.file.size,
+            alt: draft.alt.trim(),
+          });
+          continue;
+        }
         setProgress(`Otimizando foto ${position + 1} de ${drafts.length}…`);
         const image = await prepareImage(draft.file);
         const random = crypto.randomUUID().slice(0, 8);
@@ -69,7 +120,8 @@ export function Composer({ userId, martialArts }: { userId: string; martialArts:
           .from(POST_MEDIA_BUCKET)
           .upload(path, image.blob, { contentType: image.contentType, upsert: false });
         if (error) throw new ImageError("Falha ao enviar a foto. Verifique sua conexão e tente de novo.");
-        media.push({ path, width: image.width, height: image.height, size: image.blob.size, alt: draft.alt.trim() });
+        uploaded.push(path);
+        media.push({ type: "image" as const, path, width: image.width, height: image.height, size: image.blob.size, alt: draft.alt.trim() });
       }
 
       setProgress("Publicando…");
@@ -85,8 +137,11 @@ export function Composer({ userId, martialArts }: { userId: string; martialArts:
       router.push(`/p/${result.id}`);
     } catch (error) {
       // Arquivos já enviados de um post que falhou: remove para não deixar órfãos.
-      if (media.length) await supabase.storage.from(POST_MEDIA_BUCKET).remove(media.map((m) => m.path));
-      setStatus({ kind: "error", message: error instanceof ImageError ? error.message : "Não foi possível publicar." });
+      if (uploaded.length) await supabase.storage.from(POST_MEDIA_BUCKET).remove(uploaded);
+      setStatus({
+        kind: "error",
+        message: error instanceof ImageError || error instanceof VideoError ? error.message : "Não foi possível publicar.",
+      });
       setProgress("");
     }
   }
@@ -111,18 +166,28 @@ export function Composer({ userId, martialArts }: { userId: string; martialArts:
 
       <div>
         <p className="mb-2 text-sm font-semibold">
-          Fotos <span className="font-normal text-muted">({drafts.length}/{MAX_IMAGES_PER_POST})</span>
+          {hasVideo ? (
+            "Vídeo"
+          ) : (
+            <>
+              Fotos ou vídeo <span className="font-normal text-muted">({drafts.length}/{MAX_IMAGES_PER_POST} fotos)</span>
+            </>
+          )}
         </p>
         {drafts.length > 0 && (
           <ul className="mb-3 space-y-3">
             {drafts.map((draft, i) => (
               <li key={draft.key} className="flex gap-3 rounded-md border border-border p-2">
                 {/* Pré-visualização local (blob:), antes do upload. */}
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={draft.preview} alt="" className="size-20 shrink-0 rounded-sm object-cover" />
+                {draft.kind === "video" ? (
+                  <video src={draft.preview} muted playsInline preload="metadata" aria-hidden className="size-20 shrink-0 rounded-sm bg-black object-cover" />
+                ) : (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img src={draft.preview} alt="" className="size-20 shrink-0 rounded-sm object-cover" />
+                )}
                 <div className="min-w-0 flex-1">
                   <label htmlFor={`alt-${draft.key}`} className="block text-[13px] font-semibold">
-                    Descrição da foto {i + 1}
+                    {draft.kind === "video" ? "Descrição do vídeo" : `Descrição da foto ${i + 1}`}
                   </label>
                   <input
                     id={`alt-${draft.key}`}
@@ -137,7 +202,7 @@ export function Composer({ userId, martialArts }: { userId: string; martialArts:
                 </div>
                 <button
                   type="button"
-                  aria-label={`Remover foto ${i + 1}`}
+                  aria-label={draft.kind === "video" ? "Remover vídeo" : `Remover foto ${i + 1}`}
                   onClick={() => setDrafts((list) => list.filter((d) => d.key !== draft.key))}
                   className="flex size-11 shrink-0 items-center justify-center rounded-md text-muted hover:text-text"
                 >
@@ -158,7 +223,16 @@ export function Composer({ userId, martialArts }: { userId: string; martialArts:
           multiple
           className="sr-only"
           onChange={(e) => addFiles(e.target.files)}
-          disabled={drafts.length >= MAX_IMAGES_PER_POST || busy}
+          disabled={drafts.length >= MAX_IMAGES_PER_POST || hasVideo || busy}
+        />
+        <input
+          ref={videoInput}
+          id="video"
+          type="file"
+          accept="video/mp4,video/webm,video/quicktime"
+          className="sr-only"
+          onChange={(e) => addVideo(e.target.files)}
+          disabled={drafts.length > 0 || busy}
         />
         <label
           htmlFor="photos"
@@ -166,8 +240,15 @@ export function Composer({ userId, martialArts }: { userId: string; martialArts:
         >
           <ImagePlus aria-hidden className="size-5" /> Adicionar fotos
         </label>
+        <label
+          htmlFor="video"
+          className="ml-2 inline-flex min-h-11 cursor-pointer items-center gap-2 rounded-md border border-dashed border-border px-4 font-semibold hover:bg-bg has-[:disabled]:cursor-not-allowed has-[:disabled]:opacity-60"
+        >
+          <Film aria-hidden className="size-5" /> Adicionar vídeo
+        </label>
         <p className="mt-2 text-[13px] text-muted">
-          As fotos são otimizadas no seu aparelho e os dados de localização (GPS) são removidos. Publicações com crianças
+          As fotos são otimizadas no seu aparelho e os dados de localização (GPS) são removidos. Vídeo: MP4 ou WebM de até
+          60 segundos e 25 MB; a localização gravada pelo celular é apagada antes do envio. Publicações com crianças
           identificáveis exigem consentimento do responsável.
         </p>
       </div>

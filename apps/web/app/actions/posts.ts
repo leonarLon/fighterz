@@ -30,7 +30,16 @@ export async function createPost(input: CreatePostInput): Promise<{ ok: true; id
     p_visibility: data.visibility,
     p_martial_art_id: data.martialArtId ?? undefined,
     p_location_label: data.locationLabel ?? undefined,
-    p_media: data.media.map((m) => ({ path: m.path, width: m.width, height: m.height, size: m.size, alt: m.alt ?? "" })),
+    p_media: data.media.map((m) => ({
+      type: m.type,
+      path: m.path,
+      thumbnail: m.thumbnail ?? "",
+      duration_ms: m.durationMs ?? null,
+      width: m.width,
+      height: m.height,
+      size: m.size,
+      alt: m.alt ?? "",
+    })),
   });
   if (error) return failure(error, "Não foi possível publicar. Tente novamente.");
 

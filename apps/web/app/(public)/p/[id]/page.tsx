@@ -26,7 +26,7 @@ export default async function PostPage({ params }: Props) {
   // RLS: só comentários visíveis (post visível, sem bloqueio, não removidos).
   const { data } = await supabase
     .from("comment_cards")
-    .select("id, parent_id, author_id, author_username, author_display_name, body, like_count, created_at, viewer_has_liked")
+    .select("id, parent_id, author_id, author_username, author_display_name, author_avatar_path, body, like_count, created_at, viewer_has_liked")
     .eq("post_id", id)
     .order("created_at", { ascending: true })
     .limit(500);
@@ -34,7 +34,7 @@ export default async function PostPage({ params }: Props) {
   const comments: CommentView[] = (data ?? []).map((c) => ({
     id: c.id!,
     parentId: c.parent_id,
-    author: { id: c.author_id!, username: c.author_username ?? "", displayName: c.author_display_name ?? "" },
+    author: { id: c.author_id!, username: c.author_username ?? "", displayName: c.author_display_name ?? "", avatarPath: c.author_avatar_path },
     body: c.body ?? "",
     likeCount: c.like_count ?? 0,
     createdAt: c.created_at!,

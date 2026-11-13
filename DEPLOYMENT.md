@@ -43,6 +43,7 @@ npm run dev                 # http://localhost:3000
 - Testar RLS: `npx supabase test db` (pgTAP).
 - Gerar tipos: `npx supabase gen types typescript --local > packages/core/src/db/types.ts` (atalho: `npm run db:types`).
 - **Remoto:** `supabase db push` só com sua autorização, após `db diff` revisado.
+- Mídia de demonstração (só local): `npm run db:seed-media` gera fotos, vídeos e fotos de perfil num Chromium headless (Playwright) e envia ao Storage local. O script recusa rodar se a API não for `127.0.0.1`/`localhost`.
 - A migration 15 usa **pg_cron** (incluso e gratuito no Supabase) para expirar suspensões. No projeto remoto, confirme que a extensão está habilitada antes do `db push`.
 
 ## 5. Testes
@@ -60,3 +61,26 @@ npm run dev                 # http://localhost:3000
 | **C. Auto-hospedagem + Cloudflare Tunnel** | R$ 0 em serviços | Sem limites de terceiros, FFmpeg funciona | Depende do PC ligado. Energia elétrica. Upload doméstico |
 
 Nenhuma opção oferece disponibilidade contínua garantida, armazenamento ilimitado ou escala comercial.
+
+## 8. Checklist de publicação (preparado na Fase 7; executar só com autorização)
+Nada abaixo foi feito. Cada item cria ou altera recurso externo e precisa do seu "pode seguir".
+
+**Supabase (projeto remoto, plano Free)**
+1. Criar o projeto (região São Paulo) e anotar URL, chave publicável e chave secreta.
+2. Habilitar as extensões usadas: `postgis`, `pg_trgm`, `unaccent`, `citext`, `pg_cron`.
+3. `npx supabase link` + `npx supabase db push` (revisar `db diff` antes). **Não** rodar `seed.sql` nem `db:seed-media` em produção.
+4. Auth: confirmação de e-mail ligada, `site_url` e redirects com o domínio real, templates pt-BR de `supabase/templates/`. SMTP: o envio embutido do Supabase tem limite baixo por hora; avaliar um SMTP gratuito antes de abrir cadastro.
+5. Criar o primeiro superadmin manualmente (inserir em `user_roles` pelo SQL Editor) e trocar a senha.
+
+**Aplicação (opção A ou B da seção 7)**
+| Variável | Valor |
+|---|---|
+| `NEXT_PUBLIC_SUPABASE_URL` / `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` | do projeto remoto |
+| `NEXT_PUBLIC_SITE_URL` | domínio público (https) |
+| `APP_USER_AGENT` | `Figtherz/0.1 (contato: email@dominio)` |
+| `SUPABASE_SECRET_KEY` | só servidor; usada apenas na limpeza de arquivos do painel admin |
+
+**Depois do deploy**
+- Conferir cabeçalhos (CSP com nonce, HSTS) e rodar o Playwright contra a URL publicada com uma conta de teste.
+- Ativar backup: o plano Free não tem backup automático com retenção longa; agendar `supabase db dump` semanal (seção 6).
+- Revisar os limites gratuitos de Storage e egress (fotos e vídeos são o maior consumo) no painel do Supabase.

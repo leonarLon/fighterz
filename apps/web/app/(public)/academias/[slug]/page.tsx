@@ -173,7 +173,7 @@ export default async function AcademyPage({ params }: Props) {
             {teachers.map((t) => (
               <li key={t.userId}>
                 <Link href={routes.teacher(t.username)} className="flex items-center gap-3 rounded-lg border border-border bg-surface p-3 hover:bg-bg">
-                  <Avatar name={t.displayName} size="sm" />
+                  <Avatar name={t.displayName} path={t.avatarPath} size="sm" />
                   <span>
                     <span className="block font-semibold">{t.displayName}</span>
                     <span className="block text-[13px] text-muted">{MEMBERSHIP_ROLE_LABELS.teacher}</span>

@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import type { ReportTarget } from "@figtherz/core";
 import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { requireUser } from "@/lib/auth";
 import { fromZodError, text, type FormState } from "@/lib/form-state";
 
@@ -205,4 +206,29 @@ export async function savePlatformSettings(_prev: FormState, formData: FormData)
   if (error || !data?.length) return { status: "error", message: "Só administradores alteram as configurações.", values };
   revalidatePath("/", "layout");
   return { status: "success", message: "Configurações salvas.", values };
+}
+
+// ---------------------------------------------------------------------------
+// Limpeza de arquivos (fila preenchida pelo pg_cron: posts apagados há 30+ dias e uploads órfãos)
+// ---------------------------------------------------------------------------
+export async function processCleanupQueue(): Promise<Result> {
+  await requireUser();
+  const supabase = await createClient();
+  const { data: isAdmin } = await supabase.rpc("has_role", { p_role: "admin" });
+  if (!isAdmin) return { ok: false, message: ERRORS.admin_only! };
+
+  const admin = createAdminClient();
+  if (!admin) return { ok: false, message: "Configure SUPABASE_SECRET_KEY no servidor para apagar arquivos (veja DEPLOYMENT.md)." };
+
+  const { data: queue, error } = await admin.from("storage_cleanup_queue").select("bucket_id, object_name").limit(500);
+  if (error) return { ok: false, message: "Não foi possível ler a fila." };
+  let removed = 0;
+  for (const bucket of new Set((queue ?? []).map((q) => q.bucket_id))) {
+    const names = (queue ?? []).filter((q) => q.bucket_id === bucket).map((q) => q.object_name);
+    const { error: removeError } = await admin.storage.from(bucket).remove(names);
+    if (removeError) continue;
+    await admin.from("storage_cleanup_queue").delete().eq("bucket_id", bucket).in("object_name", names);
+    removed += names.length;
+  }
+  return { ok: true, message: removed ? `${removed} arquivos apagados do Storage.` : "Nada para limpar." };
 }

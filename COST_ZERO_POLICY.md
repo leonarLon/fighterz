@@ -131,3 +131,11 @@ OpenAI/Anthropic/Gemini API, Google Maps/Places, Mapbox pago, Cloudinary/Mux/img
 - ViaCEP: https://viacep.com.br/
 - Docker Pricing FAQ: https://www.docker.com/pricing/faq/
 - Cloudflare Pages limits: https://developers.cloudflare.com/pages/platform/limits/
+
+## Fase 7 (13/11/2026)
+| Item | Custo | Observação |
+|---|---|---|
+| **pg_cron** | R$ 0 | Extensão incluída no Supabase (local e Free). Rotinas: expirar suspensões (10 min) e purga diária |
+| **Vídeo sem transcodificação** | R$ 0 | Sem FFmpeg em servidor. MP4/WebM tocados como enviados; poster e limpeza de metadados no aparelho |
+| **Playwright/Chromium para mídia de demonstração** | R$ 0 | Já era dependência de testes (Apache-2.0). Gera fotos e vídeos localmente, sem banco de imagens externo |
+| **Lojas de apps** | **Pago** | Apple US$ 99/ano, Google US$ 25: fora do custo zero. Ver `MOBILE_PLAN.md` (PWA primeiro) |

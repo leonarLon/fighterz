@@ -16,7 +16,8 @@
     "db:test": "supabase test db",
     "db:types": "supabase gen types typescript --local > packages/core/src/db/types.ts",
     "test:e2e": "npm run test:e2e -w web",
-    "typecheck": "npm run typecheck -w web && tsc --noEmit -p packages/core"
+    "typecheck": "npm run typecheck -w web && tsc --noEmit -p packages/core",
+    "db:seed-media": "node scripts/seed-media.mjs"
   },
   "devDependencies": {
     "supabase": "^2"

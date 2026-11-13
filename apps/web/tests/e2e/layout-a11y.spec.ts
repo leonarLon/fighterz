@@ -38,7 +38,7 @@ test.describe("acessibilidade (WCAG 2.1 AA)", () => {
     for (const path of ["/inicio", "/explorar", "/explorar?q=bruna", "/publicar", "/notificacoes", "/salvos", "/u/atleta1", "/perfil", "/configuracoes", "/academias", "/academias/nova", "/professor"]) {
       await page.goto(path);
       const results = await new AxeBuilder({ page }).withTags(["wcag2a", "wcag2aa", "wcag21a", "wcag21aa"]).analyze();
-      expect(results.violations.map((v) => `${path} ${v.id}`)).toEqual([]);
+      expect(results.violations.map((v) => `${path} ${v.id}: ${v.nodes.map((n) => n.target.join(" ")).join(", ")}`)).toEqual([]);
     }
   });
 });

@@ -17,7 +17,7 @@ export type NotificationItem = {
   createdAt: string;
   postId: string | null;
   commentId: string | null;
-  actor: { id: string; username: string; displayName: string } | null;
+  actor: { id: string; username: string; displayName: string; avatarPath: string | null } | null;
   excerpt: string | null;
   academy: { slug: string; name: string } | null;
   event: { id: string; title: string; cancelled: boolean } | null;
@@ -97,7 +97,7 @@ function Row({ item }: { item: NotificationItem }) {
   return (
     <li className={cn("flex gap-3 px-4 py-3", item.unread && "bg-accent-soft/50")}>
       <span className="relative">
-        <Avatar name={actorName} size="sm" />
+        <Avatar name={actorName} path={item.type === "moderation" ? null : item.actor?.avatarPath} size="sm" />
         <Icon aria-hidden className="absolute -bottom-1 -right-1 size-4 rounded-full bg-surface p-0.5 text-accent" />
       </span>
       <div className="min-w-0 flex-1">

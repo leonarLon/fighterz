@@ -72,7 +72,7 @@ export default async function ExplorePage({ searchParams }: { searchParams: Prom
               {people.map((person) => (
                 <li key={person.id}>
                   <Link href={routes.profile(person.username)} className="flex items-center gap-3 px-4 py-3 hover:bg-bg">
-                    <Avatar name={person.display_name} size="sm" />
+                    <Avatar name={person.display_name} path={person.avatar_path} size="sm" />
                     <span className="min-w-0 flex-1">
                       <span className="flex items-center gap-1 font-semibold">
                         {person.display_name}

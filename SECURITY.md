@@ -44,6 +44,11 @@ Toda ação administrativa gera registro em `moderation_actions` ou `admin_audit
 | Enumeração de usuários | Mensagens genéricas em login/recuperação |
 | Abuso de serviços públicos (OSM/Nominatim/ViaCEP) | Proxy no servidor, fila e cache. Ver `COST_ZERO_POLICY.md` |
 
+> **Fase 7 (13/11/2026):** CSP com **nonce por requisição** gerado no `proxy.ts` (`lib/csp.ts`): `script-src 'self' 'nonce-…' 'strict-dynamic'`, sem `'unsafe-inline'` para scripts (o Next aplica o nonce aos próprios scripts). `style-src` mantém `'unsafe-inline'` porque React e Leaflet usam atributos `style`. Testado em dev e em build de produção (todos os scripts com nonce, nenhuma violação).
+> **Vídeo:** sem transcodificação no servidor (custo zero). O navegador valida assinatura, tamanho (25 MB) e duração (60 s) e **zera as caixas `udta`/`meta` do MP4** (onde celulares gravam GPS) antes do upload. WebM é enviado como está. O banco confere tipo × extensão e que vídeo vem sozinho no post. Limitação: não há legendas (WCAG 1.2.2); a descrição do vídeo é o texto alternativo.
+> **Fotos de perfil:** bucket `avatars` público para leitura, escrita só na pasta do dono; recorte de 400 px reencodado no aparelho (sem EXIF). O banco só aceita `avatar_path` da própria pasta.
+> **Retenção:** posts e comentários apagados são removidos fisicamente após 30 dias (pg_cron diário); arquivos vão para uma fila e são apagados do Storage pela API (o Storage não permite DELETE por SQL). Conteúdo removido pela moderação é mantido.
+
 Cabeçalhos: `Content-Security-Policy`, `Strict-Transport-Security`, `X-Content-Type-Options: nosniff`, `Referrer-Policy: strict-origin-when-cross-origin` (**não** `no-referrer`, porque a política de tiles do OSM exige Referer), `Permissions-Policy` liberando geolocalização apenas para o próprio site.
 
 ## 5. Moderação

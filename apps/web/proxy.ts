@@ -1,11 +1,24 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
+import { buildCsp, createNonce } from "@/lib/csp";
 import { GUEST_ONLY, PROTECTED_PREFIXES, matchesPrefix, routes } from "@/lib/routes";
 
-// Renova a sessão do Supabase em cada navegação e protege rotas.
-// É só uma camada de UX: cada Server Action e o RLS verificam a sessão de novo.
+// Renova a sessão do Supabase em cada navegação, protege rotas e aplica a CSP com nonce.
+// A proteção de rotas é só uma camada de UX: cada Server Action e o RLS verificam a sessão de novo.
 export async function proxy(request: NextRequest) {
-  let response = NextResponse.next({ request });
+  const nonce = createNonce();
+  const csp = buildCsp(nonce);
+
+  // O Next extrai o nonce do cabeçalho CSP da *requisição* e o aplica aos scripts que renderiza.
+  const next = () => {
+    const headers = new Headers(request.headers);
+    headers.set("x-nonce", nonce);
+    headers.set("Content-Security-Policy", csp);
+    const res = NextResponse.next({ request: { headers } });
+    res.headers.set("Content-Security-Policy", csp);
+    return res;
+  };
+  let response = next();
 
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -17,7 +30,7 @@ export async function proxy(request: NextRequest) {
         },
         setAll(cookiesToSet) {
           for (const { name, value } of cookiesToSet) request.cookies.set(name, value);
-          response = NextResponse.next({ request });
+          response = next();
           for (const { name, value, options } of cookiesToSet) response.cookies.set(name, value, options);
         },
       },

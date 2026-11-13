@@ -53,7 +53,7 @@ export const loadAcademy = cache(async (slug: string) => {
       .order("starts_at"),
     supabase
       .from("academy_memberships")
-      .select("user_id, role, status, requested_by, created_at, profiles!academy_memberships_user_id_fkey(username, display_name)")
+      .select("user_id, role, status, requested_by, created_at, profiles!academy_memberships_user_id_fkey(username, display_name, avatar_path)")
       .eq("academy_id", academy.id),
     user ? supabase.rpc("is_academy_manager", { p_academy: academy.id }) : Promise.resolve({ data: false }),
     user
@@ -79,6 +79,7 @@ export const loadAcademy = cache(async (slug: string) => {
       createdAt: m.created_at,
       username: (m.profiles as unknown as { username: string } | null)?.username ?? "",
       displayName: (m.profiles as unknown as { display_name: string } | null)?.display_name ?? "",
+      avatarPath: (m.profiles as unknown as { avatar_path: string | null } | null)?.avatar_path ?? null,
     })),
     isManager: Boolean(isManager.data),
     myMemberships: (mine.data ?? []) as { role: string; status: string; requested_by: string }[],

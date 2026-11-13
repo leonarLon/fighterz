@@ -50,3 +50,30 @@ export async function prepareImage(file: File): Promise<PreparedImage> {
   if (!jpeg) throw new ImageError("Seu navegador não conseguiu processar a imagem.");
   return { blob: jpeg, width, height, ext: "jpg", contentType: "image/jpeg" };
 }
+
+/** Foto de perfil: recorte quadrado central, 400 px, WebP (sem EXIF/GPS, como as fotos dos posts). */
+export async function prepareAvatar(file: File): Promise<PreparedImage> {
+  if (file.size > MAX_ORIGINAL_IMAGE_BYTES) throw new ImageError("A foto passa de 15 MB.");
+  const kind = detectImageKind(new Uint8Array(await file.slice(0, 32).arrayBuffer()));
+  if (!kind) throw new ImageError("O arquivo não é uma imagem válida.");
+  let bitmap: ImageBitmap;
+  try {
+    bitmap = await createImageBitmap(file, { imageOrientation: "from-image" });
+  } catch {
+    throw new ImageError("Não foi possível ler a foto. Tente JPEG ou PNG.");
+  }
+  const side = Math.min(bitmap.width, bitmap.height);
+  const size = Math.min(400, side);
+  const canvas = document.createElement("canvas");
+  canvas.width = size;
+  canvas.height = size;
+  const context = canvas.getContext("2d");
+  if (!context) throw new ImageError("Seu navegador não conseguiu processar a foto.");
+  context.drawImage(bitmap, (bitmap.width - side) / 2, (bitmap.height - side) / 2, side, side, 0, 0, size, size);
+  bitmap.close();
+  const blob = await new Promise<Blob | null>((resolve) => canvas.toBlob(resolve, "image/webp", 0.85));
+  if (blob && blob.type === "image/webp") return { blob, width: size, height: size, ext: "webp", contentType: "image/webp" };
+  const jpeg = await new Promise<Blob | null>((resolve) => canvas.toBlob(resolve, "image/jpeg", 0.88));
+  if (!jpeg) throw new ImageError("Seu navegador não conseguiu processar a foto.");
+  return { blob: jpeg, width: size, height: size, ext: "jpg", contentType: "image/jpeg" };
+}

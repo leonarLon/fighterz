@@ -36,7 +36,7 @@ function isActive(pathname: string, href: string) {
   return pathname === href || pathname.startsWith(`${href}/`);
 }
 
-export function SideNav({ username, displayName }: { username: string; displayName: string }) {
+export function SideNav({ username, displayName, avatarPath }: { username: string; displayName: string; avatarPath: string | null }) {
   const pathname = usePathname();
   return (
     <nav
@@ -103,7 +103,7 @@ export function SideNav({ username, displayName }: { username: string; displayNa
           Configurações
         </Link>
         <Link href={routes.profileEdit} className="flex items-center gap-3 rounded-md px-3 py-2 hover:bg-bg">
-          <Avatar name={displayName} size="sm" />
+          <Avatar name={displayName} path={avatarPath} size="sm" />
           <span className="min-w-0">
             <span className="block truncate text-sm font-semibold">{displayName}</span>
             <span className="block truncate text-[13px] text-muted">@{username}</span>

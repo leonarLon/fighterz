@@ -1,9 +1,19 @@
 // Tipos de exibição compartilhados entre Server e Client Components (sem dependências de servidor).
-export type PostMediaView = { id: string; url: string; width: number; height: number; alt: string };
+export type PostMediaView = {
+  id: string;
+  type: "image" | "video";
+  url: string;
+  /** Miniatura do vídeo (URL assinada). */
+  poster: string | null;
+  durationMs: number | null;
+  width: number;
+  height: number;
+  alt: string;
+};
 
 export type PostView = {
   id: string;
-  author: { id: string; username: string; displayName: string };
+  author: { id: string; username: string; displayName: string; avatarPath: string | null };
   kind: "standard" | "checkin" | "achievement" | "event_share";
   caption: string;
   visibility: "public" | "followers" | "private";
@@ -24,7 +34,7 @@ export type PostView = {
 export type CommentView = {
   id: string;
   parentId: string | null;
-  author: { id: string; username: string; displayName: string };
+  author: { id: string; username: string; displayName: string; avatarPath: string | null };
   body: string;
   likeCount: number;
   createdAt: string;

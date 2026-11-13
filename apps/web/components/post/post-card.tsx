@@ -92,7 +92,7 @@ export function PostCard({ post, viewer, onDeleted }: { post: PostView; viewer: 
     <article className="overflow-hidden rounded-lg border border-border bg-surface shadow-(--shadow-card)" aria-labelledby={`post-${post.id}-author`}>
       <header className="flex items-center gap-3 px-4 py-3">
         <Link href={routes.profile(post.author.username)} tabIndex={-1} aria-hidden>
-          <Avatar name={post.author.displayName} size="sm" />
+          <Avatar name={post.author.displayName} path={post.author.avatarPath} size="sm" />
         </Link>
         <div className="min-w-0 flex-1">
           <Link

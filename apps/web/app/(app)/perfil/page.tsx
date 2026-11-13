@@ -5,6 +5,7 @@ import { Card } from "@/components/ui/card";
 import { PageHeader } from "@/components/ui/page-header";
 import { getCurrentProfile } from "@/lib/auth";
 import { routes } from "@/lib/routes";
+import { AvatarUpload } from "./avatar-upload";
 import { ProfileForm } from "./profile-form";
 
 export const metadata: Metadata = { title: "Editar perfil" };
@@ -16,6 +17,7 @@ export default async function EditProfilePage() {
     <>
       <PageHeader title="Editar perfil" />
       <Card>
+        <AvatarUpload userId={profile.id} name={profile.display_name} path={profile.avatar_path} />
         <ProfileForm
           profile={{
             username: profile.username,

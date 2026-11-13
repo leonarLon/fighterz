@@ -17,7 +17,10 @@ export const ALT_TEXT_MAX = 500;
 const uuid = z.uuid('Identificador inválido.');
 
 export const postMediaInputSchema = z.object({
+  type: z.enum(['image', 'video']).default('image'),
   path: z.string().min(1).max(300),
+  thumbnail: z.string().min(1).max(300).optional(),
+  durationMs: z.number().int().min(0).max(60_500).optional(),
   width: z.number().int().positive().max(10000),
   height: z.number().int().positive().max(10000),
   size: z.number().int().positive(),
@@ -37,6 +40,10 @@ export const createPostSchema = z
       .optional()
       .transform((value) => value || null),
     media: z.array(postMediaInputSchema).max(MAX_IMAGES_PER_POST, `Até ${MAX_IMAGES_PER_POST} fotos por post.`),
+  })
+  .refine((data) => !data.media.some((m) => m.type === 'video') || data.media.length === 1, {
+    path: ['media'],
+    error: 'Um post com vídeo não pode ter outras mídias.',
   })
   .refine((data) => data.caption.length > 0 || data.media.length > 0, {
     path: ['caption'],

@@ -319,3 +319,57 @@ begin
           'spam', 'Divulga links de apostas nos comentários.');
 end;
 $$;
+
+-- ---------------------------------------------------------------------------
+-- Fase 7: mais professores aprovados (5), com vínculo, aulas e jornada.
+-- atleta14 Rafael (Karatê), atleta15 Sabrina (Boxe), atleta16 Thiago (Muay Thai),
+-- atleta17 Úrsula (Judô), atleta18 Vinícius (Taekwondo). Total: 7 professores aprovados + 1 pendente.
+-- ---------------------------------------------------------------------------
+do $$
+declare
+  r record;
+  v_unit uuid;
+  v_uma  uuid;
+begin
+  for r in
+    select p.id, p.username, t.name, t.art, t.academy, t.bio, t.weekday, t.hour, t.level, t.rank_ordinal
+    from (values
+      ('atleta14', 'Sensei Rafael Teixeira', 'karate',    'dojo-horizonte',         'Karatê shotokan, kata e kumite para adultos.',        2, 19, 'all',          9),
+      ('atleta15', 'Coach Sabrina Lopes',    'boxe',      'arena-norte-muay-thai',  'Boxe olímpico e condicionamento. Ex-atleta estadual.', 4, 18, 'beginner',     null),
+      ('atleta16', 'Kru Thiago Barros',      'muay-thai', 'equipe-raiz-combate',    'Muay Thai com foco em clinch e competição.',          3, 20, 'competition',  9),
+      ('atleta17', 'Sensei Úrsula Pinto',    'judo',      'tatame-central',         'Judô para iniciantes e preparação para faixa preta.', 5, 7,  'beginner',     8),
+      ('atleta18', 'Mestre Vinícius Cardoso','taekwondo', 'dojo-horizonte',         'Taekwondo olímpico, chutes e poomsae.',               6, 9,  'all',          12)
+    ) as t(username, name, art, academy, bio, weekday, hour, level, rank_ordinal)
+    join public.profiles p on p.username = t.username
+  loop
+    insert into public.teacher_profiles (user_id, professional_name, bio, experience_years, show_contact, contact_email)
+    values (r.id, r.name, r.bio, 5 + r.weekday * 2, true, r.username || '@figtherz.local');
+    update public.teacher_profiles set status = 'approved', reviewed_at = now() where user_id = r.id;
+    insert into public.teacher_martial_arts (teacher_id, martial_art_id, rank_id)
+    select r.id, m.id, (select id from public.martial_art_ranks where martial_art_id = m.id and ordinal = r.rank_ordinal)
+    from public.martial_arts m where m.slug = r.art;
+
+    insert into public.academy_memberships (academy_id, user_id, role, status, requested_by, approved_at)
+    select a.id, r.id, 'teacher', 'active', 'academy', now() from public.academies a where a.slug = r.academy
+    on conflict do nothing;
+
+    select u.id into v_unit from public.academy_units u join public.academies a on a.id = u.academy_id
+    where a.slug = r.academy order by u.name limit 1;
+    insert into public.class_schedules (academy_id, unit_id, teacher_id, martial_art_id, name, level, weekday, starts_at, ends_at, accepts_trial)
+    select a.id, v_unit, r.id, m.id, m.name || ' com ' || split_part(r.name, ' ', 2), r.level::public.class_level, r.weekday,
+           make_time(r.hour, 0, 0), make_time(r.hour + 1, 0, 0), r.level <> 'competition'
+    from public.academies a, public.martial_arts m where a.slug = r.academy and m.slug = r.art;
+
+    -- Jornada do professor (graduação atual)
+    if r.rank_ordinal is not null then
+      insert into public.user_martial_arts (user_id, martial_art_id, started_on)
+      select r.id, m.id, date '2010-01-01' + r.weekday * 365 from public.martial_arts m where m.slug = r.art
+      returning id into v_uma;
+      insert into public.rank_promotions (user_martial_art_id, user_id, rank_id, degree, promoted_on)
+      select v_uma, r.id, k.id, 0, date '2020-06-01'
+      from public.martial_art_ranks k join public.martial_arts m on m.id = k.martial_art_id
+      where m.slug = r.art and k.ordinal = r.rank_ordinal;
+    end if;
+  end loop;
+end;
+$$;

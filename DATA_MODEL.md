@@ -260,6 +260,11 @@ Todas as políticas serão cobertas por testes pgTAP do tipo "usuário A **não*
 
 Escrita sempre restrita a `(storage.foldername(name))[1] = auth.uid()::text`.
 
+> **Fase 7 (13/11/2026):**
+> - `post-media` aceita também `video/mp4` e `video/webm` (até 25 MB). Um post tem até 10 fotos **ou** 1 vídeo. `post_media.thumbnail_path` guarda a miniatura (WebP gerada no aparelho) e segue a mesma política de leitura do post. Check: vídeo exige `duration_ms` (≤ 60 s).
+> - `avatars` criado (público para leitura, 2 MB, WebP/JPEG, `{uid}/avatar-{aleatório}.webp`). `covers` continua não criado.
+> - `storage_cleanup_queue` (interna, RLS sem políticas): arquivos a apagar. `purge_deleted_content()` roda todo dia às 3h (UTC) pelo pg_cron.
+
 ## 7. Funções RPC
 
 **Implementadas na Fase 3:** `get_home_feed`, `get_profile_posts`, `get_saved_posts`, `get_explore`, `search_profiles`, `create_post` (post + mídias + marcações numa transação), `delete_post`, `delete_comment`, `mark_all_notifications_read`, além das views `post_cards`, `comment_cards` e `notification_cards` (`security_invoker`). Feed e Explorar são `security definer` com filtro explícito equivalente à RLS: filtram primeiro por índice e só montam os cards da página. Com a RLS avaliada linha a linha, a página do meio do feed passava de 300 ms; agora fica em ~3–9 ms com 1.000 posts. Soft delete de post e de comentário só por função, porque um UPDATE direto deixaria a linha invisível pela própria política de SELECT. `posts.academy_id`, `unit_id` e `event_id` entram nas Fases 4 e 5, junto com as tabelas de destino.

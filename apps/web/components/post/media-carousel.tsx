@@ -2,6 +2,7 @@
 
 import { useRef, useState, type KeyboardEvent } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
+import { formatDuration } from "@figtherz/core";
 import type { PostMediaView } from "@/lib/post-types";
 import { cn } from "@/components/ui/cn";
 
@@ -33,12 +34,13 @@ export function MediaCarousel({ media, label }: { media: PostMediaView[]; label:
       role="region"
       aria-roledescription="carrossel"
       aria-label={label}
-      tabIndex={media.length > 1 ? 0 : undefined}
-      onKeyDown={media.length > 1 ? onKeyDown : undefined}
     >
+      {/* A faixa rolável é o que recebe foco (WCAG: região rolável acessível pelo teclado; ←/→ trocam a foto). */}
       <div
         ref={track}
-        className="flex snap-x snap-mandatory overflow-x-auto [scrollbar-width:none]"
+        tabIndex={media.length > 1 ? 0 : undefined}
+        onKeyDown={media.length > 1 ? onKeyDown : undefined}
+        className="flex snap-x snap-mandatory overflow-x-auto [scrollbar-width:none] focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-accent"
         style={{ aspectRatio: ratio }}
         onScroll={(e) => {
           const el = e.currentTarget;
@@ -53,17 +55,30 @@ export function MediaCarousel({ media, label }: { media: PostMediaView[]; label:
             aria-roledescription="slide"
             aria-label={`${i + 1} de ${media.length}`}
           >
-            {/* URLs assinadas e temporárias do Storage privado: o otimizador do next/image não se aplica. */}
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src={item.url}
-              alt={item.alt}
-              width={item.width}
-              height={item.height}
-              loading={i === 0 ? "eager" : "lazy"}
-              decoding="async"
-              className="h-full w-full object-cover"
-            />
+            {item.type === "video" ? (
+              // preload="none": o vídeo só baixa quando a pessoa toca (economiza dados no feed).
+              <video
+                src={item.url}
+                poster={item.poster ?? undefined}
+                controls
+                playsInline
+                preload="none"
+                aria-label={item.alt ? `Vídeo: ${item.alt}` : `Vídeo${item.durationMs ? ` de ${formatDuration(item.durationMs)}` : ""}`}
+                className="h-full w-full bg-black object-contain"
+              />
+            ) : (
+              // URLs assinadas e temporárias do Storage privado: o otimizador do next/image não se aplica.
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                src={item.url}
+                alt={item.alt}
+                width={item.width}
+                height={item.height}
+                loading={i === 0 ? "eager" : "lazy"}
+                decoding="async"
+                className="h-full w-full object-cover"
+              />
+            )}
           </div>
         ))}
       </div>

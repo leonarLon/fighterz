@@ -6,7 +6,16 @@ import type { PostView } from "@/lib/post-types";
 
 type Client = Awaited<ReturnType<typeof createClient>>;
 type PostCardRow = Database["public"]["Views"]["post_cards"]["Row"];
-type MediaJson = { id: string; path: string; width: number | null; height: number | null; alt: string | null };
+type MediaJson = {
+  id: string;
+  type?: "image" | "video";
+  path: string;
+  thumbnail?: string | null;
+  width: number | null;
+  height: number | null;
+  duration_ms?: number | null;
+  alt: string | null;
+};
 
 // Imagens ficam num bucket privado. A URL assinada só é emitida se a RLS do Storage
 // permitir (ou seja, se o leitor pode ver o post). 1 h cobre a sessão de leitura de uma página.
@@ -16,7 +25,9 @@ export const PAGE_SIZE = 20;
 
 /** Converte linhas de post_cards em PostView, assinando todas as mídias da página numa única chamada. */
 export async function toPostViews(supabase: Client, rows: PostCardRow[]): Promise<PostView[]> {
-  const paths = rows.flatMap((row) => ((row.media as MediaJson[] | null) ?? []).map((m) => m.path));
+  const paths = rows.flatMap((row) =>
+    ((row.media as MediaJson[] | null) ?? []).flatMap((m) => (m.thumbnail ? [m.path, m.thumbnail] : [m.path])),
+  );
   const urls = new Map<string, string>();
   if (paths.length > 0) {
     const { data } = await supabase.storage.from(POST_MEDIA_BUCKET).createSignedUrls(paths, SIGNED_URL_TTL);
@@ -31,6 +42,7 @@ export async function toPostViews(supabase: Client, rows: PostCardRow[]): Promis
       id: row.author_id,
       username: row.author_username ?? "",
       displayName: row.author_display_name,
+      avatarPath: row.author_avatar_path,
     },
     kind: row.kind,
     caption: row.caption,
@@ -46,7 +58,16 @@ export async function toPostViews(supabase: Client, rows: PostCardRow[]): Promis
     viewerHasLiked: Boolean(row.viewer_has_liked),
     viewerHasSaved: Boolean(row.viewer_has_saved),
     media: ((row.media as MediaJson[] | null) ?? [])
-      .map((m) => ({ id: m.id, url: urls.get(m.path) ?? "", width: m.width ?? 1, height: m.height ?? 1, alt: m.alt ?? "" }))
+      .map((m) => ({
+        id: m.id,
+        type: m.type ?? "image",
+        url: urls.get(m.path) ?? "",
+        poster: m.thumbnail ? (urls.get(m.thumbnail) ?? null) : null,
+        durationMs: m.duration_ms ?? null,
+        width: m.width ?? 1,
+        height: m.height ?? 1,
+        alt: m.alt ?? "",
+      }))
       .filter((m) => m.url),
   }));
 }

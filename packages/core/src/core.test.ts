@@ -102,3 +102,52 @@ describe('tema', () => {
     expect(parseThemePreference(undefined)).toBe('system');
   });
 });
+
+import { detectVideoKind, formatDuration, videoError } from './index';
+
+describe('vídeo', () => {
+  const bytes = (...parts: (number[] | string)[]) =>
+    new Uint8Array(parts.flatMap((p) => (typeof p === 'string' ? [...p].map((c) => c.charCodeAt(0)) : p)));
+
+  it('detecta pela assinatura', () => {
+    expect(detectVideoKind(bytes([0x1a, 0x45, 0xdf, 0xa3, 0, 0]))).toBe('webm');
+    expect(detectVideoKind(bytes([0, 0, 0, 0x20], 'ftypisom'))).toBe('mp4');
+    expect(detectVideoKind(bytes([0, 0, 0, 0x14], 'ftypqt  '))).toBe('quicktime');
+    expect(detectVideoKind(bytes('RIFF....WEBP'))).toBeNull();
+  });
+
+  it('aplica os limites aprovados', () => {
+    expect(videoError('mp4', 10_000_000, 42)).toBeNull();
+    expect(videoError('quicktime', 1000, 10)).toContain('MP4');
+    expect(videoError('webm', 26 * 1024 * 1024, 10)).toContain('25 MB');
+    expect(videoError('mp4', 1000, 61)).toContain('60 segundos');
+    expect(videoError(null, 1000, 10)).toContain('não é um vídeo');
+    expect(formatDuration(42_400)).toBe('0:42');
+    expect(formatDuration(60_000)).toBe('1:00');
+  });
+});
+
+import { stripMp4Metadata } from './index';
+
+describe('metadados de vídeo', () => {
+  const box = (type: string, payload: number[] = []) => {
+    const size = 8 + payload.length;
+    return [(size >>> 24) & 255, (size >>> 16) & 255, (size >>> 8) & 255, size & 255, ...[...type].map((c) => c.charCodeAt(0)), ...payload];
+  };
+  it('neutraliza udta/meta (GPS) dentro de moov sem mudar o tamanho', () => {
+    const gps = [...'+25.43-049.27/'].map((c) => c.charCodeAt(0));
+    const file = new Uint8Array([
+      ...box('ftyp', [...'isom'].map((c) => c.charCodeAt(0))),
+      ...box('moov', [...box('mvhd', [0, 0, 0, 0]), ...box('udta', box('©xyz', gps)), ...box('trak', box('meta', [1, 2]))]),
+      ...box('mdat', [9, 9, 9]),
+    ]);
+    const before = file.length;
+    expect(stripMp4Metadata(file)).toBe(2);
+    expect(file.length).toBe(before);
+    const text = String.fromCharCode(...file);
+    expect(text).not.toContain('udta');
+    expect(text).not.toContain('+25.43');
+    expect(text).toContain('mdat');
+    expect(text).toContain('mvhd');
+  });
+});

@@ -849,6 +849,20 @@ isOneToOne: false
       referencedColumns: ["id"]
     }
                   ]
+                },"storage_cleanup_queue": {
+                  Row: {
+                    "bucket_id": string,"object_name": string,"queued_at": string,"reason": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "bucket_id": string,"object_name": string,"queued_at"?: string,"reason": string
+                  }
+                  Update: {
+                    "bucket_id"?: string,"object_name"?: string,"queued_at"?: string,"reason"?: string
+                  }
+                  Relationships: [
+                    
+                  ]
                 },"teacher_martial_arts": {
                   Row: {
                     "martial_art_id": string,"rank_id": string | null,"teacher_id": string
@@ -1445,6 +1459,9 @@ isOneToOne: true
 "get_admin_overview":
 { Args: Record<PropertyKey, never>; Returns: Json
                            },
+"get_cleanup_queue_count":
+{ Args: Record<PropertyKey, never>; Returns: number
+                           },
 "get_explore":
 { Args: { "p_limit"?: number,"p_page"?: number }; Returns: {
               "academy_id": string | null,
@@ -1654,6 +1671,9 @@ isOneToOne: true
                            },
 "platform_rank":
 { Args: { "p_user": string }; Returns: number
+                           },
+"purge_deleted_content":
+{ Args: { "p_days"?: number }; Returns: Json
                            },
 "purge_rate_limits":
 { Args: { "p_older_than"?: string }; Returns: number

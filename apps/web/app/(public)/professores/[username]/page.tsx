@@ -56,7 +56,7 @@ export default async function TeacherPage({ params }: Props) {
     <div className="space-y-6">
       <Card>
         <div className="flex items-start gap-4">
-          <Avatar name={teacher.professional_name ?? ""} size="lg" />
+          <Avatar name={teacher.professional_name ?? ""} path={teacher.avatar_path} size="lg" />
           <div className="min-w-0">
             <p className="text-[13px] font-semibold uppercase tracking-wide text-accent">Professor</p>
             <h1 className="font-display text-3xl font-bold leading-tight">{teacher.professional_name}</h1>

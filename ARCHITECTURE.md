@@ -140,3 +140,9 @@ Ver seção 6.
 
 ## 11. Decisões que dependem de você
 Listadas no relatório da Fase 1 e em `PRODUCT_ROADMAP.md` (seção "Pendências de aprovação").
+
+## Atualização da Fase 7 (13/11/2026)
+- **CSP com nonce** gerada no `proxy.ts` (`lib/csp.ts`) a cada requisição; o `next.config.ts` mantém só os demais cabeçalhos.
+- **Vídeo:** `lib/video-processing.ts` valida, lê a duração, gera a miniatura e limpa metadados do MP4 no navegador; o upload vai direto ao Storage, como as fotos.
+- **Chave secreta** (`lib/supabase/admin.ts`) existe só no servidor e só para apagar arquivos da fila de limpeza.
+- **Desempenho medido** (seed com ~1.100 posts, cache aquecido): feed 9 ms, Explorar 4 ms, perfil 8 ms, busca de aulas por distância 9 ms (36 ms na primeira chamada a frio), eventos 2 ms.

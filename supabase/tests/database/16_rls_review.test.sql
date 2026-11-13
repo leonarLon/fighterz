@@ -16,10 +16,10 @@ select is(
   array(select c.relname::text from pg_class c join pg_namespace n on n.oid = c.relnamespace
         where n.nspname = 'public' and c.relkind = 'r'
           and not exists (select 1 from pg_policy p where p.polrelid = c.oid)
-          and c.relname not in ('rate_limits', 'geocode_cache')
+          and c.relname not in ('rate_limits', 'geocode_cache', 'storage_cleanup_queue')
         order by 1),
   '{}'::text[],
-  'toda tabela exposta tem política (exceto as internas rate_limits e geocode_cache)'
+  'toda tabela exposta tem política (exceto as internas rate_limits, geocode_cache e storage_cleanup_queue)'
 );
 
 select is(
@@ -65,7 +65,8 @@ select is(
   array(select p.proname::text from pg_proc p join pg_namespace n on n.oid = p.pronamespace
         where n.nspname = 'public'
           and p.proname in ('notify', 'log_moderation', 'lift_expired_suspensions', 'refresh_current_rank',
-                            'enforce_rate_limit', 'check_rate_limit', 'assert_active_account', 'check_signups_open')
+                            'enforce_rate_limit', 'check_rate_limit', 'assert_active_account', 'check_signups_open',
+                            'purge_deleted_content')
           and (has_function_privilege('anon', p.oid, 'execute') or has_function_privilege('authenticated', p.oid, 'execute'))
         order by 1),
   '{}'::text[],

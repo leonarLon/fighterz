@@ -23,7 +23,7 @@ async function loadProfile(username: string) {
   // RLS decide o que é visível (suspensos e quem me bloqueou não aparecem).
   const { data } = await supabase
     .from("profiles")
-    .select("id, username, display_name, bio, city, state, is_private, follower_count, following_count, post_count")
+    .select("id, username, display_name, avatar_path, bio, city, state, is_private, follower_count, following_count, post_count")
     .eq("username", decodeURIComponent(username).toLowerCase())
     .maybeSingle();
   return data;
@@ -65,7 +65,7 @@ export default async function PublicProfilePage({ params }: Props) {
     <div className="space-y-6">
       <Card>
         <div className="flex items-start gap-4">
-          <Avatar name={profile.display_name} size="lg" />
+          <Avatar name={profile.display_name} path={profile.avatar_path} size="lg" />
           <div className="min-w-0 flex-1">
             <h1 className="font-display text-3xl font-bold leading-tight">{profile.display_name}</h1>
             <p className="flex flex-wrap items-center gap-x-1.5 text-muted">

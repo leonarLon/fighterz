@@ -44,6 +44,19 @@ Stack Next.js 16 + Tailwind 4 + Supabase local + Leaflet/OSM · 18+ · limites d
   - `/admin`: visão geral, denúncias, usuários (papéis só para superadmin), professores, academias, eventos, modalidades, histórico e configurações.
   - Seed: `moderador@figtherz.local` (moderador) e denúncias de exemplo (post do atleta25 com segurança de menores, perfil do atleta24 por spam).
 
+- Fase 7 (finalização) implementada em 13/11/2026, **aguardando aceite**. Verificações verdes: pgTAP 340, Vitest 45 (core 42 + web 3), Playwright 105 (+17 pulados de propósito), typecheck, lint e build.
+  - Migrations 16–18: vídeo em posts (pedido do usuário; até 60 s / 25 MB, 1 por post, miniatura), bucket `avatars`, purga após 30 dias + fila de limpeza do Storage (pg_cron).
+  - CSP com nonce no `proxy.ts` (`lib/csp.ts`), verificada também em build de produção.
+  - Seed: 7 professores aprovados (atleta2, 6, 14–18) + 1 pendente. `npm run db:seed-media` gera 79 fotos, 8 vídeos e 26 fotos de perfil localmente (Chromium do Playwright).
+  - Docs: README (contas de demonstração), `DEPLOYMENT.md` §8 (checklist de publicação), `MOBILE_PLAN.md` (PWA primeiro, Expo depois).
+
+## Decisões técnicas da Fase 7
+- Vídeo sem transcodificação (custo zero): o navegador valida assinatura/tamanho/duração, gera o poster e zera as caixas `udta`/`meta` do MP4 (GPS). WebM vai como está. Sem legendas (limitação WCAG 1.2.2 registrada).
+- O Storage bloqueia DELETE por SQL (`storage.protect_objects_delete`): o pg_cron só enfileira em `storage_cleanup_queue`; o admin apaga os arquivos em /admin/configuracoes, com `SUPABASE_SECRET_KEY` só no servidor (`lib/supabase/admin.ts`).
+- `style-src` mantém `'unsafe-inline'` (atributos `style` do React e do Leaflet); `script-src` usa nonce + `'strict-dynamic'`.
+- Carrossel: o foco vai na faixa rolável, não no contêiner (axe `scrollable-region-focusable`).
+- Heredoc longo no Bash falha neste ambiente: para scripts grandes, escrever um `.py` no scratchpad e executar.
+
 ## Decisões técnicas da Fase 6
 - Painel responde 404 (e não 403) para quem não é da equipe. Cada função revalida o papel no banco.
 - Moderador: denúncias, conteúdo, academias, eventos e suspensão até 30 dias. Admin: + professores, modalidades, configurações, banimento e e-mails. Superadmin: + papéis. Ninguém modera papel igual ou maior.
@@ -83,5 +96,6 @@ Stack Next.js 16 + Tailwind 4 + Supabase local + Leaflet/OSM · 18+ · limites d
 - A lista das "11 modalidades do briefing" não estava registrada. O seed usa: BJJ, Muay Thai, Judô, Karatê, Taekwondo, Capoeira, Krav Maga, Kickboxing, Boxe, MMA, Luta Olímpica + Outra. Confirmada pelo usuário em 13/11/2026.
 
 ## Próximos passos
-1. Pendências conhecidas da Fase 3: upload de avatar (bucket `avatars`), limpeza de uploads órfãos e remoção física de conteúdo apagado após 30 dias (pg_cron), vídeo (fora do MVP).
-2. Fase 7: finalização (CSP com nonce, pendências da Fase 3, desempenho, decisão de hospedagem gratuita).
+1. Pendências restantes: legendas de vídeo, capa de evento/perfil (bucket `covers`), PWA (manifesto e ícones).
+2. Usuário valida a Fase 7 (aceite) e decide sobre o commit.
+3. Publicação: só com autorização, seguindo `DEPLOYMENT.md` §7–8 (escolher entre Vercel Hobby, Cloudflare ou auto-hospedagem).

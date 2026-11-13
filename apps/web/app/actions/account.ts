@@ -85,6 +85,9 @@ export async function deleteAccount(_prev: FormState, formData: FormData): Promi
     const paths = (files ?? []).map((file) => `${user.id}/${folder.name}/${file.name}`);
     if (paths.length) await bucket.remove(paths);
   }
+  const avatars = supabase.storage.from("avatars");
+  const { data: avatarFiles } = await avatars.list(user.id, { limit: 100 });
+  if (avatarFiles?.length) await avatars.remove(avatarFiles.map((f) => `${user.id}/${f.name}`));
 
   const { error } = await supabase.rpc("delete_my_account");
   if (error) return { status: "error", message: "Não foi possível excluir a conta. Tente novamente." };
@@ -92,4 +95,21 @@ export async function deleteAccount(_prev: FormState, formData: FormData): Promi
   // O usuário já não existe no Auth: limpa só a sessão local (cookies).
   await supabase.auth.signOut({ scope: "local" });
   redirect(`${routes.home}?conta=excluida`);
+}
+
+/** Grava a foto nova e apaga a anterior. O banco confere que o caminho é da pasta do próprio usuário. */
+export async function setAvatar(path: string | null): Promise<{ ok: true } | { ok: false; message: string }> {
+  const user = await requireUser();
+  if (path !== null && !new RegExp(`^${user.id}/avatar-[a-z0-9]{6,16}\.(webp|jpg)$`).test(path)) {
+    return { ok: false, message: "Arquivo inválido." };
+  }
+  const supabase = await createClient();
+  const { data: current } = await supabase.from("profiles").select("avatar_path, username").eq("id", user.id).single();
+  const { error } = await supabase.from("profiles").update({ avatar_path: path }).eq("id", user.id);
+  if (error) return { ok: false, message: "Não foi possível salvar a foto." };
+  if (current?.avatar_path && current.avatar_path !== path) {
+    await supabase.storage.from("avatars").remove([current.avatar_path]);
+  }
+  revalidatePath("/", "layout");
+  return { ok: true };
 }
