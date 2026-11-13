@@ -3,7 +3,7 @@
 import { useState, useTransition } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Bookmark, Globe, Heart, Lock, MessageCircle, MoreHorizontal, Share2, Trash2, Flag, Users } from "lucide-react";
+import { Bookmark, Dumbbell, Globe, Heart, Lock, MessageCircle, MoreHorizontal, Share2, Trash2, Flag, Users } from "lucide-react";
 import { compactCount, timeAgo, VISIBILITY_LABELS } from "@figtherz/core";
 import { deletePost, setLike, setSaved } from "@/app/actions/posts";
 import type { PostView, Viewer } from "@/lib/post-types";
@@ -108,7 +108,7 @@ export function PostCard({ post, viewer, onDeleted }: { post: PostView; viewer: 
             </Link>
             <span aria-hidden>·</span>
             <VisibilityIcon aria-label={VISIBILITY_LABELS[post.visibility]} className="size-3.5" />
-            {post.martialArtName && (
+            {post.martialArtName && post.kind !== "checkin" && (
               <>
                 <span aria-hidden>·</span>
                 <span>{post.martialArtName}</span>
@@ -161,6 +161,23 @@ export function PostCard({ post, viewer, onDeleted }: { post: PostView; viewer: 
           </div>
         )}
       </header>
+      {post.kind === "checkin" && (
+        <p className="mx-4 mb-3 flex items-start gap-2 rounded-md bg-accent-soft px-3 py-2 text-sm">
+          <Dumbbell aria-hidden className="mt-0.5 size-4 shrink-0 text-accent" />
+          <span>
+            <span className="font-semibold">Registrou um treino</span>
+            {post.martialArtName ? ` de ${post.martialArtName}` : ""}
+            {post.academy && (
+              <>
+                {" em "}
+                <Link href={routes.academy(post.academy.slug)} className="font-semibold text-accent hover:underline">
+                  {post.academy.name}
+                </Link>
+              </>
+            )}
+          </span>
+        </p>
+      )}
 
       {post.moderationStatus !== "visible" && (
         <p className="mx-4 mb-3 rounded-md border border-warning/40 px-3 py-2 text-[13px] font-medium text-warning">

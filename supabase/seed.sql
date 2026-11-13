@@ -212,3 +212,84 @@ begin
   update public.notifications set read_at = now() where read_at is null;
 end;
 $$;
+
+-- ---------------------------------------------------------------------------
+-- Fase 5: jornada, treinos, conquistas e eventos.
+-- demo: BJJ faixa azul (2 graus confirmados por atleta2; 3º grau aguardando confirmação em /professor).
+-- Eventos: open mat da Tatame Central, seminário pessoal do atleta2, campeonato em SP e um rascunho.
+-- ---------------------------------------------------------------------------
+do $$
+declare
+  v_demo uuid := (select id from public.profiles where username = 'demo');
+  v_prof uuid := (select id from public.profiles where username = 'atleta2');
+  v_a1   uuid := (select id from public.profiles where username = 'atleta1');
+  v_a3   uuid := (select id from public.profiles where username = 'atleta3');
+  bjj    uuid := (select id from public.martial_arts where slug = 'jiu-jitsu');
+  mt     uuid := (select id from public.martial_arts where slug = 'muay-thai');
+  tatame uuid := (select id from public.academies where slug = 'tatame-central');
+  raiz   uuid := (select id from public.academies where slug = 'equipe-raiz-combate');
+  unit1  uuid;
+  r      record;
+  uma    uuid;
+  post   uuid;
+  ev     uuid;
+  i      integer;
+begin
+  select id into unit1 from public.academy_units where academy_id = tatame order by name limit 1;
+
+  -- Jornada da demo
+  insert into public.user_martial_arts (user_id, martial_art_id, started_on, federation)
+  values (v_demo, bjj, '2021-02-01', 'IBJJF') returning id into uma;
+  for r in select id, ordinal from public.martial_art_ranks where martial_art_id = bjj and ordinal <= 2 loop
+    if r.ordinal = 1 then
+      insert into public.rank_promotions (user_martial_art_id, user_id, rank_id, degree, promoted_on)
+      values (uma, v_demo, r.id, 0, '2021-02-01'), (uma, v_demo, r.id, 4, '2023-03-10');
+    else
+      insert into public.rank_promotions (user_martial_art_id, user_id, rank_id, degree, promoted_on, academy_id, teacher_id, verification, confirmed_at)
+      values (uma, v_demo, r.id, 2, '2025-04-12', tatame, v_prof, 'teacher_confirmed', now());
+      insert into public.rank_promotions (user_martial_art_id, user_id, rank_id, degree, promoted_on, academy_id, teacher_id)
+      values (uma, v_demo, r.id, 3, current_date - 20, tatame, v_prof);
+    end if;
+  end loop;
+  insert into public.user_martial_arts (user_id, martial_art_id, started_on) values (v_demo, mt, '2024-08-01');
+
+  -- Professor também tem jornada (preta 2 graus)
+  insert into public.user_martial_arts (user_id, martial_art_id, started_on) values (v_prof, bjj, '2008-01-01') returning id into uma;
+  insert into public.rank_promotions (user_martial_art_id, user_id, rank_id, degree, promoted_on)
+  select uma, v_prof, id, 2, '2019-06-01' from public.martial_art_ranks where martial_art_id = bjj and ordinal = 5;
+
+  -- Treinos da demo nos últimos 30 dias (um compartilhado no feed)
+  for i in 1..9 loop
+    insert into public.training_checkins (user_id, martial_art_id, academy_id, trained_at, duration_min, notes)
+    values (v_demo, case when i % 3 = 0 then mt else bjj end, tatame,
+            date_trunc('day', now()) - make_interval(days => i * 3) + interval '22 hours', 90,
+            case when i = 1 then 'Treino de raspagens' end);
+  end loop;
+  insert into public.posts (author_id, kind, caption, visibility, martial_art_id, academy_id, created_at)
+  values (v_demo, 'checkin', 'Treino pesado de passagem de guarda hoje.', 'public', bjj, tatame, now() - interval '3 hours')
+  returning id into post;
+  insert into public.training_checkins (user_id, martial_art_id, academy_id, trained_at, duration_min, notes, post_id)
+  values (v_demo, bjj, tatame, now() - interval '4 hours', 90, 'Treino pesado de passagem de guarda hoje.', post);
+
+  insert into public.athlete_achievements (user_id, martial_art_id, type, title, event_name, placement, medal, division, achieved_on)
+  values (v_demo, bjj, 'competition_result', 'Campeã da categoria', 'Copa Fictícia de Curitiba', 1, 'gold', 'Adulto azul leve', '2025-09-20'),
+         (v_demo, bjj, 'milestone', '100 treinos no ano', null, null, null, null, '2025-12-15');
+
+  -- Eventos
+  insert into public.events (created_by, academy_id, unit_id, type, martial_art_id, title, description, starts_at, ends_at, city, state, status)
+  values (v_a1, tatame, unit1, 'open_mat', bjj, 'Open mat de sábado', 'Treino livre para todas as faixas. Traga água e kimono.',
+          date_trunc('day', now()) + interval '5 days 13 hours', date_trunc('day', now()) + interval '5 days 15 hours', '-', 'PR', 'published');
+  insert into public.events (created_by, type, martial_art_id, title, description, starts_at, ends_at, venue_name, street, number, neighborhood, city, state, external_url, status)
+  values (v_prof, 'seminar', bjj, 'Seminário de guarda com Diego Ramos', 'Três horas de guarda aberta e raspagens.',
+          date_trunc('day', now()) + interval '12 days 12 hours', date_trunc('day', now()) + interval '12 days 15 hours',
+          'Ginásio Fictício', 'Rua Exemplo', '100', 'Centro', 'Curitiba', 'PR', 'https://example.com/seminario', 'published')
+  returning id into ev;
+  insert into public.event_interests (event_id, user_id, kind) values (ev, v_demo, 'interested'), (ev, v_a1, 'interested');
+  insert into public.events (created_by, academy_id, type, martial_art_id, title, starts_at, ends_at, venue_name, city, state, status)
+  values (v_a3, raiz, 'championship', bjj, 'Campeonato Paulista Fictício', date_trunc('day', now()) + interval '30 days 11 hours',
+          date_trunc('day', now()) + interval '31 days 20 hours', 'Arena Exemplo', 'São Paulo', 'SP', 'published');
+  insert into public.events (created_by, type, martial_art_id, title, starts_at, ends_at, city, state, status)
+  values (v_prof, 'workshop', bjj, 'Workshop de arbitragem (rascunho)', date_trunc('day', now()) + interval '40 days 12 hours',
+          date_trunc('day', now()) + interval '40 days 16 hours', 'Curitiba', 'PR', 'draft');
+end;
+$$;

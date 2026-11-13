@@ -36,7 +36,7 @@
 - Solicitação de perfil profissional + aprovação admin, academias, unidades (CEP → ViaCEP, pino confirmado), vínculos com aceite mútuo, grade de aulas, página pública sem login, mapa Leaflet, rotas externas, copiar/compartilhar endereço, busca por distância/cidade/bairro.
 - **Aceite:** o professor de 3 academias vê grade unificada. O visitante sem login consulta grade e mapa.
 
-### Fase 5: Evolução e comunidade esportiva
+### Fase 5: Evolução e comunidade esportiva (aceita em 13/11/2026)
 - Jornada por modalidade (graduações e histórico), confirmação pelo professor, conquistas, check-in → post opcional, histórico/calendário, eventos + interesse/salvar.
 - **Aceite:** graduação BJJ com graus validados. Check-in exibido como "registrou treino".
 

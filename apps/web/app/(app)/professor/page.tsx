@@ -8,6 +8,7 @@ import { ScheduleGrid, type ScheduleItem } from "@/components/academy/schedule-g
 import { Card } from "@/components/ui/card";
 import { PageHeader } from "@/components/ui/page-header";
 import { TeacherMemberships } from "./memberships";
+import { PromotionRequests, type PromotionRequest } from "./promotion-requests";
 import { TeacherForm, type TeacherFormValues } from "./teacher-form";
 
 export const metadata: Metadata = { title: "Área do professor" };
@@ -45,8 +46,9 @@ export default async function TeacherAreaPage() {
   const approved = profile?.status === "approved";
   let schedule: ScheduleItem[] = [];
   let memberships: { academyId: string; slug: string; name: string; status: string; requestedBy: string }[] = [];
+  let requests: PromotionRequest[] = [];
   if (approved) {
-    const [{ data: s }, { data: m }] = await Promise.all([
+    const [{ data: s }, { data: m }, { data: pr }] = await Promise.all([
       supabase.rpc("get_teacher_schedule", { p_teacher: user.id }),
       supabase
         .from("academy_memberships")
@@ -54,7 +56,25 @@ export default async function TeacherAreaPage() {
         .eq("user_id", user.id)
         .eq("role", "teacher")
         .in("status", ["active", "pending"]),
+      supabase
+        .from("promotion_cards")
+        .select("*")
+        .eq("teacher_id", user.id)
+        .eq("verification", "self_reported")
+        .order("created_at"),
     ]);
+    requests = (pr ?? []).map((p) => ({
+      id: p.id!,
+      username: p.user_username ?? "",
+      displayName: p.user_display_name ?? "",
+      martialArt: p.martial_art_name ?? "",
+      rankName: p.rank_name ?? "",
+      rankColor: p.rank_color,
+      rankSecondaryColor: p.rank_secondary_color,
+      degree: p.degree ?? 0,
+      promotedOn: p.promoted_on!,
+      academyName: p.academy_name,
+    }));
     schedule = (s ?? []) as unknown as ScheduleItem[];
     memberships = (m ?? []).map((row) => {
       const academy = row.academies as unknown as { slug: string; name: string };
@@ -101,6 +121,12 @@ export default async function TeacherAreaPage() {
               Minha grade
             </h2>
             <ScheduleGrid items={schedule} showAcademy />
+          </section>
+          <section aria-labelledby="graduacoes-pendentes">
+            <h2 id="graduacoes-pendentes" className="mb-3 font-display text-2xl font-semibold">
+              Graduações para confirmar
+            </h2>
+            <PromotionRequests items={requests} />
           </section>
           <section aria-labelledby="vinculos">
             <h2 id="vinculos" className="mb-3 font-display text-2xl font-semibold">

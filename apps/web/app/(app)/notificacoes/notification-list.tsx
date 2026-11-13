@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useTransition } from "react";
 import Link from "next/link";
-import { AtSign, Building2, Heart, MessageCircle, Reply, ShieldCheck, UserPlus, UserRoundPlus } from "lucide-react";
+import { AtSign, BadgeCheck, Building2, CalendarDays, Heart, Medal, MessageCircle, Reply, ShieldCheck, UserPlus, UserRoundPlus } from "lucide-react";
 import { timeAgo } from "@figtherz/core";
 import { markNotificationsRead, respondFollowRequest, respondMention } from "@/app/actions/social";
 import { routes } from "@/lib/routes";
@@ -19,6 +19,7 @@ export type NotificationItem = {
   actor: { id: string; username: string; displayName: string } | null;
   excerpt: string | null;
   academy: { slug: string; name: string } | null;
+  event: { id: string; title: string; cancelled: boolean } | null;
   mentionStatus: "pending" | "approved" | "rejected" | null;
 };
 
@@ -31,6 +32,9 @@ const copy: Record<string, { text: string; icon: typeof Heart }> = {
   mention: { text: "marcou você em um post", icon: AtSign },
   membership_request: { text: "enviou um pedido de vínculo", icon: Building2 },
   moderation: { text: "revisou seu perfil profissional", icon: ShieldCheck },
+  promotion_request: { text: "pediu que você confirme uma graduação", icon: Medal },
+  promotion_confirmed: { text: "confirmou sua graduação", icon: BadgeCheck },
+  event_update: { text: "atualizou um evento que você marcou interesse", icon: CalendarDays },
 };
 
 export function NotificationList({ items }: { items: NotificationItem[] }) {
@@ -48,21 +52,27 @@ export function NotificationList({ items }: { items: NotificationItem[] }) {
   );
 }
 
+/** Para onde a notificação leva. Vínculo: quem gerencia vai ao painel; quem foi convidado vai à área do professor. */
+function targetOf(item: NotificationItem): string {
+  if (item.postId) return routes.post(item.postId);
+  if (item.type === "membership_request" && item.academy) return `${routes.manageAcademy(item.academy.slug)}#equipe`;
+  if (item.type === "moderation") return routes.teacherArea;
+  if (item.type === "promotion_request") return `${routes.teacherArea}#graduacoes-pendentes`;
+  if (item.type === "promotion_confirmed") return routes.journey;
+  if (item.event) return routes.event(item.event.id);
+  if (item.actor) return routes.profile(item.actor.username);
+  return routes.notifications;
+}
+
 function Row({ item }: { item: NotificationItem }) {
   const [done, setDone] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
-  const meta = copy[item.type] ?? { text: "interagiu com você", icon: Heart };
+  const meta =
+    item.type === "event_update" && item.event?.cancelled
+      ? { text: "cancelou um evento que você marcou interesse", icon: CalendarDays }
+      : (copy[item.type] ?? { text: "interagiu com você", icon: Heart });
   const Icon = meta.icon;
-  // Vínculo: quem gerencia vai ao painel; quem foi convidado vai à área do professor.
-  const target = item.postId
-    ? routes.post(item.postId)
-    : item.type === "membership_request" && item.academy
-      ? `${routes.manageAcademy(item.academy.slug)}#equipe`
-      : item.type === "moderation"
-        ? routes.teacherArea
-        : item.actor
-          ? routes.profile(item.actor.username)
-          : routes.notifications;
+  const target = targetOf(item);
 
   function run(action: () => Promise<{ ok: boolean }>, label: string) {
     startTransition(async () => {
@@ -84,6 +94,7 @@ function Row({ item }: { item: NotificationItem }) {
             <span className="font-semibold">{item.actor?.displayName ?? "Alguém"}</span> {meta.text}
             {item.excerpt ? <span className="text-muted">: “{item.excerpt}”</span> : null}
             {item.academy ? <span className="text-muted"> · {item.academy.name}</span> : null}
+            {item.event ? <span className="text-muted">: “{item.event.title}”</span> : null}
           </Link>
         </p>
         <p className="text-[13px] text-muted">

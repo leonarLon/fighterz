@@ -34,7 +34,7 @@ Toda ação administrativa gera registro em `moderation_actions` ou `admin_audit
 |---|---|
 | Acesso a dados de terceiros (IDOR) | RLS + testes pgTAP "A não lê/escreve dados de B" para cada tabela |
 | Escalada de privilégio | Colunas sensíveis (`status`, `role`, contadores) protegidas por trigger/política de UPDATE com `WITH CHECK` |
-| Spam/abuso | `check_rate_limit()` no banco: posts 20/h, comentários 60/h, follows 200/dia, denúncias 20/dia, check-ins 5/dia, geocodificação 10/h por usuário |
+| Spam/abuso | `check_rate_limit()` no banco: posts 20/h, comentários 60/h, follows 200/dia, denúncias 20/dia, check-ins 5/dia, conquistas 30/dia, eventos 10/dia, geocodificação 10/h por usuário |
 | XSS | React escapa por padrão. Proibido `dangerouslySetInnerHTML` com conteúdo de usuário. Links do usuário com `rel="noopener nofollow ugc"`. CSP restritiva |
 | CSRF | Cookies `SameSite=Lax` + Server Actions (checagem de origem do Next) |
 | Upload malicioso | Validação de MIME **e** assinatura (magic bytes), limites de tamanho no bucket, reencode de imagem no cliente (remove EXIF/GPS), nomes gerados (UUID), servir com `Content-Disposition` adequado |

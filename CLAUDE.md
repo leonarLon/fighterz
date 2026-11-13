@@ -34,6 +34,17 @@ Stack Next.js 16 + Tailwind 4 + Supabase local + Leaflet/OSM · 18+ · limites d
   - Migrations 10–12: teacher_profiles (aprovação admin, view pública `teacher_cards`), academias/unidades (PostGIS)/vínculos/seguidores/grade, geocode_cache, funções de vínculo com aceite mútuo, `search_classes`, `get_teacher_schedule`.
   - Seed: 4 academias fictícias, 12 aulas; atleta2 é professor em 3 academias (aceite); atleta7 tem pedido pendente; admin@figtherz.local aprova em /admin/professores.
 
+- Fase 5 (evolução e comunidade esportiva) **aceita em 13/11/2026**. Verificações verdes: pgTAP 280, Vitest 42 (core 39 + web 3), Playwright 87 (+13 pulados de propósito no mobile), typecheck, lint e build.
+  - Migrations 13–14: jornada (modalidades do atleta, `rank_promotions` com graus validados e confirmação do professor, conquistas, `training_checkins` + `create_checkin` com post opcional) e eventos (interesse/salvar, aviso de cancelamento).
+  - Telas: `/jornada` (graduações, calendário de treinos, conquistas), `/jornada/treino`, `/eventos`, `/eventos/[id]`, `/eventos/novo`, fila "Graduações para confirmar" em `/professor`, jornada no perfil público, privacidade da jornada em Configurações.
+  - Seed: demo é faixa azul (2 graus confirmados por atleta2, 3º grau aguardando), tem treinos, conquistas e interesse no seminário do atleta2; 3 eventos publicados e 1 rascunho.
+
+## Decisões técnicas da Fase 5
+- Desvios do DATA_MODEL registrados lá (§4.5 e §4.6): visibilidade da jornada por `user_settings`, check-in sem confirmação do professor, evento com `created_by` + `academy_id` opcional, status sem `finished`.
+- Datas e horas da interface em horário de Brasília (`APP_TIMEZONE`, sem horário de verão desde 2019). Eventos em outros fusos do Brasil aparecem no horário de Brasília: limitação conhecida.
+- Política de SELECT nunca deve consultar a própria tabela por id (ex.: `can_view_event(id)`): quebra o `INSERT ... RETURNING`. Usar as colunas da linha.
+- `create_checkin` é `security definer` porque grava `posts.kind` e `posts.academy_id`, que o usuário não escreve direto. Rate limits de post e de check-in continuam valendo (dependem do JWT, não do papel).
+
 ## Decisões técnicas da Fase 4
 - Leaflet direto, sem `react-leaflet` (Hippocratic License). Pino arrastável + campos de latitude/longitude como alternativa acessível.
 - ViaCEP e Nominatim só pelo servidor (`/api/geo/*`, exige login), com cache de 90 dias e cota no banco: 30 CEPs/h e 10 geocodificações/h por usuário, mais 1 req/s global ao Nominatim. Testes automatizados **não** chamam esses serviços nem baixam tiles do OSM (bloqueados no Playwright).
@@ -61,4 +72,4 @@ Stack Next.js 16 + Tailwind 4 + Supabase local + Leaflet/OSM · 18+ · limites d
 
 ## Próximos passos
 1. Pendências conhecidas da Fase 3: upload de avatar (bucket `avatars`), limpeza de uploads órfãos e remoção física de conteúdo apagado após 30 dias (pg_cron), vídeo (fora do MVP).
-2. Fase 5: jornada (graduações e histórico), confirmação pelo professor, conquistas, check-in → post, eventos.
+2. Fase 6: painel admin, moderação com histórico, suspensão, auditoria, revisão completa de RLS.

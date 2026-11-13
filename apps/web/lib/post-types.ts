@@ -4,10 +4,13 @@ export type PostMediaView = { id: string; url: string; width: number; height: nu
 export type PostView = {
   id: string;
   author: { id: string; username: string; displayName: string };
+  kind: "standard" | "checkin" | "achievement" | "event_share";
   caption: string;
   visibility: "public" | "followers" | "private";
   locationLabel: string | null;
   martialArtName: string | null;
+  /** Academia citada no post (registro de treino). */
+  academy: { name: string; slug: string } | null;
   likeCount: number;
   commentCount: number;
   createdAt: string;

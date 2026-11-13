@@ -161,6 +161,44 @@ isOneToOne: false
                   Relationships: [
                     
                   ]
+                },"athlete_achievements": {
+                  Row: {
+                    "achieved_on": string,"created_at": string,"division": string | null,"event_id": string | null,"event_name": string | null,"evidence_url": string | null,"id": string,"martial_art_id": string | null,"medal": Database["public"]['Enums']["medal"] | null,"placement": number | null,"title": string,"type": Database["public"]['Enums']["achievement_type"],"updated_at": string,"user_id": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "achieved_on": string,"created_at"?: string,"division"?: string | null,"event_id"?: string | null,"event_name"?: string | null,"evidence_url"?: string | null,"id"?: string,"martial_art_id"?: string | null,"medal"?: Database["public"]['Enums']["medal"] | null,"placement"?: number | null,"title": string,"type"?: Database["public"]['Enums']["achievement_type"],"updated_at"?: string,"user_id"?: string
+                  }
+                  Update: {
+                    "achieved_on"?: string,"created_at"?: string,"division"?: string | null,"event_id"?: string | null,"event_name"?: string | null,"evidence_url"?: string | null,"id"?: string,"martial_art_id"?: string | null,"medal"?: Database["public"]['Enums']["medal"] | null,"placement"?: number | null,"title"?: string,"type"?: Database["public"]['Enums']["achievement_type"],"updated_at"?: string,"user_id"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "athlete_achievements_event_id_fkey"
+      columns: ["event_id"]
+isOneToOne: false
+      referencedRelation: "event_cards"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "athlete_achievements_event_id_fkey"
+      columns: ["event_id"]
+isOneToOne: false
+      referencedRelation: "events"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "athlete_achievements_martial_art_id_fkey"
+      columns: ["martial_art_id"]
+isOneToOne: false
+      referencedRelation: "martial_arts"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "athlete_achievements_user_id_fkey"
+      columns: ["user_id"]
+isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    }
+                  ]
                 },"blocked_users": {
                   Row: {
                     "blocked_id": string,"blocker_id": string,"created_at": string
@@ -301,6 +339,76 @@ isOneToOne: false
       referencedColumns: ["id"]
     }
                   ]
+                },"event_interests": {
+                  Row: {
+                    "created_at": string,"event_id": string,"kind": Database["public"]['Enums']["event_interest_kind"],"user_id": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "created_at"?: string,"event_id": string,"kind": Database["public"]['Enums']["event_interest_kind"],"user_id": string
+                  }
+                  Update: {
+                    "created_at"?: string,"event_id"?: string,"kind"?: Database["public"]['Enums']["event_interest_kind"],"user_id"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "event_interests_event_id_fkey"
+      columns: ["event_id"]
+isOneToOne: false
+      referencedRelation: "event_cards"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "event_interests_event_id_fkey"
+      columns: ["event_id"]
+isOneToOne: false
+      referencedRelation: "events"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "event_interests_user_id_fkey"
+      columns: ["user_id"]
+isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"events": {
+                  Row: {
+                    "academy_id": string | null,"city": string,"created_at": string,"created_by": string,"description": string | null,"ends_at": string,"external_url": string | null,"id": string,"interest_count": number,"latitude": number | null,"location": unknown,"longitude": number | null,"martial_art_id": string | null,"neighborhood": string | null,"number": string | null,"postal_code": string | null,"starts_at": string,"state": string,"status": Database["public"]['Enums']["event_status"],"street": string | null,"title": string,"type": Database["public"]['Enums']["event_type"],"unit_id": string | null,"updated_at": string,"venue_name": string | null
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "academy_id"?: string | null,"city": string,"created_at"?: string,"created_by": string,"description"?: string | null,"ends_at": string,"external_url"?: string | null,"id"?: string,"interest_count"?: number,"latitude"?: number | null,"location"?: never,"longitude"?: number | null,"martial_art_id"?: string | null,"neighborhood"?: string | null,"number"?: string | null,"postal_code"?: string | null,"starts_at": string,"state": string,"status"?: Database["public"]['Enums']["event_status"],"street"?: string | null,"title": string,"type"?: Database["public"]['Enums']["event_type"],"unit_id"?: string | null,"updated_at"?: string,"venue_name"?: string | null
+                  }
+                  Update: {
+                    "academy_id"?: string | null,"city"?: string,"created_at"?: string,"created_by"?: string,"description"?: string | null,"ends_at"?: string,"external_url"?: string | null,"id"?: string,"interest_count"?: number,"latitude"?: number | null,"location"?: never,"longitude"?: number | null,"martial_art_id"?: string | null,"neighborhood"?: string | null,"number"?: string | null,"postal_code"?: string | null,"starts_at"?: string,"state"?: string,"status"?: Database["public"]['Enums']["event_status"],"street"?: string | null,"title"?: string,"type"?: Database["public"]['Enums']["event_type"],"unit_id"?: string | null,"updated_at"?: string,"venue_name"?: string | null
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "events_academy_id_fkey"
+      columns: ["academy_id"]
+isOneToOne: false
+      referencedRelation: "academies"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "events_created_by_fkey"
+      columns: ["created_by"]
+isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "events_martial_art_id_fkey"
+      columns: ["martial_art_id"]
+isOneToOne: false
+      referencedRelation: "martial_arts"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "events_unit_id_fkey"
+      columns: ["unit_id"]
+isOneToOne: false
+      referencedRelation: "academy_units"
+      referencedColumns: ["id"]
+    }
+                  ]
                 },"follows": {
                   Row: {
                     "accepted_at": string | null,"created_at": string,"follower_id": string,"following_id": string,"status": Database["public"]['Enums']["follow_status"]
@@ -377,14 +485,14 @@ isOneToOne: false
                   ]
                 },"notifications": {
                   Row: {
-                    "academy_id": string | null,"actor_id": string | null,"comment_id": string | null,"created_at": string,"id": string,"post_id": string | null,"read_at": string | null,"recipient_id": string,"type": Database["public"]['Enums']["notification_type"]
+                    "academy_id": string | null,"actor_id": string | null,"comment_id": string | null,"created_at": string,"event_id": string | null,"id": string,"post_id": string | null,"read_at": string | null,"recipient_id": string,"type": Database["public"]['Enums']["notification_type"]
                   }
                   ComputedFields: never
                   Insert: {
-                    "academy_id"?: string | null,"actor_id"?: string | null,"comment_id"?: string | null,"created_at"?: string,"id"?: string,"post_id"?: string | null,"read_at"?: string | null,"recipient_id": string,"type": Database["public"]['Enums']["notification_type"]
+                    "academy_id"?: string | null,"actor_id"?: string | null,"comment_id"?: string | null,"created_at"?: string,"event_id"?: string | null,"id"?: string,"post_id"?: string | null,"read_at"?: string | null,"recipient_id": string,"type": Database["public"]['Enums']["notification_type"]
                   }
                   Update: {
-                    "academy_id"?: string | null,"actor_id"?: string | null,"comment_id"?: string | null,"created_at"?: string,"id"?: string,"post_id"?: string | null,"read_at"?: string | null,"recipient_id"?: string,"type"?: Database["public"]['Enums']["notification_type"]
+                    "academy_id"?: string | null,"actor_id"?: string | null,"comment_id"?: string | null,"created_at"?: string,"event_id"?: string | null,"id"?: string,"post_id"?: string | null,"read_at"?: string | null,"recipient_id"?: string,"type"?: Database["public"]['Enums']["notification_type"]
                   }
                   Relationships: [
                     {
@@ -410,6 +518,18 @@ isOneToOne: false
       columns: ["comment_id"]
 isOneToOne: false
       referencedRelation: "comments"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "notifications_event_id_fkey"
+      columns: ["event_id"]
+isOneToOne: false
+      referencedRelation: "event_cards"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "notifications_event_id_fkey"
+      columns: ["event_id"]
+isOneToOne: false
+      referencedRelation: "events"
       referencedColumns: ["id"]
     },{
       foreignKeyName: "notifications_post_id_fkey"
@@ -523,17 +643,23 @@ isOneToOne: false
                   ]
                 },"posts": {
                   Row: {
-                    "author_id": string,"caption": string,"comment_count": number,"created_at": string,"deleted_at": string | null,"external_video_url": string | null,"id": string,"kind": Database["public"]['Enums']["post_kind"],"like_count": number,"location_label": string | null,"martial_art_id": string | null,"moderation_status": Database["public"]['Enums']["moderation_status"],"save_count": number,"search_vector": unknown,"updated_at": string,"visibility": Database["public"]['Enums']["visibility"]
+                    "academy_id": string | null,"author_id": string,"caption": string,"comment_count": number,"created_at": string,"deleted_at": string | null,"external_video_url": string | null,"id": string,"kind": Database["public"]['Enums']["post_kind"],"like_count": number,"location_label": string | null,"martial_art_id": string | null,"moderation_status": Database["public"]['Enums']["moderation_status"],"save_count": number,"search_vector": unknown,"updated_at": string,"visibility": Database["public"]['Enums']["visibility"]
                   }
                   ComputedFields: never
                   Insert: {
-                    "author_id": string,"caption"?: string,"comment_count"?: number,"created_at"?: string,"deleted_at"?: string | null,"external_video_url"?: string | null,"id"?: string,"kind"?: Database["public"]['Enums']["post_kind"],"like_count"?: number,"location_label"?: string | null,"martial_art_id"?: string | null,"moderation_status"?: Database["public"]['Enums']["moderation_status"],"save_count"?: number,"search_vector"?: never,"updated_at"?: string,"visibility"?: Database["public"]['Enums']["visibility"]
+                    "academy_id"?: string | null,"author_id": string,"caption"?: string,"comment_count"?: number,"created_at"?: string,"deleted_at"?: string | null,"external_video_url"?: string | null,"id"?: string,"kind"?: Database["public"]['Enums']["post_kind"],"like_count"?: number,"location_label"?: string | null,"martial_art_id"?: string | null,"moderation_status"?: Database["public"]['Enums']["moderation_status"],"save_count"?: number,"search_vector"?: never,"updated_at"?: string,"visibility"?: Database["public"]['Enums']["visibility"]
                   }
                   Update: {
-                    "author_id"?: string,"caption"?: string,"comment_count"?: number,"created_at"?: string,"deleted_at"?: string | null,"external_video_url"?: string | null,"id"?: string,"kind"?: Database["public"]['Enums']["post_kind"],"like_count"?: number,"location_label"?: string | null,"martial_art_id"?: string | null,"moderation_status"?: Database["public"]['Enums']["moderation_status"],"save_count"?: number,"search_vector"?: never,"updated_at"?: string,"visibility"?: Database["public"]['Enums']["visibility"]
+                    "academy_id"?: string | null,"author_id"?: string,"caption"?: string,"comment_count"?: number,"created_at"?: string,"deleted_at"?: string | null,"external_video_url"?: string | null,"id"?: string,"kind"?: Database["public"]['Enums']["post_kind"],"like_count"?: number,"location_label"?: string | null,"martial_art_id"?: string | null,"moderation_status"?: Database["public"]['Enums']["moderation_status"],"save_count"?: number,"search_vector"?: never,"updated_at"?: string,"visibility"?: Database["public"]['Enums']["visibility"]
                   }
                   Relationships: [
                     {
+      foreignKeyName: "posts_academy_id_fkey"
+      columns: ["academy_id"]
+isOneToOne: false
+      referencedRelation: "academies"
+      referencedColumns: ["id"]
+    },{
       foreignKeyName: "posts_author_id_fkey"
       columns: ["author_id"]
 isOneToOne: false
@@ -560,6 +686,56 @@ isOneToOne: false
                   }
                   Relationships: [
                     
+                  ]
+                },"rank_promotions": {
+                  Row: {
+                    "academy_id": string | null,"confirmed_at": string | null,"created_at": string,"degree": number,"id": string,"notes": string | null,"promoted_on": string,"rank_id": string,"teacher_id": string | null,"updated_at": string,"user_id": string,"user_martial_art_id": string,"verification": Database["public"]['Enums']["verification_status"]
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "academy_id"?: string | null,"confirmed_at"?: string | null,"created_at"?: string,"degree"?: number,"id"?: string,"notes"?: string | null,"promoted_on": string,"rank_id": string,"teacher_id"?: string | null,"updated_at"?: string,"user_id": string,"user_martial_art_id": string,"verification"?: Database["public"]['Enums']["verification_status"]
+                  }
+                  Update: {
+                    "academy_id"?: string | null,"confirmed_at"?: string | null,"created_at"?: string,"degree"?: number,"id"?: string,"notes"?: string | null,"promoted_on"?: string,"rank_id"?: string,"teacher_id"?: string | null,"updated_at"?: string,"user_id"?: string,"user_martial_art_id"?: string,"verification"?: Database["public"]['Enums']["verification_status"]
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "rank_promotions_academy_id_fkey"
+      columns: ["academy_id"]
+isOneToOne: false
+      referencedRelation: "academies"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "rank_promotions_rank_id_fkey"
+      columns: ["rank_id"]
+isOneToOne: false
+      referencedRelation: "martial_art_ranks"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "rank_promotions_teacher_id_fkey"
+      columns: ["teacher_id"]
+isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "rank_promotions_user_id_fkey"
+      columns: ["user_id"]
+isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "rank_promotions_user_martial_art_id_fkey"
+      columns: ["user_martial_art_id"]
+isOneToOne: false
+      referencedRelation: "journey_cards"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "rank_promotions_user_martial_art_id_fkey"
+      columns: ["user_martial_art_id"]
+isOneToOne: false
+      referencedRelation: "user_martial_arts"
+      referencedColumns: ["id"]
+    }
                   ]
                 },"rate_limits": {
                   Row: {
@@ -697,6 +873,94 @@ isOneToOne: true
       referencedColumns: ["id"]
     }
                   ]
+                },"training_checkins": {
+                  Row: {
+                    "academy_id": string | null,"class_schedule_id": string | null,"created_at": string,"duration_min": number | null,"id": string,"martial_art_id": string,"notes": string | null,"post_id": string | null,"trained_at": string,"user_id": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "academy_id"?: string | null,"class_schedule_id"?: string | null,"created_at"?: string,"duration_min"?: number | null,"id"?: string,"martial_art_id": string,"notes"?: string | null,"post_id"?: string | null,"trained_at": string,"user_id": string
+                  }
+                  Update: {
+                    "academy_id"?: string | null,"class_schedule_id"?: string | null,"created_at"?: string,"duration_min"?: number | null,"id"?: string,"martial_art_id"?: string,"notes"?: string | null,"post_id"?: string | null,"trained_at"?: string,"user_id"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "training_checkins_academy_id_fkey"
+      columns: ["academy_id"]
+isOneToOne: false
+      referencedRelation: "academies"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "training_checkins_class_schedule_id_fkey"
+      columns: ["class_schedule_id"]
+isOneToOne: false
+      referencedRelation: "class_cards"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "training_checkins_class_schedule_id_fkey"
+      columns: ["class_schedule_id"]
+isOneToOne: false
+      referencedRelation: "class_schedules"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "training_checkins_martial_art_id_fkey"
+      columns: ["martial_art_id"]
+isOneToOne: false
+      referencedRelation: "martial_arts"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "training_checkins_post_id_fkey"
+      columns: ["post_id"]
+isOneToOne: false
+      referencedRelation: "post_cards"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "training_checkins_post_id_fkey"
+      columns: ["post_id"]
+isOneToOne: false
+      referencedRelation: "posts"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "training_checkins_user_id_fkey"
+      columns: ["user_id"]
+isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"user_martial_arts": {
+                  Row: {
+                    "created_at": string,"current_degree": number,"current_rank_id": string | null,"federation": string | null,"id": string,"martial_art_id": string,"started_on": string | null,"updated_at": string,"user_id": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "created_at"?: string,"current_degree"?: number,"current_rank_id"?: string | null,"federation"?: string | null,"id"?: string,"martial_art_id": string,"started_on"?: string | null,"updated_at"?: string,"user_id": string
+                  }
+                  Update: {
+                    "created_at"?: string,"current_degree"?: number,"current_rank_id"?: string | null,"federation"?: string | null,"id"?: string,"martial_art_id"?: string,"started_on"?: string | null,"updated_at"?: string,"user_id"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "user_martial_arts_current_rank_id_fkey"
+      columns: ["current_rank_id"]
+isOneToOne: false
+      referencedRelation: "martial_art_ranks"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "user_martial_arts_martial_art_id_fkey"
+      columns: ["martial_art_id"]
+isOneToOne: false
+      referencedRelation: "martial_arts"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "user_martial_arts_user_id_fkey"
+      columns: ["user_id"]
+isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    }
+                  ]
                 },"user_roles": {
                   Row: {
                     "created_at": string,"granted_by": string | null,"role": Database["public"]['Enums']["platform_role"],"user_id": string
@@ -746,7 +1010,57 @@ isOneToOne: true
                 }
           }
           Views: {
-            "class_cards": {
+            "checkin_cards": {
+                  Row: {
+                    "academy_id": string | null,"academy_name": string | null,"academy_slug": string | null,"class_name": string | null,"class_schedule_id": string | null,"created_at": string,"duration_min": number | null,"id": string,"martial_art_id": string,"martial_art_name": string,"notes": string | null,"post_id": string | null,"trained_at": string,"user_id": string
+                  }
+                  ComputedFields: never
+                  Relationships: [
+                    {
+      foreignKeyName: "training_checkins_academy_id_fkey"
+      columns: ["academy_id"]
+isOneToOne: false
+      referencedRelation: "academies"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "training_checkins_class_schedule_id_fkey"
+      columns: ["class_schedule_id"]
+isOneToOne: false
+      referencedRelation: "class_cards"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "training_checkins_class_schedule_id_fkey"
+      columns: ["class_schedule_id"]
+isOneToOne: false
+      referencedRelation: "class_schedules"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "training_checkins_martial_art_id_fkey"
+      columns: ["martial_art_id"]
+isOneToOne: false
+      referencedRelation: "martial_arts"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "training_checkins_post_id_fkey"
+      columns: ["post_id"]
+isOneToOne: false
+      referencedRelation: "post_cards"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "training_checkins_post_id_fkey"
+      columns: ["post_id"]
+isOneToOne: false
+      referencedRelation: "posts"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "training_checkins_user_id_fkey"
+      columns: ["user_id"]
+isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"class_cards": {
                   Row: {
                     "academy_id": string,"academy_name": string,"academy_slug": string,"academy_verified": boolean,"accepts_trial": boolean,"city": string,"complement": string | null,"ends_at": string,"id": string,"latitude": number | null,"level": Database["public"]['Enums']["class_level"],"longitude": number | null,"martial_art_id": string,"martial_art_name": string,"name": string,"neighborhood": string | null,"notes": string | null,"number": string | null,"postal_code": string | null,"reference_point": string | null,"starts_at": string,"state": string,"status": Database["public"]['Enums']["class_status"],"street": string | null,"teacher_display_name": string | null,"teacher_id": string | null,"teacher_username": string | null,"unit_id": string,"unit_name": string,"weekday": number
                   }
@@ -816,9 +1130,67 @@ isOneToOne: false
       referencedColumns: ["id"]
     }
                   ]
+                },"event_cards": {
+                  Row: {
+                    "academy_id": string | null,"academy_name": string | null,"academy_slug": string | null,"city": string,"created_at": string,"created_by": string,"description": string | null,"ends_at": string,"external_url": string | null,"id": string,"interest_count": number,"latitude": number | null,"longitude": number | null,"martial_art_id": string | null,"martial_art_name": string | null,"neighborhood": string | null,"number": string | null,"organizer_display_name": string,"organizer_username": string | null,"postal_code": string | null,"starts_at": string,"state": string,"status": Database["public"]['Enums']["event_status"],"street": string | null,"title": string,"type": Database["public"]['Enums']["event_type"],"unit_id": string | null,"venue_name": string | null,"viewer_interested": boolean | null,"viewer_saved": boolean | null
+                  }
+                  ComputedFields: never
+                  Relationships: [
+                    {
+      foreignKeyName: "events_academy_id_fkey"
+      columns: ["academy_id"]
+isOneToOne: false
+      referencedRelation: "academies"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "events_created_by_fkey"
+      columns: ["created_by"]
+isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "events_martial_art_id_fkey"
+      columns: ["martial_art_id"]
+isOneToOne: false
+      referencedRelation: "martial_arts"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "events_unit_id_fkey"
+      columns: ["unit_id"]
+isOneToOne: false
+      referencedRelation: "academy_units"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"journey_cards": {
+                  Row: {
+                    "current_confirmed": boolean | null,"current_degree": number,"current_rank_id": string | null,"federation": string | null,"has_ranks": boolean,"id": string,"martial_art_id": string,"martial_art_name": string,"martial_art_slug": string,"max_degrees": number | null,"rank_color": string | null,"rank_name": string | null,"rank_secondary_color": string | null,"sort_order": number,"started_on": string | null,"user_id": string
+                  }
+                  ComputedFields: never
+                  Relationships: [
+                    {
+      foreignKeyName: "user_martial_arts_current_rank_id_fkey"
+      columns: ["current_rank_id"]
+isOneToOne: false
+      referencedRelation: "martial_art_ranks"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "user_martial_arts_martial_art_id_fkey"
+      columns: ["martial_art_id"]
+isOneToOne: false
+      referencedRelation: "martial_arts"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "user_martial_arts_user_id_fkey"
+      columns: ["user_id"]
+isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    }
+                  ]
                 },"notification_cards": {
                   Row: {
-                    "academy_id": string | null,"academy_name": string | null,"academy_slug": string | null,"actor_avatar_path": string | null,"actor_display_name": string | null,"actor_id": string | null,"actor_username": string | null,"comment_id": string | null,"created_at": string,"id": string,"post_excerpt": string | null,"post_id": string | null,"read_at": string | null,"type": Database["public"]['Enums']["notification_type"]
+                    "academy_id": string | null,"academy_name": string | null,"academy_slug": string | null,"actor_avatar_path": string | null,"actor_display_name": string | null,"actor_id": string | null,"actor_username": string | null,"comment_id": string | null,"created_at": string,"event_id": string | null,"event_status": Database["public"]['Enums']["event_status"] | null,"event_title": string | null,"id": string,"post_excerpt": string | null,"post_id": string | null,"read_at": string | null,"type": Database["public"]['Enums']["notification_type"]
                   }
                   ComputedFields: never
                   Relationships: [
@@ -847,6 +1219,18 @@ isOneToOne: false
       referencedRelation: "comments"
       referencedColumns: ["id"]
     },{
+      foreignKeyName: "notifications_event_id_fkey"
+      columns: ["event_id"]
+isOneToOne: false
+      referencedRelation: "event_cards"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "notifications_event_id_fkey"
+      columns: ["event_id"]
+isOneToOne: false
+      referencedRelation: "events"
+      referencedColumns: ["id"]
+    },{
       foreignKeyName: "notifications_post_id_fkey"
       columns: ["post_id"]
 isOneToOne: false
@@ -862,11 +1246,17 @@ isOneToOne: false
                   ]
                 },"post_cards": {
                   Row: {
-                    "author_avatar_path": string | null,"author_display_name": string,"author_id": string,"author_username": string | null,"caption": string,"comment_count": number,"created_at": string,"id": string,"kind": Database["public"]['Enums']["post_kind"],"like_count": number,"location_label": string | null,"martial_art_id": string | null,"martial_art_name": string | null,"media": Json | null,"mentions": Json | null,"moderation_status": Database["public"]['Enums']["moderation_status"],"save_count": number,"viewer_has_liked": boolean | null,"viewer_has_saved": boolean | null,"visibility": Database["public"]['Enums']["visibility"]
+                    "academy_id": string | null,"academy_name": string | null,"academy_slug": string | null,"author_avatar_path": string | null,"author_display_name": string,"author_id": string,"author_username": string | null,"caption": string,"comment_count": number,"created_at": string,"id": string,"kind": Database["public"]['Enums']["post_kind"],"like_count": number,"location_label": string | null,"martial_art_id": string | null,"martial_art_name": string | null,"media": Json | null,"mentions": Json | null,"moderation_status": Database["public"]['Enums']["moderation_status"],"save_count": number,"viewer_has_liked": boolean | null,"viewer_has_saved": boolean | null,"visibility": Database["public"]['Enums']["visibility"]
                   }
                   ComputedFields: never
                   Relationships: [
                     {
+      foreignKeyName: "posts_academy_id_fkey"
+      columns: ["academy_id"]
+isOneToOne: false
+      referencedRelation: "academies"
+      referencedColumns: ["id"]
+    },{
       foreignKeyName: "posts_author_id_fkey"
       columns: ["author_id"]
 isOneToOne: false
@@ -874,6 +1264,56 @@ isOneToOne: false
       referencedColumns: ["id"]
     },{
       foreignKeyName: "posts_martial_art_id_fkey"
+      columns: ["martial_art_id"]
+isOneToOne: false
+      referencedRelation: "martial_arts"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"promotion_cards": {
+                  Row: {
+                    "academy_id": string | null,"academy_name": string | null,"academy_slug": string | null,"confirmed_at": string | null,"created_at": string,"degree": number,"id": string,"martial_art_id": string,"martial_art_name": string,"max_degrees": number,"notes": string | null,"promoted_on": string,"rank_color": string | null,"rank_id": string,"rank_name": string,"rank_ordinal": number,"rank_secondary_color": string | null,"teacher_display_name": string | null,"teacher_id": string | null,"teacher_username": string | null,"user_display_name": string,"user_id": string,"user_martial_art_id": string,"user_username": string | null,"verification": Database["public"]['Enums']["verification_status"]
+                  }
+                  ComputedFields: never
+                  Relationships: [
+                    {
+      foreignKeyName: "rank_promotions_academy_id_fkey"
+      columns: ["academy_id"]
+isOneToOne: false
+      referencedRelation: "academies"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "rank_promotions_rank_id_fkey"
+      columns: ["rank_id"]
+isOneToOne: false
+      referencedRelation: "martial_art_ranks"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "rank_promotions_teacher_id_fkey"
+      columns: ["teacher_id"]
+isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "rank_promotions_user_id_fkey"
+      columns: ["user_id"]
+isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "rank_promotions_user_martial_art_id_fkey"
+      columns: ["user_martial_art_id"]
+isOneToOne: false
+      referencedRelation: "journey_cards"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "rank_promotions_user_martial_art_id_fkey"
+      columns: ["user_martial_art_id"]
+isOneToOne: false
+      referencedRelation: "user_martial_arts"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "user_martial_arts_martial_art_id_fkey"
       columns: ["martial_art_id"]
 isOneToOne: false
       referencedRelation: "martial_arts"
@@ -900,6 +1340,12 @@ isOneToOne: true
             "can_interact_with_post":
 { Args: { "p_post_id": string }; Returns: boolean
                            },
+"can_view_event":
+{ Args: { "p_event": string }; Returns: boolean
+                           },
+"can_view_journey":
+{ Args: { "p_owner": string,"p_section": string }; Returns: boolean
+                           },
 "can_view_post":
 { Args: { "p_post_id": string }; Returns: boolean
                            },
@@ -912,8 +1358,14 @@ isOneToOne: true
 "check_rate_limit":
 { Args: { "p_key": string,"p_max": number,"p_window": string }; Returns: boolean
                            },
+"confirm_promotion":
+{ Args: { "p_confirm": boolean,"p_promotion": string }; Returns: undefined
+                           },
 "create_academy":
 { Args: { "p_description"?: string,"p_martial_art_ids"?: (string)[],"p_name": string }; Returns: string
+                           },
+"create_checkin":
+{ Args: { "p_academy_id"?: string,"p_class_schedule_id"?: string,"p_duration_min"?: number,"p_martial_art_id"?: string,"p_notes"?: string,"p_share"?: boolean,"p_trained_at": string,"p_visibility"?: Database["public"]['Enums']["visibility"] }; Returns: string
                            },
 "create_post":
 { Args: { "p_caption": string,"p_id": string,"p_location_label"?: string,"p_martial_art_id"?: string,"p_media"?: Json,"p_visibility"?: Database["public"]['Enums']["visibility"] }; Returns: string
@@ -941,7 +1393,10 @@ isOneToOne: true
                            },
 "get_explore":
 { Args: { "p_limit"?: number,"p_page"?: number }; Returns: {
-              "author_avatar_path": string | null,
+              "academy_id": string | null,
+"academy_name": string | null,
+"academy_slug": string | null,
+"author_avatar_path": string | null,
 "author_display_name": string,
 "author_id": string,
 "author_username": string | null,
@@ -970,7 +1425,10 @@ isOneToOne: true
       } },
 "get_home_feed":
 { Args: { "p_before_created_at"?: string,"p_before_id"?: string,"p_limit"?: number }; Returns: {
-              "author_avatar_path": string | null,
+              "academy_id": string | null,
+"academy_name": string | null,
+"academy_slug": string | null,
+"author_avatar_path": string | null,
 "author_display_name": string,
 "author_id": string,
 "author_username": string | null,
@@ -999,7 +1457,10 @@ isOneToOne: true
       } },
 "get_profile_posts":
 { Args: { "p_author_id": string,"p_before_created_at"?: string,"p_before_id"?: string,"p_limit"?: number }; Returns: {
-              "author_avatar_path": string | null,
+              "academy_id": string | null,
+"academy_name": string | null,
+"academy_slug": string | null,
+"author_avatar_path": string | null,
 "author_display_name": string,
 "author_id": string,
 "author_username": string | null,
@@ -1070,6 +1531,11 @@ isOneToOne: true
         isOneToOne: false
         isSetofReturn: true
       } },
+"get_training_summary":
+{ Args: { "p_user": string }; Returns: {
+              "last_30_days": number,"this_year": number,"total": number
+            }[]
+                           },
 "has_blocked_me":
 { Args: { "other": string }; Returns: boolean
                            },
@@ -1121,6 +1587,9 @@ isOneToOne: true
 "purge_rate_limits":
 { Args: { "p_older_than"?: string }; Returns: number
                            },
+"refresh_current_rank":
+{ Args: { "p_uma": string }; Returns: undefined
+                           },
 "remove_member":
 { Args: { "p_academy": string,"p_role": Database["public"]['Enums']["membership_role"],"p_user": string }; Returns: undefined
                            },
@@ -1156,7 +1625,7 @@ isOneToOne: true
                            }
           }
           Enums: {
-            "academy_status": "active"|"hidden"|"suspended","account_status": "active"|"suspended"|"deleted","class_level": "all"|"beginner"|"intermediate"|"advanced"|"kids"|"competition","class_status": "active"|"paused"|"cancelled","coords_source": "manual"|"nominatim","follow_status": "pending"|"accepted","media_status": "uploading"|"processing"|"ready"|"failed","media_type": "image"|"video","membership_requester": "user"|"academy","membership_role": "owner"|"admin"|"teacher"|"student","membership_status": "pending"|"active"|"rejected"|"left","mention_status": "pending"|"approved"|"rejected","moderation_status": "visible"|"under_review"|"removed","notification_type": "follow"|"follow_request"|"like"|"comment"|"reply"|"mention"|"class_update"|"event_update"|"promotion_confirmed"|"membership_request"|"moderation","platform_role": "moderator"|"admin"|"superadmin","post_kind": "standard"|"checkin"|"achievement"|"event_share","rank_track": "adult"|"kids","report_reason": "spam"|"harassment"|"violence"|"nudity"|"minor_safety"|"impersonation"|"misinformation"|"other","report_status": "open"|"in_review"|"resolved"|"dismissed","report_target": "post"|"comment"|"profile"|"academy"|"event","teacher_status": "pending"|"approved"|"rejected"|"revoked","theme_preference": "light"|"dark"|"system","visibility": "public"|"followers"|"private"
+            "academy_status": "active"|"hidden"|"suspended","account_status": "active"|"suspended"|"deleted","achievement_type": "competition_result"|"milestone"|"certification"|"other","class_level": "all"|"beginner"|"intermediate"|"advanced"|"kids"|"competition","class_status": "active"|"paused"|"cancelled","coords_source": "manual"|"nominatim","event_interest_kind": "interested"|"saved","event_status": "draft"|"published"|"cancelled","event_type": "championship"|"seminar"|"open_mat"|"graduation"|"workshop"|"special_training"|"other","follow_status": "pending"|"accepted","medal": "gold"|"silver"|"bronze","media_status": "uploading"|"processing"|"ready"|"failed","media_type": "image"|"video","membership_requester": "user"|"academy","membership_role": "owner"|"admin"|"teacher"|"student","membership_status": "pending"|"active"|"rejected"|"left","mention_status": "pending"|"approved"|"rejected","moderation_status": "visible"|"under_review"|"removed","notification_type": "follow"|"follow_request"|"like"|"comment"|"reply"|"mention"|"class_update"|"event_update"|"promotion_confirmed"|"membership_request"|"moderation"|"promotion_request","platform_role": "moderator"|"admin"|"superadmin","post_kind": "standard"|"checkin"|"achievement"|"event_share","rank_track": "adult"|"kids","report_reason": "spam"|"harassment"|"violence"|"nudity"|"minor_safety"|"impersonation"|"misinformation"|"other","report_status": "open"|"in_review"|"resolved"|"dismissed","report_target": "post"|"comment"|"profile"|"academy"|"event","teacher_status": "pending"|"approved"|"rejected"|"revoked","theme_preference": "light"|"dark"|"system","verification_status": "self_reported"|"teacher_confirmed","visibility": "public"|"followers"|"private"
           }
           CompositeTypes: {
             [_ in never]: never
@@ -1276,7 +1745,7 @@ export const Constants = {
           }
         },"public": {
           Enums: {
-            "academy_status": ["active", "hidden", "suspended"],"account_status": ["active", "suspended", "deleted"],"class_level": ["all", "beginner", "intermediate", "advanced", "kids", "competition"],"class_status": ["active", "paused", "cancelled"],"coords_source": ["manual", "nominatim"],"follow_status": ["pending", "accepted"],"media_status": ["uploading", "processing", "ready", "failed"],"media_type": ["image", "video"],"membership_requester": ["user", "academy"],"membership_role": ["owner", "admin", "teacher", "student"],"membership_status": ["pending", "active", "rejected", "left"],"mention_status": ["pending", "approved", "rejected"],"moderation_status": ["visible", "under_review", "removed"],"notification_type": ["follow", "follow_request", "like", "comment", "reply", "mention", "class_update", "event_update", "promotion_confirmed", "membership_request", "moderation"],"platform_role": ["moderator", "admin", "superadmin"],"post_kind": ["standard", "checkin", "achievement", "event_share"],"rank_track": ["adult", "kids"],"report_reason": ["spam", "harassment", "violence", "nudity", "minor_safety", "impersonation", "misinformation", "other"],"report_status": ["open", "in_review", "resolved", "dismissed"],"report_target": ["post", "comment", "profile", "academy", "event"],"teacher_status": ["pending", "approved", "rejected", "revoked"],"theme_preference": ["light", "dark", "system"],"visibility": ["public", "followers", "private"]
+            "academy_status": ["active", "hidden", "suspended"],"account_status": ["active", "suspended", "deleted"],"achievement_type": ["competition_result", "milestone", "certification", "other"],"class_level": ["all", "beginner", "intermediate", "advanced", "kids", "competition"],"class_status": ["active", "paused", "cancelled"],"coords_source": ["manual", "nominatim"],"event_interest_kind": ["interested", "saved"],"event_status": ["draft", "published", "cancelled"],"event_type": ["championship", "seminar", "open_mat", "graduation", "workshop", "special_training", "other"],"follow_status": ["pending", "accepted"],"medal": ["gold", "silver", "bronze"],"media_status": ["uploading", "processing", "ready", "failed"],"media_type": ["image", "video"],"membership_requester": ["user", "academy"],"membership_role": ["owner", "admin", "teacher", "student"],"membership_status": ["pending", "active", "rejected", "left"],"mention_status": ["pending", "approved", "rejected"],"moderation_status": ["visible", "under_review", "removed"],"notification_type": ["follow", "follow_request", "like", "comment", "reply", "mention", "class_update", "event_update", "promotion_confirmed", "membership_request", "moderation", "promotion_request"],"platform_role": ["moderator", "admin", "superadmin"],"post_kind": ["standard", "checkin", "achievement", "event_share"],"rank_track": ["adult", "kids"],"report_reason": ["spam", "harassment", "violence", "nudity", "minor_safety", "impersonation", "misinformation", "other"],"report_status": ["open", "in_review", "resolved", "dismissed"],"report_target": ["post", "comment", "profile", "academy", "event"],"teacher_status": ["pending", "approved", "rejected", "revoked"],"theme_preference": ["light", "dark", "system"],"verification_status": ["self_reported", "teacher_confirmed"],"visibility": ["public", "followers", "private"]
           }
         }
 } as const

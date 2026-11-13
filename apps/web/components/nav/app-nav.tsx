@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Bell, Bookmark, Building2, CalendarSearch, Compass, GraduationCap, House, Plus, Settings, UserRound, type LucideIcon } from "lucide-react";
+import { Bell, Bookmark, Building2, CalendarDays, CalendarSearch, Compass, GraduationCap, Medal, House, Plus, Settings, UserRound, type LucideIcon } from "lucide-react";
 import { routes } from "@/lib/routes";
 import { cn } from "@/components/ui/cn";
 import { Logo } from "@/components/ui/logo";
@@ -11,8 +11,8 @@ import { NotificationBadge } from "./notification-badge";
 
 type Item = { href: string; label: string; icon: LucideIcon; primary?: boolean; badge?: boolean };
 
-// Mesmos destinos no mobile e no desktop (DESIGN_SYSTEM.md §6). Academias, Eventos e Jornada
-// entram no menu lateral quando as Fases 4 e 5 criarem essas páginas.
+// Mesmos destinos no mobile e no desktop (DESIGN_SYSTEM.md §6). Jornada, aulas, academias e eventos
+// ficam no menu lateral (desktop) e em Explorar (mobile).
 function items(username: string): Item[] {
   return [
     { href: routes.feed, label: "Início", icon: House },
@@ -25,6 +25,8 @@ function items(username: string): Item[] {
 
 // Menu lateral (desktop) também leva a aulas, academias e à área do professor (DESIGN_SYSTEM.md §6).
 const secondary: Item[] = [
+  { href: routes.journey, label: "Minha jornada", icon: Medal },
+  { href: routes.events, label: "Eventos", icon: CalendarDays },
   { href: routes.classes, label: "Aulas", icon: CalendarSearch },
   { href: routes.academies, label: "Academias", icon: Building2 },
   { href: routes.teacherArea, label: "Área do professor", icon: GraduationCap },

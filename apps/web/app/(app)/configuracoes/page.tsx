@@ -12,6 +12,7 @@ import { requireUser } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 import { routes } from "@/lib/routes";
 import { DeleteAccountForm } from "./delete-account-form";
+import { JourneyPrivacyForm } from "./journey-privacy-form";
 
 export const metadata: Metadata = { title: "Configurações" };
 
@@ -20,7 +21,7 @@ export default async function SettingsPage({ searchParams }: { searchParams: Pro
   const { senha } = await searchParams;
   const supabase = await createClient();
   const [{ data: settings }, { data: isAdmin }] = await Promise.all([
-    supabase.from("user_settings").select("theme").eq("user_id", user.id).maybeSingle(),
+    supabase.from("user_settings").select("theme, show_ranks, show_achievements, show_checkins").eq("user_id", user.id).maybeSingle(),
     supabase.rpc("has_role", { p_role: "admin" }),
   ]);
 
@@ -37,6 +38,18 @@ export default async function SettingsPage({ searchParams }: { searchParams: Pro
           <h2 className="mb-4 font-display text-2xl font-semibold">Aparência</h2>
           <ThemeSwitcher initial={parseThemePreference(settings?.theme)} />
           <p className="mt-2 text-[13px] text-muted">Automático segue a configuração do seu dispositivo.</p>
+        </Card>
+
+        <Card>
+          <h2 className="mb-1 font-display text-2xl font-semibold">Privacidade da jornada</h2>
+          <p className="mb-4 text-sm text-muted">Quem vê cada parte da sua jornada no seu perfil.</p>
+          <JourneyPrivacyForm
+            initial={{
+              showRanks: settings?.show_ranks ?? "public",
+              showAchievements: settings?.show_achievements ?? "public",
+              showCheckins: settings?.show_checkins ?? "followers",
+            }}
+          />
         </Card>
 
         <Card>

@@ -186,12 +186,25 @@ Dedup: unique parcial em (recipient, actor, type, post_id) para `like`.
 Índice (user_id, trained_at desc). Limite: 5 check-ins/dia por usuário (rate limit).
 > A interface exibe "registrou um treino em X", **nunca** "esteve em X".
 
+> **Implementado na Fase 5 (13/11/2026), com ajustes:**
+> - A visibilidade da jornada vem de `user_settings` (`show_ranks`, `show_achievements`, `show_checkins`), e não de uma coluna `visibility` por linha. A função `can_view_journey(dono, seção)` aplica a escolha mais a privacidade do perfil e bloqueios.
+> - `rank_promotions` ganhou `user_id` (copiado da modalidade por trigger, para a RLS) e `confirmed_at`. O trigger valida graduação da modalidade, `degree <= max_degrees`, data não futura e professor aprovado. Editar graduação, grau, data ou professor volta a promoção para `self_reported`. Recusar a confirmação desfaz a indicação do professor.
+> - `training_checkins` **não** tem confirmação pelo professor (só graduações têm) nem `unit_id`/`visibility`. Check-in só nasce por `create_checkin()`, que cria o post `kind = 'checkin'` na mesma transação quando o usuário escolhe compartilhar. `posts.academy_id` foi criado para o card "registrou um treino em X".
+> - Views de leitura: `journey_cards`, `promotion_cards`, `checkin_cards` (`security_invoker`). `get_training_summary(user)` dá o resumo para o perfil.
+
 ### 4.6 Eventos
 
 **events**: `id`, `organizer_user_id nullable`, `organizer_academy_id nullable` (check: exatamente um), `type enum('championship','seminar','open_mat','graduation','workshop','special_training','other')`, `martial_art_id`, `title`, `description`, `starts_at`, `ends_at`, `unit_id nullable` **ou** endereço próprio + `location geography`, `external_url` (regulamento/inscrição), `cover_path`, `status enum('draft','published','cancelled','finished')`, `interest_count`.
 Índices: (starts_at) where published, GiST(location).
 
 **event_interests**: PK(event_id, user_id, kind), `kind enum('saved','interested')`.
+
+> **Implementado na Fase 5 (13/11/2026), com ajustes:**
+> - Organizador: `created_by` (sempre) + `academy_id` opcional, no lugar de "exatamente um entre usuário e academia". Evento pessoal exige professor aprovado; evento de academia exige gestor (owner/admin). Assim fica registrado quem criou mesmo quando a academia organiza.
+> - `status` só tem `draft`, `published` e `cancelled`. "Encerrado" é derivado de `ends_at`, sem rotina para mudar status. Cancelado não volta a publicado; publicado não é excluído (é cancelado, e os interessados recebem `event_update`). Só rascunho é excluído.
+> - Cidade, UF e coordenadas ficam sempre na linha: com `unit_id`, o trigger copia da unidade. Endereço próprio ainda não tem pino no mapa (só link de rota pelo endereço).
+> - Interesse e salvos são privados (cada um vê os seus); `interest_count` é público. `notifications.event_id` leva ao evento. `cover_path` ficou para depois (sem bucket `covers`).
+> - A política de SELECT de `events` usa as colunas da linha, não `can_view_event(id)`: no `INSERT ... RETURNING` a linha nova ainda não é visível para uma função que consulta a tabela.
 
 ### 4.7 Segurança e moderação
 
@@ -246,6 +259,8 @@ Escrita sempre restrita a `(storage.foldername(name))[1] = auth.uid()::text`.
 ## 7. Funções RPC
 
 **Implementadas na Fase 3:** `get_home_feed`, `get_profile_posts`, `get_saved_posts`, `get_explore`, `search_profiles`, `create_post` (post + mídias + marcações numa transação), `delete_post`, `delete_comment`, `mark_all_notifications_read`, além das views `post_cards`, `comment_cards` e `notification_cards` (`security_invoker`). Feed e Explorar são `security definer` com filtro explícito equivalente à RLS: filtram primeiro por índice e só montam os cards da página. Com a RLS avaliada linha a linha, a página do meio do feed passava de 300 ms; agora fica em ~3–9 ms com 1.000 posts. Soft delete de post e de comentário só por função, porque um UPDATE direto deixaria a linha invisível pela própria política de SELECT. `posts.academy_id`, `unit_id` e `event_id` entram nas Fases 4 e 5, junto com as tabelas de destino.
+
+**Implementadas na Fase 5:** `create_checkin`, `confirm_promotion`, `get_training_summary`, `can_view_journey`, `can_view_event`, views `journey_cards`, `promotion_cards`, `checkin_cards`, `event_cards`.
 
 **Planejadas:**
 `get_home_feed`, `get_explore`, `get_profile_page`, `get_academy_page`, `get_teacher_schedule` (todas as academias do professor), `search_global`, `search_units_nearby(lat, lng, radius_km, filtros)`, `create_checkin(... , share_to_feed)`, `confirm_promotion`, `respond_membership`, `toggle_like`, `delete_my_account`, `export_my_data` (LGPD).

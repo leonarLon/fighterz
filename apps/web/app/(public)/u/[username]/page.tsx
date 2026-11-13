@@ -13,6 +13,7 @@ import { createClient } from "@/lib/supabase/server";
 import { loadProfilePosts } from "@/lib/posts";
 import { getViewer } from "@/lib/viewer";
 import { routes } from "@/lib/routes";
+import { JourneyCard } from "./journey-card";
 import { ProfileActions } from "./profile-actions";
 
 type Props = { params: Promise<{ username: string }> };
@@ -114,6 +115,8 @@ export default async function PublicProfilePage({ params }: Props) {
         </div>
         <BeltDivider className="mt-6" />
       </Card>
+
+      {canSeeContent && <JourneyCard supabase={supabase} userId={profile.id} />}
 
       {page ? (
         <PostList
