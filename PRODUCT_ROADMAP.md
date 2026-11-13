@@ -32,7 +32,7 @@
 - Feed cronológico por cursor, curtidas, comentários + respostas, salvos, seguir/privado/solicitações, compartilhar (link + Web Share), marcações com aprovação, Explorar, notificações com Realtime, bloqueio e denúncia básica.
 - **Aceite:** feed com 1.000 posts de seed carrega a 1ª página em < 300 ms local, sem N+1. Curtida dupla impossível.
 
-### Fase 4: Professores e academias
+### Fase 4: Professores e academias (aceita em 13/11/2026)
 - Solicitação de perfil profissional + aprovação admin, academias, unidades (CEP → ViaCEP, pino confirmado), vínculos com aceite mútuo, grade de aulas, página pública sem login, mapa Leaflet, rotas externas, copiar/compartilhar endereço, busca por distância/cidade/bairro.
 - **Aceite:** o professor de 3 academias vê grade unificada. O visitante sem login consulta grade e mapa.
 

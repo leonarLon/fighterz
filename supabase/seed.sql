@@ -125,3 +125,90 @@ begin
   update public.notifications set read_at = now() where recipient_id = v_demo;
 end;
 $$;
+
+-- ---------------------------------------------------------------------------
+-- Fase 4: professores, academias fictícias, unidades, grade e vínculos.
+-- atleta2 (Diego Ramos) é professor aprovado em 3 academias: grade unificada em /professores/atleta2.
+-- atleta7 tem pedido de professor pendente (para testar a aprovação em /admin/professores).
+-- ---------------------------------------------------------------------------
+do $$
+declare
+  v_demo uuid := '00000000-0000-4000-8000-000000000001';
+  u      uuid[] := array(select id from public.profiles where username like 'atleta%' order by (substring(username from 7))::int);
+  bjj    uuid := (select id from public.martial_arts where slug = 'jiu-jitsu');
+  mt     uuid := (select id from public.martial_arts where slug = 'muay-thai');
+  judo   uuid := (select id from public.martial_arts where slug = 'judo');
+  boxe   uuid := (select id from public.martial_arts where slug = 'boxe');
+  a1 uuid; a2 uuid; a3 uuid; a4 uuid;
+  u1a uuid; u1b uuid; u2 uuid; u3 uuid; u4 uuid;
+begin
+  -- Professores
+  insert into public.teacher_profiles (user_id, professional_name, bio, experience_years, lineage, show_contact, contact_email, social_links, certifications)
+  values
+    (u[2], 'Professor Diego Ramos', 'Faixa preta de Jiu-Jitsu. Aulas para iniciantes e competidores em três academias.', 14,
+     'Linhagem tradicional de Jiu-Jitsu brasileiro', true, 'diego.ramos@figtherz.local', '["https://www.youtube.com/@exemplo"]',
+     '[{"title":"Faixa preta 2º grau","issuer":"Federação estadual","year":2022}]'),
+    (u[6], 'Kru Igor Mendes', 'Muay Thai tradicional, condicionamento e técnica.', 9, null, false, null, '[]', '[]'),
+    (u[7], 'Juliana Prado', 'Judô para adultos iniciantes.', 6, null, false, null, '[]', '[]');
+  update public.teacher_profiles set status = 'approved', reviewed_at = now() where user_id in (u[2], u[6]);
+  insert into public.teacher_martial_arts (teacher_id, martial_art_id, rank_id) values
+    (u[2], bjj, (select id from public.martial_art_ranks where martial_art_id = bjj and name = 'Faixa Preta')),
+    (u[6], mt,  (select id from public.martial_art_ranks where martial_art_id = mt and name = 'Kruang Preto')),
+    (u[7], judo, null);
+
+  -- Academias (nomes fictícios)
+  insert into public.academies (name, description, instagram, created_by, is_verified)
+  values ('Tatame Central', 'Jiu-Jitsu e Muay Thai no coração de Curitiba. Turmas para todos os níveis e aula experimental gratuita.', 'tatamecentral.demo', u[1], true)
+  returning id into a1;
+  insert into public.academies (name, description, created_by)
+  values ('Equipe Raiz Combate', 'Equipe de competição e turmas de iniciantes no Batel.', u[3]) returning id into a2;
+  insert into public.academies (name, description, created_by)
+  values ('Dojo Horizonte', 'Judô e Jiu-Jitsu em Pinheiros, São Paulo.', u[4]) returning id into a3;
+  insert into public.academies (name, description, created_by)
+  values ('Arena Norte Muay Thai', 'Muay Thai e boxe na Tijuca, Rio de Janeiro.', u[5]) returning id into a4;
+
+  insert into public.academy_martial_arts (academy_id, martial_art_id) values
+    (a1, bjj), (a1, mt), (a2, bjj), (a3, judo), (a3, bjj), (a4, mt), (a4, boxe);
+
+  insert into public.academy_units (academy_id, name, postal_code, street, number, neighborhood, city, state, reference_point, latitude, longitude)
+  values (a1, 'Sede Centro', '80020000', 'Rua das Flores', '120', 'Centro', 'Curitiba', 'PR', 'Próximo à praça', -25.4310, -49.2710)
+  returning id into u1a;
+  insert into public.academy_units (academy_id, name, postal_code, street, number, neighborhood, city, state, latitude, longitude)
+  values (a1, 'Unidade Água Verde', '80240000', 'Avenida Exemplo', '900', 'Água Verde', 'Curitiba', 'PR', -25.4510, -49.2850)
+  returning id into u1b;
+  insert into public.academy_units (academy_id, name, postal_code, street, number, neighborhood, city, state, latitude, longitude)
+  values (a2, 'Batel', '80420000', 'Rua Fictícia', '45', 'Batel', 'Curitiba', 'PR', -25.4420, -49.2900) returning id into u2;
+  insert into public.academy_units (academy_id, name, postal_code, street, number, neighborhood, city, state, latitude, longitude)
+  values (a3, 'Pinheiros', '05422000', 'Rua Modelo', '300', 'Pinheiros', 'São Paulo', 'SP', -23.5670, -46.6920) returning id into u3;
+  insert into public.academy_units (academy_id, name, postal_code, street, number, neighborhood, city, state, latitude, longitude)
+  values (a4, 'Tijuca', '20510000', 'Rua Demonstração', '77', 'Tijuca', 'Rio de Janeiro', 'RJ', -22.9250, -43.2320) returning id into u4;
+
+  -- Vínculos ativos (aceite mútuo simulado no seed)
+  insert into public.academy_memberships (academy_id, user_id, role, status, requested_by, approved_at) values
+    (a1, u[2], 'teacher', 'active', 'academy', now()),
+    (a2, u[2], 'teacher', 'active', 'academy', now()),
+    (a3, u[2], 'teacher', 'active', 'user', now()),
+    (a1, u[6], 'teacher', 'active', 'academy', now()),
+    (a4, u[6], 'teacher', 'active', 'academy', now()),
+    (a1, v_demo, 'student', 'active', 'user', now()),
+    (a2, u[8], 'student', 'pending', 'user', null);
+
+  -- Grade (0 = domingo)
+  insert into public.class_schedules (academy_id, unit_id, teacher_id, martial_art_id, name, level, weekday, starts_at, ends_at, accepts_trial) values
+    (a1, u1a, u[2], bjj,  'Jiu-Jitsu Iniciante',       'beginner',     1, '19:00', '20:30', true),
+    (a1, u1a, u[2], bjj,  'Jiu-Jitsu Iniciante',       'beginner',     3, '19:00', '20:30', true),
+    (a1, u1a, u[2], bjj,  'Jiu-Jitsu Avançado',        'advanced',     2, '20:00', '21:30', false),
+    (a1, u1b, u[6], mt,   'Muay Thai Todos os Níveis', 'all',          1, '07:00', '08:00', true),
+    (a1, u1b, u[6], mt,   'Muay Thai Todos os Níveis', 'all',          4, '18:30', '19:30', true),
+    (a1, u1a, null, bjj,  'Open Mat',                  'all',          6, '10:00', '12:00', false),
+    (a2, u2,  u[2], bjj,  'Competição',                'competition',  2, '12:00', '13:30', false),
+    (a2, u2,  u[2], bjj,  'Jiu-Jitsu Manhã',           'all',          5, '06:30', '07:30', true),
+    (a3, u3,  u[2], bjj,  'Jiu-Jitsu Pinheiros',       'intermediate', 4, '20:00', '21:30', false),
+    (a3, u3,  null, judo, 'Judô Adulto',               'beginner',     2, '19:00', '20:00', true),
+    (a4, u4,  u[6], mt,   'Muay Thai Iniciante',       'beginner',     1, '19:00', '20:00', true),
+    (a4, u4,  null, boxe, 'Boxe Condicionamento',      'all',          3, '07:00', '08:00', true);
+
+  insert into public.academy_followers (academy_id, user_id) values (a1, v_demo), (a1, u[9]), (a2, u[10]);
+  update public.notifications set read_at = now() where read_at is null;
+end;
+$$;

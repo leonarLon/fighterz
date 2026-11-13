@@ -111,7 +111,8 @@ Modalidades: `academy_martial_arts(academy_id, martial_art_id)`.
 | id, academy_id FK cascade, name | |
 | postal_code | text `^\d{8}$` |
 | street, number, complement, neighborhood, city, state (char(2)), reference_point | text |
-| location | `geography(Point,4326)` nullable |
+| latitude, longitude | `double precision` nullable (em par) |
+| location | `geography(Point,4326)` **gerada** a partir de latitude/longitude (Fase 4: o cliente envia números simples e o banco monta o ponto) |
 | coords_source | enum('manual','nominatim') |
 | coords_confirmed_at | timestamptz |
 | timezone | text default 'America/Sao_Paulo' |

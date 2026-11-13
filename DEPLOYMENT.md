@@ -32,7 +32,7 @@ npm run dev                 # http://localhost:3000
 | `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` | cliente | não (protegida por RLS) |
 | `NEXT_PUBLIC_SITE_URL` | cliente/servidor | não (base dos links de e-mail) |
 | `SUPABASE_SECRET_KEY` | **somente servidor** | **sim**. Ainda não usada: a exclusão de conta roda via RPC com a sessão do usuário |
-| `APP_USER_AGENT` | servidor | não (ex.: `Figtherz/0.1 (+url-do-projeto)` para OSM/Nominatim) |
+| `APP_USER_AGENT` | servidor | não. User-Agent das chamadas à ViaCEP e ao Nominatim. Padrão local: `Figtherz/0.1 (ambiente de desenvolvimento local)`. **Antes de publicar**, defina com o e-mail de contato do projeto, no formato `Figtherz/0.1 (contato: email@dominio)`, como exige a política do Nominatim. O e-mail fica só na variável de ambiente do servidor, não no repositório |
 | `MEDIA_WORKER_ENABLED` | servidor | não |
 
 `.env.local` nunca é commitado. Só `.env.example` sem valores.

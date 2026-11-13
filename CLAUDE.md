@@ -30,6 +30,18 @@ Stack Next.js 16 + Tailwind 4 + Supabase local + Leaflet/OSM · 18+ · limites d
   - Migrations 06–09: grafo social (bloqueios, follows com solicitação), posts/mídia/marcações/curtidas/comentários/salvos, notificações (Realtime) e denúncias com ocultação preventiva, Storage e funções de leitura.
   - Seed local: 25 atletas (`atleta1..25@figtherz.local`, senha `Figtherz123`), 1.000 posts, follows, curtidas e comentários.
 
+- Fase 4 (professores e academias) **aceita em 13/11/2026**. Verificações verdes: pgTAP 212, Vitest 33 (core 30 + web 3), Playwright 75 (+11 pulados de propósito no mobile), typecheck, lint e build.
+  - Migrations 10–12: teacher_profiles (aprovação admin, view pública `teacher_cards`), academias/unidades (PostGIS)/vínculos/seguidores/grade, geocode_cache, funções de vínculo com aceite mútuo, `search_classes`, `get_teacher_schedule`.
+  - Seed: 4 academias fictícias, 12 aulas; atleta2 é professor em 3 academias (aceite); atleta7 tem pedido pendente; admin@figtherz.local aprova em /admin/professores.
+
+## Decisões técnicas da Fase 4
+- Leaflet direto, sem `react-leaflet` (Hippocratic License). Pino arrastável + campos de latitude/longitude como alternativa acessível.
+- ViaCEP e Nominatim só pelo servidor (`/api/geo/*`, exige login), com cache de 90 dias e cota no banco: 30 CEPs/h e 10 geocodificações/h por usuário, mais 1 req/s global ao Nominatim. Testes automatizados **não** chamam esses serviços nem baixam tiles do OSM (bloqueados no Playwright).
+- `teacher_cards` é uma view com permissões do dono (não `security_invoker`): a tabela base é só dono/admin e a view mostra apenas aprovados, com contato só se `show_contact`.
+- Vínculos só mudam por funções (`request_membership`, `invite_member`, `respond_membership`, `leave_membership`, `remove_member`): quem não iniciou o pedido decide.
+- Ações que fazem o item sair da lista (aceitar solicitação, aprovar professor) não chamam `revalidatePath`: a UI mostra o resultado localmente.
+- `APP_USER_AGENT` usa um e-mail de contato (decidido em 13/11/2026), definido só na variável de ambiente do servidor antes de publicar (DEPLOYMENT.md).
+
 ## Decisões técnicas da Fase 3 (aprovadas pelo usuário em 13/11/2026)
 - Rate limit e `created_at` forçado só valem quando há JWT (`auth.uid() is not null`). Seeds e rotinas internas inserem em massa e com datas livres.
 - Bucket `post-media` único e privado, com URL assinada de 1 h (ver DATA_MODEL.md §6).
@@ -49,4 +61,4 @@ Stack Next.js 16 + Tailwind 4 + Supabase local + Leaflet/OSM · 18+ · limites d
 
 ## Próximos passos
 1. Pendências conhecidas da Fase 3: upload de avatar (bucket `avatars`), limpeza de uploads órfãos e remoção física de conteúdo apagado após 30 dias (pg_cron), vídeo (fora do MVP).
-2. Fase 4 (em andamento): professores, academias, unidades (ViaCEP/Nominatim), vínculos, grade de aulas, mapa Leaflet.
+2. Fase 5: jornada (graduações e histórico), confirmação pelo professor, conquistas, check-in → post, eventos.

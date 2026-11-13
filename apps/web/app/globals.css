@@ -148,3 +148,29 @@ body {
     scroll-behavior: auto !important;
   }
 }
+
+/* Pino do mapa (Leaflet divIcon): gota vermelha da marca com borda neutra para os dois temas. */
+.figtherz-pin span {
+  display: block;
+  width: 28px;
+  height: 28px;
+  border-radius: 50% 50% 50% 0;
+  background: #c8102e;
+  border: 3px solid #ffffff;
+  box-shadow: 0 1px 4px rgb(0 0 0 / 0.4);
+  transform: rotate(-45deg);
+}
+
+/* Controles e popups do mapa seguem o tema; os tiles ficam sem filtro (DESIGN_SYSTEM.md §7). */
+.leaflet-container {
+  font-family: var(--font-sans);
+}
+.leaflet-popup-content-wrapper,
+.leaflet-popup-tip,
+.leaflet-bar a {
+  background: var(--surface);
+  color: var(--text);
+}
+.leaflet-popup-content a {
+  color: var(--accent-text);
+}

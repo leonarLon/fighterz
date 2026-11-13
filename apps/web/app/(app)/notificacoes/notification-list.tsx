@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useTransition } from "react";
 import Link from "next/link";
-import { AtSign, Heart, MessageCircle, Reply, UserPlus, UserRoundPlus } from "lucide-react";
+import { AtSign, Building2, Heart, MessageCircle, Reply, ShieldCheck, UserPlus, UserRoundPlus } from "lucide-react";
 import { timeAgo } from "@figtherz/core";
 import { markNotificationsRead, respondFollowRequest, respondMention } from "@/app/actions/social";
 import { routes } from "@/lib/routes";
@@ -18,6 +18,7 @@ export type NotificationItem = {
   postId: string | null;
   actor: { id: string; username: string; displayName: string } | null;
   excerpt: string | null;
+  academy: { slug: string; name: string } | null;
   mentionStatus: "pending" | "approved" | "rejected" | null;
 };
 
@@ -28,6 +29,8 @@ const copy: Record<string, { text: string; icon: typeof Heart }> = {
   follow: { text: "começou a seguir você", icon: UserPlus },
   follow_request: { text: "pediu para seguir você", icon: UserRoundPlus },
   mention: { text: "marcou você em um post", icon: AtSign },
+  membership_request: { text: "enviou um pedido de vínculo", icon: Building2 },
+  moderation: { text: "revisou seu perfil profissional", icon: ShieldCheck },
 };
 
 export function NotificationList({ items }: { items: NotificationItem[] }) {
@@ -50,7 +53,16 @@ function Row({ item }: { item: NotificationItem }) {
   const [pending, startTransition] = useTransition();
   const meta = copy[item.type] ?? { text: "interagiu com você", icon: Heart };
   const Icon = meta.icon;
-  const target = item.postId ? routes.post(item.postId) : item.actor ? routes.profile(item.actor.username) : routes.notifications;
+  // Vínculo: quem gerencia vai ao painel; quem foi convidado vai à área do professor.
+  const target = item.postId
+    ? routes.post(item.postId)
+    : item.type === "membership_request" && item.academy
+      ? `${routes.manageAcademy(item.academy.slug)}#equipe`
+      : item.type === "moderation"
+        ? routes.teacherArea
+        : item.actor
+          ? routes.profile(item.actor.username)
+          : routes.notifications;
 
   function run(action: () => Promise<{ ok: boolean }>, label: string) {
     startTransition(async () => {
@@ -71,6 +83,7 @@ function Row({ item }: { item: NotificationItem }) {
           <Link href={target} className="hover:underline">
             <span className="font-semibold">{item.actor?.displayName ?? "Alguém"}</span> {meta.text}
             {item.excerpt ? <span className="text-muted">: “{item.excerpt}”</span> : null}
+            {item.academy ? <span className="text-muted"> · {item.academy.name}</span> : null}
           </Link>
         </p>
         <p className="text-[13px] text-muted">

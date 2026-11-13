@@ -35,7 +35,7 @@ test.describe("acessibilidade (WCAG 2.1 AA)", () => {
 
   test("área logada sem violações", async ({ page }) => {
     await signInViaUi(page, "demo@figtherz.local", "Figtherz123");
-    for (const path of ["/inicio", "/explorar", "/explorar?q=bruna", "/publicar", "/notificacoes", "/salvos", "/u/atleta1", "/perfil", "/configuracoes"]) {
+    for (const path of ["/inicio", "/explorar", "/explorar?q=bruna", "/publicar", "/notificacoes", "/salvos", "/u/atleta1", "/perfil", "/configuracoes", "/academias", "/academias/nova", "/professor"]) {
       await page.goto(path);
       const results = await new AxeBuilder({ page }).withTags(["wcag2a", "wcag2aa", "wcag21a", "wcag21aa"]).analyze();
       expect(results.violations.map((v) => `${path} ${v.id}`)).toEqual([]);
@@ -49,4 +49,28 @@ test("página de post (com comentários) sem violações", async ({ page }) => {
   await expect(page).toHaveURL(/\/p\//);
   const results = await new AxeBuilder({ page }).withTags(["wcag2a", "wcag2aa", "wcag21a", "wcag21aa"]).analyze();
   expect(results.violations.map((v) => `${v.id}: ${v.nodes.map((n) => n.target.join(" ")).join(", ")}`)).toEqual([]);
+});
+
+test.describe("acessibilidade da Fase 4", () => {
+  test.beforeEach(async ({ context }) => {
+    await context.route("https://tile.openstreetmap.org/**", (route) => route.fulfill({ status: 204, body: "" }));
+  });
+
+  for (const path of ["/aulas", "/aulas?cidade=curitiba", "/academias/tatame-central", "/professores/atleta2"]) {
+    test(`${path} sem violações`, async ({ page }) => {
+      await page.goto(path);
+      await page.waitForLoadState("networkidle");
+      const results = await new AxeBuilder({ page }).withTags(["wcag2a", "wcag2aa", "wcag21a", "wcag21aa"]).analyze();
+      expect(results.violations.map((v) => `${v.id}: ${v.nodes.map((n) => n.target.join(" ")).join(", ")}`)).toEqual([]);
+    });
+  }
+
+  test("painel de gestão sem violações", async ({ page }) => {
+    await signInViaUi(page, "atleta1@figtherz.local", "Figtherz123");
+    await expect(page).toHaveURL(/\/inicio$/);
+    await page.goto("/academias/tatame-central/gerenciar");
+    await page.waitForLoadState("networkidle");
+    const results = await new AxeBuilder({ page }).withTags(["wcag2a", "wcag2aa", "wcag21a", "wcag21aa"]).analyze();
+    expect(results.violations.map((v) => `${v.id}: ${v.nodes.map((n) => n.target.join(" ")).join(", ")}`)).toEqual([]);
+  });
 });

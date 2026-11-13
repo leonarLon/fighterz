@@ -19,7 +19,7 @@
 | Estado servidor | TanStack Query | Cache, paginação infinita, otimismo em curtidas | SWR |
 | Backend | **Supabase** (Postgres + Auth/GoTrue + Storage + PostgREST) | Auth completa (e-mail/senha, recuperação, confirmação), RLS no banco, storage com políticas, tudo open source e executável localmente | Postgres + Auth.js + MinIO (mais trabalho, mesma capacidade) |
 | Banco | **PostgreSQL 15+, PostGIS, pg_trgm, unaccent, citext** | Geobusca e busca textual PT-BR | — |
-| Mapas | **Leaflet + react-leaflet + tiles OSM** | Sem chave, sem custo | MapLibre GL + PMTiles próprios |
+| Mapas | **Leaflet (direto, sem react-leaflet) + tiles OSM** | Sem chave, sem custo. O `react-leaflet` usa a Hippocratic License (não OSI); um wrapper próprio de ~150 linhas evita a dependência | MapLibre GL + PMTiles próprios |
 | Mídia | Storage do Supabase + otimização no cliente + **FFmpeg** em worker local | Ver seção 6 | MinIO |
 | Testes | **Vitest**, **Playwright**, **pgTAP** | Unitário, E2E, RLS testado dentro do banco | — |
 | Monorepo | **npm workspaces** | Já instalado, zero ferramenta extra | pnpm, Turborepo |

@@ -31,7 +31,7 @@ Se qualquer resposta reprovar, a ferramenta não entra. Aplique a regra de conti
 | Docker Desktop | Proprietária, gratuita com condições | Não | Gratuito para uso pessoal, educacional, projeto open source não comercial ou empresa com **< 250 funcionários E < US$ 10 mi de receita anual**. Alternativa 100% open source: Docker Engine dentro do WSL2, ou Podman |
 | WSL2 | Recurso do Windows | Não | Necessário para Docker no Windows. **Ainda não instalado** nesta máquina |
 | FFmpeg | LGPL-2.1+ (GPL se compilado com x264) | Não | Usado como processo externo (CLI), sem linkagem. Não instalado ainda |
-| Leaflet | BSD-2-Clause | Não | |
+| Leaflet | BSD-2-Clause | Não | Usado direto. `react-leaflet` **não** entra (Hippocratic License 2.1, fora das licenças OSI) |
 | Vitest | MIT | Não | |
 | Playwright | Apache-2.0 | Não | |
 | pgTAP | PostgreSQL License | Não | Testes de RLS (`supabase test db`) |

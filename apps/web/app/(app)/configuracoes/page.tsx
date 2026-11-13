@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { KeyRound, LogOut } from "lucide-react";
+import { KeyRound, LogOut, ShieldCheck } from "lucide-react";
 import { parseThemePreference } from "@figtherz/core";
 import { signOut } from "@/app/actions/auth";
 import { Button } from "@/components/ui/button";
@@ -19,7 +19,10 @@ export default async function SettingsPage({ searchParams }: { searchParams: Pro
   const user = await requireUser();
   const { senha } = await searchParams;
   const supabase = await createClient();
-  const { data: settings } = await supabase.from("user_settings").select("theme").eq("user_id", user.id).maybeSingle();
+  const [{ data: settings }, { data: isAdmin }] = await Promise.all([
+    supabase.from("user_settings").select("theme").eq("user_id", user.id).maybeSingle(),
+    supabase.rpc("has_role", { p_role: "admin" }),
+  ]);
 
   return (
     <>
@@ -47,6 +50,15 @@ export default async function SettingsPage({ searchParams }: { searchParams: Pro
               <KeyRound aria-hidden className="size-4" />
               Alterar senha
             </Link>
+            {isAdmin && (
+              <Link
+                href={routes.adminTeachers}
+                className="inline-flex min-h-11 items-center gap-2 rounded-md border border-border px-4 font-semibold hover:bg-bg"
+              >
+                <ShieldCheck aria-hidden className="size-4" />
+                Aprovar professores
+              </Link>
+            )}
             <form action={signOut}>
               <Button type="submit" variant="secondary">
                 <LogOut aria-hidden className="size-4" />

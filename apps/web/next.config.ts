@@ -10,7 +10,8 @@ const csp = [
   "default-src 'self'",
   `script-src 'self' 'unsafe-inline'${isDev ? " 'unsafe-eval'" : ""}`,
   "style-src 'self' 'unsafe-inline'",
-  `img-src 'self' data: blob: ${supabaseUrl}`,
+  // Tiles do OpenStreetMap (mapa das unidades).
+  `img-src 'self' data: blob: ${supabaseUrl} https://tile.openstreetmap.org`,
   "font-src 'self'",
   `connect-src 'self' ${supabaseUrl} ${supabaseWs}`,
   "frame-ancestors 'none'",

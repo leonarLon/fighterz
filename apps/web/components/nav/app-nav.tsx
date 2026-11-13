@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Bell, Bookmark, Compass, House, Plus, Settings, UserRound, type LucideIcon } from "lucide-react";
+import { Bell, Bookmark, Building2, CalendarSearch, Compass, GraduationCap, House, Plus, Settings, UserRound, type LucideIcon } from "lucide-react";
 import { routes } from "@/lib/routes";
 import { cn } from "@/components/ui/cn";
 import { Logo } from "@/components/ui/logo";
@@ -22,6 +22,13 @@ function items(username: string): Item[] {
     { href: routes.profile(username), label: "Perfil", icon: UserRound },
   ];
 }
+
+// Menu lateral (desktop) também leva a aulas, academias e à área do professor (DESIGN_SYSTEM.md §6).
+const secondary: Item[] = [
+  { href: routes.classes, label: "Aulas", icon: CalendarSearch },
+  { href: routes.academies, label: "Academias", icon: Building2 },
+  { href: routes.teacherArea, label: "Área do professor", icon: GraduationCap },
+];
 
 function isActive(pathname: string, href: string) {
   return pathname === href || pathname.startsWith(`${href}/`);
@@ -61,6 +68,20 @@ export function SideNav({ username, displayName }: { username: string; displayNa
             </li>
           );
         })}
+      </ul>
+      <ul className="mt-6 space-y-1 border-t border-border pt-4">
+        {secondary.map(({ href, label, icon: Icon }) => (
+          <li key={href}>
+            <Link
+              href={href}
+              aria-current={isActive(pathname, href) ? "page" : undefined}
+              className="flex min-h-11 items-center gap-3 rounded-md px-3 font-semibold text-text hover:bg-bg aria-[current=page]:bg-accent-soft aria-[current=page]:text-accent"
+            >
+              <Icon aria-hidden className="size-5" />
+              {label}
+            </Link>
+          </li>
+        ))}
       </ul>
       <div className="mt-auto space-y-1 border-t border-border pt-4">
         <Link
@@ -106,7 +127,8 @@ export function BottomNav({ username }: { username: string }) {
               <Link
                 href={href}
                 aria-current={active ? "page" : undefined}
-                aria-label={label}
+                // Só o botão Publicar não tem texto visível; os demais usam o próprio rótulo (WCAG 2.5.3).
+                aria-label={primary ? label : undefined}
                 className={cn(
                   "flex min-h-14 min-w-14 flex-col items-center justify-center gap-0.5 text-[11px] font-semibold",
                   active ? "text-accent" : "text-muted",
@@ -122,7 +144,7 @@ export function BottomNav({ username }: { username: string }) {
                       <Icon aria-hidden className="size-6" strokeWidth={active ? 2.5 : 2} />
                       {badge && <NotificationBadge />}
                     </span>
-                    <span aria-hidden>{label}</span>
+                    <span>{label}</span>
                   </>
                 )}
               </Link>

@@ -14,7 +14,7 @@ export default async function NotificationsPage() {
   const [{ data }, { data: mentions }] = await Promise.all([
     supabase
       .from("notification_cards")
-      .select("id, type, read_at, created_at, post_id, actor_id, actor_username, actor_display_name, post_excerpt")
+      .select("id, type, read_at, created_at, post_id, actor_id, actor_username, actor_display_name, post_excerpt, academy_slug, academy_name")
       .order("created_at", { ascending: false })
       .limit(100),
     supabase.from("post_mentions").select("post_id, status").eq("user_id", user.id),
@@ -29,6 +29,7 @@ export default async function NotificationsPage() {
     postId: n.post_id,
     actor: n.actor_id ? { id: n.actor_id, username: n.actor_username ?? "", displayName: n.actor_display_name ?? "" } : null,
     excerpt: n.post_excerpt,
+    academy: n.academy_slug ? { slug: n.academy_slug, name: n.academy_name ?? "" } : null,
     mentionStatus: n.type === "mention" && n.post_id ? (mentionStatus.get(n.post_id) ?? null) : null,
   }));
 
