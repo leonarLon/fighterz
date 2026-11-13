@@ -38,6 +38,10 @@ export async function signUp(_prev: FormState, formData: FormData): Promise<Form
   const input = parsed.data;
 
   const supabase = await createClient();
+  const { data: platform } = await supabase.from("platform_settings").select("signups_open").maybeSingle();
+  if (platform && !platform.signups_open) {
+    return { status: "error", message: "Novos cadastros estão temporariamente fechados. Tente mais tarde.", values };
+  }
   const { data: available } = await supabase.rpc("is_username_available", { p_username: input.username });
   if (!available) {
     return {
@@ -88,6 +92,9 @@ export async function signIn(_prev: FormState, formData: FormData): Promise<Form
 
   if (error || !data.user) {
     if (error && isRateLimited(error.code)) return { status: "error", message: TOO_MANY, values };
+    if (error?.code === "user_banned") {
+      return { status: "error", message: "Esta conta está suspensa. Se acha que foi um engano, responda ao e-mail de suporte.", values };
+    }
     if (error?.code === "email_not_confirmed") {
       return { status: "error", message: "Confirme seu e-mail antes de entrar. Procure o link na sua caixa de entrada.", values };
     }

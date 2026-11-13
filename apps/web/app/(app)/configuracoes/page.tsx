@@ -20,9 +20,9 @@ export default async function SettingsPage({ searchParams }: { searchParams: Pro
   const user = await requireUser();
   const { senha } = await searchParams;
   const supabase = await createClient();
-  const [{ data: settings }, { data: isAdmin }] = await Promise.all([
+  const [{ data: settings }, { data: isStaff }] = await Promise.all([
     supabase.from("user_settings").select("theme, show_ranks, show_achievements, show_checkins").eq("user_id", user.id).maybeSingle(),
-    supabase.rpc("has_role", { p_role: "admin" }),
+    supabase.rpc("has_role", { p_role: "moderator" }),
   ]);
 
   return (
@@ -63,13 +63,13 @@ export default async function SettingsPage({ searchParams }: { searchParams: Pro
               <KeyRound aria-hidden className="size-4" />
               Alterar senha
             </Link>
-            {isAdmin && (
+            {isStaff && (
               <Link
-                href={routes.adminTeachers}
+                href={routes.admin}
                 className="inline-flex min-h-11 items-center gap-2 rounded-md border border-border px-4 font-semibold hover:bg-bg"
               >
                 <ShieldCheck aria-hidden className="size-4" />
-                Aprovar professores
+                Painel de administração
               </Link>
             )}
             <form action={signOut}>

@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Barlow_Condensed, Inter } from "next/font/google";
 import { readThemeCookie } from "@/lib/theme";
+import { Announcement } from "@/components/announcement";
 import "./globals.css";
 
 // next/font baixa as fontes no build e as serve do próprio site (sem requisição ao Google em runtime).
@@ -36,6 +37,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         >
           Pular para o conteúdo
         </a>
+        <Announcement />
         {children}
       </body>
     </html>

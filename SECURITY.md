@@ -47,6 +47,13 @@ Toda ação administrativa gera registro em `moderation_actions` ou `admin_audit
 Cabeçalhos: `Content-Security-Policy`, `Strict-Transport-Security`, `X-Content-Type-Options: nosniff`, `Referrer-Policy: strict-origin-when-cross-origin` (**não** `no-referrer`, porque a política de tiles do OSM exige Referer), `Permissions-Policy` liberando geolocalização apenas para o próprio site.
 
 ## 5. Moderação
+
+> **Implementado na Fase 6 (13/11/2026):** painel em `/admin` (404 para quem não é da equipe). Fila agrupada por conteúdo (`get_report_queue`), remoção/restauração com motivo obrigatório (`moderate_content`), descarte de denúncias (`close_reports`, que também desfaz a ocultação preventiva), suspensão (`suspend_user`/`unsuspend_user`) e histórico append-only em `moderation_actions`.
+> - **Suspensão:** perfil some, `auth.users.banned_until` bloqueia o login, as sessões são encerradas e um trigger nega escrita mesmo com JWT ainda válido (`assert_active_account`). Moderador suspende até 30 dias; prazos maiores e banimento (sem prazo) são de admin, e só admin desfaz banimento. Suspensões com prazo expiram sozinhas (pg_cron a cada 10 min). O próprio usuário vê o motivo.
+> - **Hierarquia:** ninguém modera a si mesmo nem quem tem papel igual ou maior (`platform_rank`).
+> - **Aviso ao autor** sem expor quem moderou ("Equipe Figtherz").
+> - **Minimização:** o e-mail dos usuários só aparece para admin, não para moderador.
+> - **Revisão automática de RLS** (`16_rls_review.test.sql`): toda tabela com RLS, toda tabela exposta com política, nenhuma escrita para `anon`, nenhuma view aceitando escrita, toda função `security definer` com `search_path` fixo, funções internas sem `execute` para clientes e colunas sensíveis de `profiles` sem `UPDATE` do usuário. A revisão achou e fechou o grant padrão de escrita do Supabase nas views (não explorável, porque todas têm join).
 - Denúncia de post, comentário, perfil, academia e evento, com motivos padronizados.
 - **Ocultação preventiva:** conteúdo com 3+ denúncias distintas de `minor_safety`, `nudity` ou `violence` (fora de contexto esportivo) vai para `under_review` automaticamente até um moderador decidir.
 - Fila priorizada: `minor_safety` primeiro.

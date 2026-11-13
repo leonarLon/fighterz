@@ -1,21 +1,17 @@
 import type { Metadata } from "next";
-import { notFound } from "next/navigation";
-import { requireUser } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 import { EmptyState } from "@/components/ui/empty-state";
 import { PageHeader } from "@/components/ui/page-header";
 import { GraduationCap } from "lucide-react";
 import { ReviewItem } from "./review-item";
+import { requireAdmin } from "../access";
 
 export const metadata: Metadata = { title: "Aprovar professores" };
 
-// Fila de aprovação de professores. O painel admin completo é a Fase 6; esta tela destrava a Fase 4.
-// Acesso: has_role('admin') no servidor; o banco também nega (review_teacher e RLS).
+// Fila de aprovação de professores. Acesso: admin no servidor; o banco também nega (review_teacher e RLS).
 export default async function AdminTeachersPage() {
-  await requireUser();
+  await requireAdmin();
   const supabase = await createClient();
-  const { data: isAdmin } = await supabase.rpc("has_role", { p_role: "admin" });
-  if (!isAdmin) notFound();
 
   const { data } = await supabase
     .from("teacher_profiles")

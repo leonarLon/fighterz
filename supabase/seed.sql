@@ -1,18 +1,21 @@
 -- Dados de demonstração SOMENTE para o ambiente local (`supabase db reset`).
--- Nunca rodar em produção. Senha de ambos: Figtherz123
---   demo@figtherz.local   usuário comum
---   admin@figtherz.local  superadmin
+-- Nunca rodar em produção. Senha de todos: Figtherz123
+--   demo@figtherz.local       usuário comum
+--   admin@figtherz.local      superadmin
+--   moderador@figtherz.local  moderador (Fase 6)
 
 do $$
 declare
   v_demo  uuid := '00000000-0000-4000-8000-000000000001';
   v_admin uuid := '00000000-0000-4000-8000-000000000002';
+  v_mod   uuid := '00000000-0000-4000-8000-000000000003';
   u record;
 begin
   for u in
     select * from (values
       (v_demo,  'demo@figtherz.local',  'demo',  'Atleta Demo',  '1995-04-10'),
-      (v_admin, 'admin@figtherz.local', 'admin', 'Admin Figtherz', '1988-09-21')
+      (v_admin, 'admin@figtherz.local', 'admin', 'Admin Figtherz', '1988-09-21'),
+      (v_mod,   'moderador@figtherz.local', 'moderador', 'Moderação Figtherz', '1990-02-14')
     ) as t(id, email, username, display_name, birth_date)
   loop
     insert into auth.users (
@@ -33,7 +36,7 @@ begin
             'email', now(), now(), now());
   end loop;
 
-  insert into public.user_roles (user_id, role, granted_by) values (v_admin, 'superadmin', null);
+  insert into public.user_roles (user_id, role, granted_by) values (v_admin, 'superadmin', null), (v_mod, 'moderator', v_admin);
 end;
 $$;
 
@@ -291,5 +294,28 @@ begin
   insert into public.events (created_by, type, martial_art_id, title, starts_at, ends_at, city, state, status)
   values (v_prof, 'workshop', bjj, 'Workshop de arbitragem (rascunho)', date_trunc('day', now()) + interval '40 days 12 hours',
           date_trunc('day', now()) + interval '40 days 16 hours', 'Curitiba', 'PR', 'draft');
+end;
+$$;
+
+-- ---------------------------------------------------------------------------
+-- Fase 6: denúncias de demonstração para a fila de moderação (moderador@ e admin@).
+-- Um post do atleta25 com 3 denúncias (uma de segurança de menores) e um perfil denunciado por spam.
+-- ---------------------------------------------------------------------------
+do $$
+declare
+  v_target uuid := (select id from public.profiles where username = 'atleta25');
+  v_post   uuid;
+  v_i      integer;
+begin
+  select id into v_post from public.posts where author_id = v_target and deleted_at is null order by created_at desc limit 1;
+  for v_i in 10..12 loop
+    insert into public.reports (reporter_id, target_type, target_id, reason, details)
+    values ((select id from public.profiles where username = 'atleta' || v_i), 'post', v_post,
+            (array['spam', 'minor_safety', 'harassment'])[v_i - 9]::public.report_reason,
+            case when v_i = 11 then 'Parece mostrar uma criança sem autorização.' end);
+  end loop;
+  insert into public.reports (reporter_id, target_type, target_id, reason, details)
+  values ((select id from public.profiles where username = 'atleta13'), 'profile', (select id from public.profiles where username = 'atleta24'),
+          'spam', 'Divulga links de apostas nos comentários.');
 end;
 $$;

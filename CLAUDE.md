@@ -39,6 +39,18 @@ Stack Next.js 16 + Tailwind 4 + Supabase local + Leaflet/OSM · 18+ · limites d
   - Telas: `/jornada` (graduações, calendário de treinos, conquistas), `/jornada/treino`, `/eventos`, `/eventos/[id]`, `/eventos/novo`, fila "Graduações para confirmar" em `/professor`, jornada no perfil público, privacidade da jornada em Configurações.
   - Seed: demo é faixa azul (2 graus confirmados por atleta2, 3º grau aguardando), tem treinos, conquistas e interesse no seminário do atleta2; 3 eventos publicados e 1 rascunho.
 
+- Fase 6 (administração e segurança) **aceita em 13/11/2026**. Verificações verdes: pgTAP 325, Vitest 42 (core 39 + web 3), Playwright 97 (+15 pulados de propósito no mobile), typecheck, lint e build.
+  - Migration 15: `moderation_actions` (append-only), suspensão com prazo (login bloqueado via `banned_until`, escrita negada por trigger, expiração por pg_cron), fila de denúncias, `moderate_content`/`close_reports`, selo de academia, `platform_settings` (cadastros abertos, aviso no topo), denúncia de academia e evento.
+  - `/admin`: visão geral, denúncias, usuários (papéis só para superadmin), professores, academias, eventos, modalidades, histórico e configurações.
+  - Seed: `moderador@figtherz.local` (moderador) e denúncias de exemplo (post do atleta25 com segurança de menores, perfil do atleta24 por spam).
+
+## Decisões técnicas da Fase 6
+- Painel responde 404 (e não 403) para quem não é da equipe. Cada função revalida o papel no banco.
+- Moderador: denúncias, conteúdo, academias, eventos e suspensão até 30 dias. Admin: + professores, modalidades, configurações, banimento e e-mails. Superadmin: + papéis. Ninguém modera papel igual ou maior.
+- Notificação de moderação usa ator nulo e aparece como "Equipe Figtherz".
+- Toda view nova precisa de `revoke insert, update, delete ... from anon, authenticated` (o Supabase concede por padrão). O teste `16_rls_review` falha se esquecer.
+- pg_cron é a primeira rotina agendada; as pendências da Fase 3 (limpeza de órfãos, purga após 30 dias) podem usar o mesmo mecanismo.
+
 ## Decisões técnicas da Fase 5
 - Desvios do DATA_MODEL registrados lá (§4.5 e §4.6): visibilidade da jornada por `user_settings`, check-in sem confirmação do professor, evento com `created_by` + `academy_id` opcional, status sem `finished`.
 - Datas e horas da interface em horário de Brasília (`APP_TIMEZONE`, sem horário de verão desde 2019). Eventos em outros fusos do Brasil aparecem no horário de Brasília: limitação conhecida.
@@ -72,4 +84,4 @@ Stack Next.js 16 + Tailwind 4 + Supabase local + Leaflet/OSM · 18+ · limites d
 
 ## Próximos passos
 1. Pendências conhecidas da Fase 3: upload de avatar (bucket `avatars`), limpeza de uploads órfãos e remoção física de conteúdo apagado após 30 dias (pg_cron), vídeo (fora do MVP).
-2. Fase 6: painel admin, moderação com histórico, suspensão, auditoria, revisão completa de RLS.
+2. Fase 7: finalização (CSP com nonce, pendências da Fase 3, desempenho, decisão de hospedagem gratuita).

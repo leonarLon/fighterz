@@ -181,7 +181,9 @@ export function PostCard({ post, viewer, onDeleted }: { post: PostView; viewer: 
 
       {post.moderationStatus !== "visible" && (
         <p className="mx-4 mb-3 rounded-md border border-warning/40 px-3 py-2 text-[13px] font-medium text-warning">
-          Este post está em análise pela moderação e só você o vê.
+          {post.moderationStatus === "removed"
+            ? "Este post foi removido pela moderação por violar as diretrizes. Só você o vê."
+            : "Este post está em análise pela moderação e só você o vê."}
         </p>
       )}
 

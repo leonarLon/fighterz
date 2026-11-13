@@ -40,7 +40,7 @@
 - Jornada por modalidade (graduações e histórico), confirmação pelo professor, conquistas, check-in → post opcional, histórico/calendário, eventos + interesse/salvar.
 - **Aceite:** graduação BJJ com graus validados. Check-in exibido como "registrou treino".
 
-### Fase 6: Administração e segurança
+### Fase 6: Administração e segurança (aceita em 13/11/2026)
 - Painel admin (usuários, professores, academias, unidades, posts, denúncias, modalidades, eventos, verificações, configurações), moderação com histórico, suspensão, auditoria, revisão completa de RLS.
 
 ### Fase 7: Finalização

@@ -13,6 +13,7 @@ import { Avatar } from "@/components/ui/avatar";
 import { BeltDivider } from "@/components/ui/belt";
 import { ButtonLink } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { ReportButton } from "@/components/report/report-button";
 import { AcademyActions } from "./academy-actions";
 
 type Props = { params: Promise<{ slug: string }> };
@@ -111,6 +112,17 @@ export default async function AcademyPage({ params }: Props) {
             <ButtonLink href={`${routes.signIn}?next=${encodeURIComponent(routes.academy(academy.slug))}`}>
               Entrar para seguir
             </ButtonLink>
+          )}
+          {!isManager && (
+            <div className="mt-2">
+              <ReportButton
+                targetType="academy"
+                targetId={academy.id}
+                title="Denunciar academia"
+                loggedIn={Boolean(viewerId)}
+                returnTo={routes.academy(academy.slug)}
+              />
+            </div>
           )}
         </div>
         <BeltDivider className="mt-6" />

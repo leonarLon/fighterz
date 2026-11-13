@@ -78,7 +78,8 @@ export const REPORT_REASON_LABELS: Record<ReportReason, string> = {
   other: 'Outro motivo',
 };
 
-export const REPORT_TARGETS = ['post', 'comment', 'profile'] as const;
+export const REPORT_TARGETS = ['post', 'comment', 'profile', 'academy', 'event'] as const;
+export type ReportTarget = (typeof REPORT_TARGETS)[number];
 
 export const reportSchema = z.object({
   targetType: z.enum(REPORT_TARGETS),

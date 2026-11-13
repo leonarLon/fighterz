@@ -43,6 +43,7 @@ npm run dev                 # http://localhost:3000
 - Testar RLS: `npx supabase test db` (pgTAP).
 - Gerar tipos: `npx supabase gen types typescript --local > packages/core/src/db/types.ts` (atalho: `npm run db:types`).
 - **Remoto:** `supabase db push` só com sua autorização, após `db diff` revisado.
+- A migration 15 usa **pg_cron** (incluso e gratuito no Supabase) para expirar suspensões. No projeto remoto, confirme que a extensão está habilitada antes do `db push`.
 
 ## 5. Testes
 `npm run test` (Vitest) · `npm run test:e2e` (Playwright, exige `supabase start`; na 1ª vez rode `npx playwright install chromium` em `apps/web`) · `npm run db:test` (pgTAP) · `npm run typecheck` · `npm run lint`.

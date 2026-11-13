@@ -1,14 +1,14 @@
 "use client";
 
 import { useActionState } from "react";
-import { REPORT_REASON_LABELS, REPORT_REASONS } from "@figtherz/core";
+import { REPORT_REASON_LABELS, REPORT_REASONS, type ReportTarget } from "@figtherz/core";
 import { reportContent } from "@/app/actions/posts";
 import { Button } from "@/components/ui/button";
 import { TextareaField } from "@/components/ui/field";
 import { FormMessage } from "@/components/ui/form-message";
 import { idleState } from "@/lib/form-state";
 
-export function ReportForm({ targetType, targetId }: { targetType: "post" | "comment" | "profile"; targetId: string }) {
+export function ReportForm({ targetType, targetId }: { targetType: ReportTarget; targetId: string }) {
   const [state, action, pending] = useActionState(reportContent, idleState);
 
   if (state.status === "success") return <FormMessage status="success" message={state.message} />;

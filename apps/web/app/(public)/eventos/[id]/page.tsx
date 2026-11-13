@@ -10,6 +10,7 @@ import { AddressActions } from "@/components/academy/address-actions";
 import { LeafletMap } from "@/components/map/map";
 import { BeltDivider } from "@/components/ui/belt";
 import { Card } from "@/components/ui/card";
+import { ReportButton } from "@/components/report/report-button";
 import { EventActions, EventManageActions } from "./event-actions";
 
 type Props = { params: Promise<{ id: string }> };
@@ -108,7 +109,13 @@ export default async function EventPage({ params }: Props) {
             </a>
           )}
         </div>
-        {canManage && <EventManageActions eventId={event.id!} status={event.status!} />}
+        {canManage ? (
+          <EventManageActions eventId={event.id!} status={event.status!} />
+        ) : (
+          <div className="mt-2">
+            <ReportButton targetType="event" targetId={event.id!} title="Denunciar evento" loggedIn={Boolean(user)} returnTo={routes.event(event.id!)} />
+          </div>
+        )}
         <BeltDivider className="mt-6" />
       </Card>
 

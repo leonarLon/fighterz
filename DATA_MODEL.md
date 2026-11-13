@@ -214,7 +214,11 @@ Dedup: unique parcial em (recipient, actor, type, post_id) para `like`.
 unique(reporter_id, target_type, target_id) where status in ('open','in_review'). `minor_safety` entra com **prioridade máxima** na fila.
 > Aqui o alvo é polimórfico de propósito: a tabela é de auditoria e não deve sumir em cascata quando o alvo é removido.
 
-**moderation_actions**: `id`, `moderator_id`, `report_id nullable`, `target_type`, `target_id`, `action enum('remove_content','restore_content','warn','suspend','unsuspend','ban','verify','unverify')`, `reason`, `expires_at`, `created_at`. **Append-only** (sem UPDATE/DELETE por política).
+**moderation_actions**: `id`, `moderator_id` (nulo = rotina automática), `target_type`, `target_id`, `action enum('remove_content','restore_content','dismiss_reports','warn','suspend','unsuspend','ban','verify','unverify')`, `reason`, `expires_at`, `created_at`. **Append-only**: sem grant de INSERT/UPDATE/DELETE para clientes; só as funções de moderação escrevem (Fase 6). `report_id` foi dispensado: as decisões valem para todas as denúncias abertas do alvo.
+
+**profiles** (Fase 6): `suspended_until` (nulo com status `suspended` = banimento) e `suspension_reason`, sem grant de UPDATE para o usuário.
+
+**platform_settings** (Fase 6): linha única com `signups_open` (barra cadastro no banco, por trigger em `auth.users`) e `announcement` (aviso no topo do site). Leitura pública, escrita só admin, auditada.
 
 **admin_audit_log**: append-only. Registra mudanças de papéis, aprovações de professor/academia e alterações de modalidades.
 
