@@ -1,3 +1,4 @@
+import AxeBuilder from "@axe-core/playwright";
 import { expect, test, type Browser, type Page } from "@playwright/test";
 import { createClient } from "@supabase/supabase-js";
 import { DEMO, createConfirmedUser, localEnv, makePng, signInViaUi } from "./helpers";
@@ -186,4 +187,23 @@ test.describe("rede social", () => {
     await page.getByRole("button", { name: /^Curtir \d/ }).first().click();
     await expect(page).toHaveURL(/\/entrar\?next=/);
   });
+});
+
+test("Início vazio: sugere quem seguir, mostra o que está em alta e passa a mostrar o feed", async ({ page }) => {
+  await createConfirmedUser(page, "novato");
+  await page.goto("/inicio");
+  await expect(page.getByRole("heading", { name: "Comece seguindo pessoas" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Em alta na comunidade" })).toBeVisible();
+  await expect(page.locator("main article").first()).toBeVisible();
+
+  const results = await new AxeBuilder({ page }).withTags(["wcag2a", "wcag2aa", "wcag21a", "wcag21aa"]).analyze();
+  expect(results.violations.map((v) => v.id)).toEqual([]);
+
+  const list = page.getByRole("region", { name: "Comece seguindo pessoas" }).getByRole("list");
+  const first = list.getByRole("button", { name: /^Seguir / }).first();
+  await first.click();
+  await expect(list.getByRole("button", { pressed: true }).first()).toBeVisible();
+  await page.getByRole("button", { name: "Ver meu feed" }).click();
+  await expect(page.getByRole("heading", { name: "Comece seguindo pessoas" })).toBeHidden({ timeout: 15_000 });
+  await expect(page.locator("main article").first()).toBeVisible();
 });

@@ -5,7 +5,7 @@ test.describe("cadastro e login", () => {
   test("jornada completa: cadastro, confirmação, perfil, tema, sair, entrar e excluir conta", async ({ page, context }) => {
     const user = await createConfirmedUser(page, "jornada");
     await expect(page.getByRole("heading", { name: "Início" })).toBeVisible();
-    await expect(page.getByText("Seu feed ainda está vazio")).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Comece seguindo pessoas" })).toBeVisible();
 
     // Editar perfil
     await page.goto("/perfil");
