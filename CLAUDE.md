@@ -50,6 +50,10 @@ Stack Next.js 16 + Tailwind 4 + Supabase local + Leaflet/OSM · 18+ · limites d
   - Seed: 7 professores aprovados (atleta2, 6, 14–18) + 1 pendente. `npm run db:seed-media` gera 79 fotos, 8 vídeos e 26 fotos de perfil localmente (Chromium do Playwright).
   - Docs: README (contas de demonstração), `DEPLOYMENT.md` §8 (checklist de publicação), `MOBILE_PLAN.md` (PWA primeiro, Expo depois).
 
+## Publicação (14/11/2026)
+- Supabase remoto: projeto `wdntjflsjzgkdktemrdo` (linkado). 18 migrations aplicadas; seed e mídia de demonstração levados a pedido do usuário. Atletas/demo com `Figtherz123`; admin e moderador com senha privada.
+- App na Vercel (Root Directory `apps/web`); variáveis em `DEPLOYMENT.md` §8. Mudança de schema: `npx supabase db push --linked` só com autorização.
+
 ## Decisões técnicas da Fase 7
 - Vídeo sem transcodificação (custo zero): o navegador valida assinatura/tamanho/duração, gera o poster e zera as caixas `udta`/`meta` do MP4 (GPS). WebM vai como está. Sem legendas (limitação WCAG 1.2.2 registrada).
 - O Storage bloqueia DELETE por SQL (`storage.protect_objects_delete`): o pg_cron só enfileira em `storage_cleanup_queue`; o admin apaga os arquivos em /admin/configuracoes, com `SUPABASE_SECRET_KEY` só no servidor (`lib/supabase/admin.ts`).

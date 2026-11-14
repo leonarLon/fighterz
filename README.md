@@ -30,7 +30,9 @@ cp apps/web/.env.example apps/web/.env.local   # preencher com `npx supabase sta
 npm run dev                 # http://localhost:3000
 ```
 
-## Contas de demonstração (somente local, senha `Figtherz123`)
+## Contas de demonstração (senha `Figtherz123`)
+
+As mesmas contas existem no site publicado (decisão de 14/11/2026), exceto que `admin@` e `moderador@` lá têm outra senha, que não está no repositório.
 | Conta | Papel |
 |---|---|
 | `demo@figtherz.local` | usuário comum (faixa azul, treinos, conquistas, aluno da Tatame Central) |

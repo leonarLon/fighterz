@@ -68,7 +68,8 @@ Nada abaixo foi feito. Cada item cria ou altera recurso externo e precisa do seu
 **Supabase (projeto remoto, plano Free)**
 1. Criar o projeto (região São Paulo) e anotar URL, chave publicável e chave secreta.
 2. Habilitar as extensões usadas: `postgis`, `pg_trgm`, `unaccent`, `citext`, `pg_cron`.
-3. `npx supabase link` + `npx supabase db push` (revisar `db diff` antes). **Não** rodar `seed.sql` nem `db:seed-media` em produção.
+3. `npx supabase link` + `npx supabase db push` (revisar `db diff` antes).
+   - **Decisão do usuário (14/11/2026): o site publicado usa os dados de demonstração.** Aplicados com `npx supabase db push --linked --include-seed` e `npm run db:seed-media -- --remote` (com `SUPABASE_URL` e `SUPABASE_SECRET_KEY` só no terminal). Atletas e demo mantêm `Figtherz123` (demonstração aberta); `admin@` e `moderador@` têm senha própria, trocada no SQL Editor e fora do repositório.
 4. Auth: confirmação de e-mail ligada, `site_url` e redirects com o domínio real, templates pt-BR de `supabase/templates/`. SMTP: o envio embutido do Supabase tem limite baixo por hora; avaliar um SMTP gratuito antes de abrir cadastro.
 5. Criar o primeiro superadmin manualmente (inserir em `user_roles` pelo SQL Editor) e trocar a senha.
 

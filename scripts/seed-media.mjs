@@ -1,23 +1,38 @@
-// Mídia de demonstração para o ambiente LOCAL: fotos (WebP) e vídeos curtos (WebM) desenhados num
-// Chromium headless (o do Playwright), enviados ao Storage local e publicados nos perfis do seed.
-// Nada é baixado da internet. Uso: `npm run db:seed-media` (depois de `npm run db:reset`).
+// Mídia de demonstração: fotos (WebP) e vídeos curtos (WebM) desenhados num Chromium headless (o do
+// Playwright), enviados ao Storage e publicados nos perfis do seed. Nada é baixado da internet.
+// Local (padrão): `npm run db:seed-media` (depois de `npm run db:reset`).
+// Remoto (decisão do usuário em 14/11/2026, demonstração no site publicado): `npm run db:seed-media -- --remote`
+// com SUPABASE_URL e SUPABASE_SECRET_KEY definidas no terminal (a chave nunca vai para o repositório).
 import { execSync } from "node:child_process";
 import { randomUUID } from "node:crypto";
 import { chromium } from "@playwright/test";
 import { createClient } from "@supabase/supabase-js";
 
-const env = Object.fromEntries(
-  execSync("npx supabase status -o env", { encoding: "utf8" })
-    .split(/\r?\n/)
-    .filter((l) => l.includes("="))
-    .map((l) => [l.slice(0, l.indexOf("=")), l.slice(l.indexOf("=") + 1).replace(/^"|"$/g, "")]),
-);
-const url = env.API_URL;
-if (!/^http:\/\/(127\.0\.0\.1|localhost)(:\d+)?$/.test(url ?? "")) {
-  console.error(`Recusado: este script só roda contra o Supabase local (API_URL=${url}).`);
-  process.exit(1);
+let url;
+let key;
+if (process.argv.includes("--remote")) {
+  url = process.env.SUPABASE_URL;
+  key = process.env.SUPABASE_SECRET_KEY;
+  if (!/^https:\/\/[a-z0-9]+\.supabase\.co$/.test(url ?? "") || !key) {
+    console.error("Recusado: --remote exige SUPABASE_URL (https://<ref>.supabase.co) e SUPABASE_SECRET_KEY no ambiente.");
+    process.exit(1);
+  }
+  console.log(`Destino REMOTO: ${url}`);
+} else {
+  const env = Object.fromEntries(
+    execSync("npx supabase status -o env", { encoding: "utf8" })
+      .split(/\r?\n/)
+      .filter((l) => l.includes("="))
+      .map((l) => [l.slice(0, l.indexOf("=")), l.slice(l.indexOf("=") + 1).replace(/^"|"$/g, "")]),
+  );
+  url = env.API_URL;
+  key = env.SERVICE_ROLE_KEY;
+  if (!/^http:\/\/(127\.0\.0\.1|localhost)(:\d+)?$/.test(url ?? "")) {
+    console.error(`Recusado: sem --remote, este script só roda contra o Supabase local (API_URL=${url}).`);
+    process.exit(1);
+  }
 }
-const supabase = createClient(url, env.SERVICE_ROLE_KEY, { auth: { persistSession: false } });
+const supabase = createClient(url, key, { auth: { persistSession: false } });
 
 const force = process.argv.includes("--force");
 const { count } = await supabase.from("post_media").select("id", { count: "exact", head: true }).like("storage_path", "%/seed-%");
