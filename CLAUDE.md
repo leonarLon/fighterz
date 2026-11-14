@@ -44,7 +44,7 @@ Stack Next.js 16 + Tailwind 4 + Supabase local + Leaflet/OSM · 18+ · limites d
   - `/admin`: visão geral, denúncias, usuários (papéis só para superadmin), professores, academias, eventos, modalidades, histórico e configurações.
   - Seed: `moderador@figtherz.local` (moderador) e denúncias de exemplo (post do atleta25 com segurança de menores, perfil do atleta24 por spam).
 
-- Fase 7 (finalização) implementada em 13/11/2026, **aguardando aceite**. Verificações verdes: pgTAP 340, Vitest 45 (core 42 + web 3), Playwright 105 (+17 pulados de propósito), typecheck, lint e build.
+- Fase 7 (finalização) **aceita em 14/11/2026**. Verificações verdes: pgTAP 340, Vitest 45 (core 42 + web 3), Playwright 105 (+17 pulados de propósito), typecheck, lint e build.
   - Migrations 16–18: vídeo em posts (pedido do usuário; até 60 s / 25 MB, 1 por post, miniatura), bucket `avatars`, purga após 30 dias + fila de limpeza do Storage (pg_cron).
   - CSP com nonce no `proxy.ts` (`lib/csp.ts`), verificada também em build de produção.
   - Seed: 7 professores aprovados (atleta2, 6, 14–18) + 1 pendente. `npm run db:seed-media` gera 79 fotos, 8 vídeos e 26 fotos de perfil localmente (Chromium do Playwright).
@@ -55,6 +55,7 @@ Stack Next.js 16 + Tailwind 4 + Supabase local + Leaflet/OSM · 18+ · limites d
 - O Storage bloqueia DELETE por SQL (`storage.protect_objects_delete`): o pg_cron só enfileira em `storage_cleanup_queue`; o admin apaga os arquivos em /admin/configuracoes, com `SUPABASE_SECRET_KEY` só no servidor (`lib/supabase/admin.ts`).
 - `style-src` mantém `'unsafe-inline'` (atributos `style` do React e do Leaflet); `script-src` usa nonce + `'strict-dynamic'`.
 - Carrossel: o foco vai na faixa rolável, não no contêiner (axe `scrollable-region-focusable`).
+- Docker Desktop no Windows pode reservar portas (`netsh int ipv4 show excludedportrange protocol=tcp`) que cobrem 54321–54324. Sintoma: login falha com "E-mail ou senha incorretos" e `supabase start` dá "bind: forbidden". Correção (admin): `net stop winnat` e `net start winnat`, depois `supabase start`.
 - Heredoc longo no Bash falha neste ambiente: para scripts grandes, escrever um `.py` no scratchpad e executar.
 
 ## Decisões técnicas da Fase 6
@@ -97,5 +98,4 @@ Stack Next.js 16 + Tailwind 4 + Supabase local + Leaflet/OSM · 18+ · limites d
 
 ## Próximos passos
 1. Pendências restantes: legendas de vídeo, capa de evento/perfil (bucket `covers`), PWA (manifesto e ícones).
-2. Usuário valida a Fase 7 (aceite) e decide sobre o commit.
-3. Publicação: só com autorização, seguindo `DEPLOYMENT.md` §7–8 (escolher entre Vercel Hobby, Cloudflare ou auto-hospedagem).
+2. Publicação: só com autorização, seguindo `DEPLOYMENT.md` §7–8 (escolher entre Vercel Hobby, Cloudflare ou auto-hospedagem).

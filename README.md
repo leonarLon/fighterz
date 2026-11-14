@@ -2,7 +2,7 @@
 
 Rede social para praticantes, professores e academias de artes marciais e esportes de combate: comunidade, descoberta de academias e aulas, perfil profissional, jornada de evolução, registro de treinos, eventos e moderação. Construída sob uma **política de custo zero**.
 
-> **Status:** Fases 1 a 6 aceitas; Fase 7 (finalização) implementada em 13/11/2026, aguardando aceite. Tudo roda 100% local (Supabase CLI + Docker). Publicação só com autorização. Ver `PRODUCT_ROADMAP.md`.
+> **Status:** Fases 1 a 7 aceitas (Fase 7 em 14/11/2026). Tudo roda 100% local (Supabase CLI + Docker). Publicação só com autorização. Ver `PRODUCT_ROADMAP.md`.
 
 ## Documentação
 | Documento | Conteúdo |
