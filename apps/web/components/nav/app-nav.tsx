@@ -102,7 +102,7 @@ export function SideNav({ username, displayName, avatarPath }: { username: strin
           <Settings aria-hidden className="size-5" />
           Configurações
         </Link>
-        <Link href={routes.profileEdit} className="flex items-center gap-3 rounded-md px-3 py-2 hover:bg-bg">
+        <Link href={routes.profile(username)} className="flex items-center gap-3 rounded-md px-3 py-2 hover:bg-bg">
           <Avatar name={displayName} path={avatarPath} size="sm" />
           <span className="min-w-0">
             <span className="block truncate text-sm font-semibold">{displayName}</span>

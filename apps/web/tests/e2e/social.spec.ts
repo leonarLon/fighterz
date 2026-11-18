@@ -207,3 +207,24 @@ test("Início vazio: sugere quem seguir, mostra o que está em alta e passa a mo
   await expect(page.getByRole("heading", { name: "Comece seguindo pessoas" })).toBeHidden({ timeout: 15_000 });
   await expect(page.locator("main article").first()).toBeVisible();
 });
+test("perfil próprio: atalhos para publicar e montar a jornada, sem travar", async ({ page }) => {
+  const user = await createConfirmedUser(page, "meuperfil");
+  await page.getByRole("navigation", { name: "Principal" }).filter({ visible: true }).getByRole("link", { name: "Perfil", exact: true }).click();
+  await expect(page).toHaveURL(new RegExp(`/u/${user.username}$`));
+  await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
+
+  const main = page.locator("main");
+  await expect(main.getByRole("link", { name: "Publicar" })).toBeVisible();
+  await expect(main.getByRole("link", { name: "Editar perfil" })).toBeVisible();
+  await expect(main.getByRole("link", { name: "Adicionar foto" })).toBeVisible();
+  const quick = page.getByRole("navigation", { name: "Adicionar ao perfil" });
+  await expect(quick.getByRole("link", { name: "Registrar treino" })).toHaveAttribute("href", "/jornada/treino");
+  await expect(main.getByRole("link", { name: "Montar minha jornada" })).toBeVisible();
+  await expect(main.getByText("Você ainda não publicou")).toBeVisible();
+
+  const results = await new AxeBuilder({ page }).withTags(["wcag2a", "wcag2aa", "wcag21a", "wcag21aa"]).analyze();
+  expect(results.violations.map((v) => v.id)).toEqual([]);
+
+  await main.getByRole("link", { name: "Fazer a primeira publicação" }).click();
+  await expect(page).toHaveURL(/\/publicar$/);
+});

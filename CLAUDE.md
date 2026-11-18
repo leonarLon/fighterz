@@ -60,6 +60,9 @@ Stack Next.js 16 + Tailwind 4 + Supabase local + Leaflet/OSM · 18+ · limites d
 - E-mails de cadastro e recuperação: o SMTP embutido do Supabase tem limite muito baixo por hora (erro `over_email_send_rate_limit`). Solução: SMTP próprio gratuito configurado no painel do Supabase. As actions agora registram o erro nos logs (`console.error`) e a recuperação não mostra mais "sucesso" quando o envio falha.
 - Foto: `decodeImage` tenta `createImageBitmap` e cai para `<img>` (Safari antigo, HEIC). Input aceita `image/*`.
 - Sugestões do Início vazio: autores dos posts em alta primeiro; seguir pela lista usa `follow(id, { refresh: false })` (revalidar na action re-renderiza a página e a lista sumia).
+- Perfil próprio: botões Publicar/Editar, atalhos (registrar treino, graduação, conquista), Jornada com "Gerenciar" e convite quando vazia, seção "Publicações" com convite para o primeiro post. Jornada e posts em `Suspense` (o topo aparece antes). O nome no rodapé da barra lateral leva ao perfil, não à edição.
+- Lentidão: as funções da Vercel rodavam em `iad1` (EUA) e o banco está em `sa-east-1`. `apps/web/vercel.json` fixa `regions: ["gru1"]` (permitido no Hobby).
+- `loading.tsx` só em páginas que não usam `notFound()` (início, explorar, jornada, notificações, perfil): com streaming o status já foi enviado e o 404 vira 200. O painel admin precisa do 404 (Fase 6), então o grupo `(app)` não tem `loading.tsx`. Perfil inexistente passa a responder 200 com a tela de "não encontrado" (o Next marca `noindex`).
 - `supabase link` grava em `supabase/.temp/*-version` e `storage-migration` as versões do projeto remoto, e o `supabase start` local passa a exigir essas imagens. Sem internet no Docker, mover esses arquivos para fora de `.temp` faz o ambiente local voltar às imagens instaladas.
 
 ## Decisões técnicas da Fase 7
