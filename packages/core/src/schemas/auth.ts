@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { isAdult, parseIsoDate, MIN_ACCOUNT_AGE } from '../domain/age';
+import { isAdult, parseIsoDate, MAX_DECLARED_AGE, MIN_ACCOUNT_AGE } from '../domain/age';
 import { PASSWORD_MAX_LENGTH, PASSWORD_MIN_LENGTH, hasLettersAndDigits, isCommonPassword } from '../domain/password';
 import { usernameSchema, displayNameSchema } from './profile';
 
@@ -22,6 +22,15 @@ export const birthDateSchema = z
   .refine((value) => value >= '1900-01-01', 'Informe uma data válida.')
   .refine((value) => isAdult(value), `É preciso ter ${MIN_ACCOUNT_AGE} anos ou mais para criar uma conta.`);
 
+/** Idade em anos, digitada no cadastro (feedback de produção: o seletor de data confundia no celular). */
+export const ageSchema = z
+  .string()
+  .trim()
+  .regex(/^\d{1,3}$/, 'Informe sua idade em anos, só números.')
+  .transform(Number)
+  .refine((age) => age >= MIN_ACCOUNT_AGE, `É preciso ter ${MIN_ACCOUNT_AGE} anos ou mais para criar uma conta.`)
+  .refine((age) => age <= MAX_DECLARED_AGE, 'Informe uma idade válida.');
+
 export const signUpSchema = z
   .object({
     email: emailSchema,
@@ -29,7 +38,7 @@ export const signUpSchema = z
     confirmPassword: z.string(),
     username: usernameSchema,
     displayName: displayNameSchema,
-    birthDate: birthDateSchema,
+    age: ageSchema,
     acceptedTerms: z.literal(true, 'Você precisa aceitar os Termos de Uso e a Política de Privacidade.'),
   })
   .refine((data) => data.password === data.confirmPassword, {

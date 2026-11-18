@@ -57,14 +57,18 @@ export function SignUpForm() {
         errors={errors.email}
       />
       <InputField
-        id="birthDate"
-        label="Data de nascimento"
-        type="date"
-        autoComplete="bday"
+        id="age"
+        label="Idade"
+        type="text"
+        inputMode="numeric"
+        pattern="[0-9]*"
+        maxLength={3}
+        autoComplete="off"
         required
-        help="Usada só para confirmar que você tem 18 anos ou mais. Não aparece no perfil."
-        defaultValue={state.values?.birthDate}
-        errors={errors.birthDate}
+        className="max-w-28"
+        help="Em anos. É preciso ter 18 ou mais. Não aparece no perfil."
+        defaultValue={state.values?.age}
+        errors={errors.age}
       />
       <InputField
         id="password"

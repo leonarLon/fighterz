@@ -83,7 +83,7 @@ function Row({ item }: { item: NotificationItem }) {
   const [pending, startTransition] = useTransition();
   const meta = metaOf(item);
   // Moderação nunca mostra quem decidiu.
-  const actorName = item.type === "moderation" ? "Equipe Figtherz" : (item.actor?.displayName ?? "Alguém");
+  const actorName = item.type === "moderation" ? "Equipe Fighterz" : (item.actor?.displayName ?? "Alguém");
   const Icon = meta.icon;
   const target = targetOf(item);
 

@@ -91,7 +91,7 @@ test.describe("moderação ponta a ponta", () => {
     await offender.page.goto(postUrl);
     await expect(offender.page.getByText("Este post foi removido pela moderação")).toBeVisible();
     await offender.page.goto("/notificacoes");
-    await expect(offender.page.getByText("Equipe Figtherz removeu um post seu por violar as diretrizes")).toBeVisible();
+    await expect(offender.page.getByText("Equipe Fighterz removeu um post seu por violar as diretrizes")).toBeVisible();
 
     // Suspensão de 1 dia pela página de usuários
     await mod.page.goto(`/admin/usuarios?q=${user.username}`);

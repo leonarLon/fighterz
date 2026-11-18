@@ -68,7 +68,7 @@ export function PostCard({ post, viewer, onDeleted }: { post: PostView; viewer: 
     const url = new URL(postUrl, window.location.origin).toString();
     try {
       if (navigator.share) {
-        await navigator.share({ title: `Post de ${post.author.displayName} no Figtherz`, url });
+        await navigator.share({ title: `Post de ${post.author.displayName} no Fighterz`, url });
         return;
       }
       await navigator.clipboard.writeText(url);

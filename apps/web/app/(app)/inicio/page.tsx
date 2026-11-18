@@ -7,6 +7,7 @@ import { PageHeader } from "@/components/ui/page-header";
 import { PostList } from "@/components/post/post-list";
 import { createClient } from "@/lib/supabase/server";
 import { loadExplore, loadHomeFeed } from "@/lib/posts";
+import type { PostView } from "@/lib/post-types";
 import { getViewer } from "@/lib/viewer";
 import { routes } from "@/lib/routes";
 import { FollowSuggestions, type Suggestion } from "./suggestions";
@@ -17,8 +18,11 @@ type Client = Awaited<ReturnType<typeof createClient>>;
 
 const SUGGESTION_LIMIT = 8;
 
-/** Professores aprovados primeiro, depois perfis públicos; sem quem a pessoa já segue (ou pediu para seguir). */
-async function loadSuggestions(supabase: Client, viewerId: string): Promise<Suggestion[]> {
+/**
+ * Ordem: autores dos posts em alta (publicam de verdade, então o feed deixa de ficar vazio ao segui-los),
+ * depois professores aprovados e outros perfis públicos. Sem quem a pessoa já segue (ou pediu para seguir).
+ */
+async function loadSuggestions(supabase: Client, viewerId: string, trending: PostView[]): Promise<Suggestion[]> {
   const [{ data: following }, { data: teachers }, { data: profiles }] = await Promise.all([
     supabase.from("follows").select("following_id").eq("follower_id", viewerId),
     supabase.from("teacher_cards").select("user_id, username, display_name, avatar_path, martial_arts").limit(20),
@@ -38,11 +42,20 @@ async function loadSuggestions(supabase: Client, viewerId: string): Promise<Sugg
       out.push(s);
     }
   };
+  const teacherArt = new Map<string, string | undefined>();
+  for (const t of teachers ?? []) {
+    const arts = Array.isArray(t.martial_arts) ? (t.martial_arts as { martial_art?: string }[]) : [];
+    if (t.user_id) teacherArt.set(t.user_id, arts[0]?.martial_art);
+  }
+  const teacherDetail = (id: string) => (teacherArt.has(id) ? (teacherArt.get(id) ? `Professor de ${teacherArt.get(id)}` : "Professor") : null);
+  for (const post of trending) {
+    if (post.visibility !== "public") continue;
+    const a = post.author;
+    add({ id: a.id, username: a.username, displayName: a.displayName, avatarPath: a.avatarPath, detail: teacherDetail(a.id) ?? post.martialArtName });
+  }
   for (const t of teachers ?? []) {
     if (!t.user_id || !t.username || !t.display_name) continue;
-    const arts = Array.isArray(t.martial_arts) ? (t.martial_arts as { martial_art?: string }[]) : [];
-    const art = arts[0]?.martial_art;
-    add({ id: t.user_id, username: t.username, displayName: t.display_name, avatarPath: t.avatar_path, detail: art ? `Professor de ${art}` : "Professor" });
+    add({ id: t.user_id, username: t.username, displayName: t.display_name, avatarPath: t.avatar_path, detail: teacherDetail(t.user_id) });
   }
   for (const p of profiles ?? []) {
     add({
@@ -60,7 +73,8 @@ export default async function FeedPage() {
   const supabase = await createClient();
   const [viewer, page] = await Promise.all([getViewer(), loadHomeFeed(supabase)]);
   const isEmpty = page.items.length === 0 && !page.nextCursor;
-  const [suggestions, popular] = isEmpty && viewer ? await Promise.all([loadSuggestions(supabase, viewer.id), loadExplore(supabase)]) : [[], null];
+  const popular = isEmpty && viewer ? await loadExplore(supabase) : null;
+  const suggestions = popular && viewer ? await loadSuggestions(supabase, viewer.id, popular.items) : [];
 
   return (
     <>

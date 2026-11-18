@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import {
   ageOn,
+  ageSchema,
   isAdult,
   parseIsoDate,
   parseThemePreference,
@@ -51,7 +52,7 @@ describe('cadastro', () => {
     confirmPassword: 'Tatame2026',
     username: 'Atleta_01',
     displayName: ' Atleta ',
-    birthDate: '1995-04-10',
+    age: '30',
     acceptedTerms: true,
   };
 
@@ -65,13 +66,23 @@ describe('cadastro', () => {
   it('recusa menor de idade, termos não aceitos e senhas diferentes', () => {
     const result = signUpSchema.safeParse({
       ...valid,
-      birthDate: '2015-01-01',
+      age: '17',
       acceptedTerms: false,
       confirmPassword: 'outra',
     });
     expect(result.success).toBe(false);
     const paths = result.error?.issues.map((issue) => issue.path.join('.'));
-    expect(paths).toEqual(expect.arrayContaining(['birthDate', 'acceptedTerms']));
+    expect(paths).toEqual(expect.arrayContaining(['age', 'acceptedTerms']));
+  });
+});
+
+describe('idade no cadastro', () => {
+  it('aceita só números inteiros entre 18 e 120', () => {
+    expect(ageSchema.parse(' 18 ')).toBe(18);
+    expect(ageSchema.parse('120')).toBe(120);
+    for (const bad of ['17', '121', '', '2O', '18.5', '-20', 'dezoito']) {
+      expect(ageSchema.safeParse(bad).success, bad).toBe(false);
+    }
   });
 });
 

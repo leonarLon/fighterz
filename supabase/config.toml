@@ -246,15 +246,15 @@ otp_expiry = 3600
 
 # Uncomment to customize email template
 [auth.email.template.confirmation]
-subject = "Confirme seu cadastro no Figtherz"
+subject = "Confirme seu cadastro no Fighterz"
 content_path = "./supabase/templates/confirmation.html"
 
 [auth.email.template.recovery]
-subject = "Redefinir sua senha do Figtherz"
+subject = "Redefinir sua senha do Fighterz"
 content_path = "./supabase/templates/recovery.html"
 
 [auth.email.template.email_change]
-subject = "Confirme seu novo e-mail no Figtherz"
+subject = "Confirme seu novo e-mail no Fighterz"
 content_path = "./supabase/templates/email_change.html"
 
 # [auth.email.template.invite]

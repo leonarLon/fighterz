@@ -47,7 +47,7 @@ export function AvatarUpload({ userId, name, path }: { userId: string; name: str
             ref={input}
             id="avatar"
             type="file"
-            accept="image/jpeg,image/png,image/webp,image/heic"
+            accept="image/*"
             className="sr-only"
             onChange={(e) => choose(e.target.files?.[0])}
             disabled={pending}

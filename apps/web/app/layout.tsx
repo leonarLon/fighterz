@@ -14,7 +14,7 @@ const barlow = Barlow_Condensed({
 });
 
 export const metadata: Metadata = {
-  title: { default: "Figtherz", template: "%s · Figtherz" },
+  title: { default: "Fighterz", template: "%s · Fighterz" },
   description: "A rede social das artes marciais: alunos, professores e academias.",
 };
 

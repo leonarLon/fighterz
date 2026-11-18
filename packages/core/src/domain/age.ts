@@ -1,5 +1,7 @@
 /** Idade mínima para criar conta (SECURITY.md §6). */
 export const MIN_ACCOUNT_AGE = 18;
+/** Teto de sanidade para a idade digitada no cadastro (igual ao check do banco). */
+export const MAX_DECLARED_AGE = 120;
 
 const ISO_DATE = /^(\d{4})-(\d{2})-(\d{2})$/;
 

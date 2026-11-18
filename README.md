@@ -1,4 +1,6 @@
-# Figtherz
+# Fighterz
+
+> O nome público mudou de Figtherz para **Fighterz** em 18/11/2026. Pacotes (`@figtherz/core`), pasta e contas de demonstração (`@figtherz.local`) mantêm o nome antigo.
 
 Rede social para praticantes, professores e academias de artes marciais e esportes de combate: comunidade, descoberta de academias e aulas, perfil profissional, jornada de evolução, registro de treinos, eventos e moderação. Construída sob uma **política de custo zero**.
 

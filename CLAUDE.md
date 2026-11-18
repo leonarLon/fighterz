@@ -1,4 +1,4 @@
-# Figtherz: contexto para o Claude Code
+# Fighterz (antigo Figtherz): contexto para o Claude Code
 
 Rede social de artes marciais (alunos, professores, academias). Idioma do projeto e das conversas: **português (Brasil)**.
 
@@ -53,6 +53,14 @@ Stack Next.js 16 + Tailwind 4 + Supabase local + Leaflet/OSM · 18+ · limites d
 ## Publicação (14/11/2026)
 - Supabase remoto: projeto `wdntjflsjzgkdktemrdo` (linkado). 18 migrations aplicadas; seed e mídia de demonstração levados a pedido do usuário. Atletas/demo com `Figtherz123`; admin e moderador com senha privada.
 - App na Vercel (Root Directory `apps/web`); variáveis em `DEPLOYMENT.md` §8. Mudança de schema: `npx supabase db push --linked` só com autorização.
+
+## Ajustes pós-publicação (18/11/2026, feedback de produção)
+- Nome público **Fighterz** (logo, títulos, e-mails, termos). Pacotes, pasta, `project_id` e contas `@figtherz.local` continuam com o nome antigo.
+- Cadastro pede **idade** (campo numérico) em vez da data de nascimento: migration 19 (`user_settings.declared_age`, `birth_date` opcional; `handle_new_user` aceita `age` ou `birth_date`). A migration remota precisa ir **antes** do deploy do código.
+- E-mails de cadastro e recuperação: o SMTP embutido do Supabase tem limite muito baixo por hora (erro `over_email_send_rate_limit`). Solução: SMTP próprio gratuito configurado no painel do Supabase. As actions agora registram o erro nos logs (`console.error`) e a recuperação não mostra mais "sucesso" quando o envio falha.
+- Foto: `decodeImage` tenta `createImageBitmap` e cai para `<img>` (Safari antigo, HEIC). Input aceita `image/*`.
+- Sugestões do Início vazio: autores dos posts em alta primeiro; seguir pela lista usa `follow(id, { refresh: false })` (revalidar na action re-renderiza a página e a lista sumia).
+- `supabase link` grava em `supabase/.temp/*-version` e `storage-migration` as versões do projeto remoto, e o `supabase start` local passa a exigir essas imagens. Sem internet no Docker, mover esses arquivos para fora de `.temp` faz o ambiente local voltar às imagens instaladas.
 
 ## Decisões técnicas da Fase 7
 - Vídeo sem transcodificação (custo zero): o navegador valida assinatura/tamanho/duração, gera o poster e zera as caixas `udta`/`meta` do MP4 (GPS). WebM vai como está. Sem legendas (limitação WCAG 1.2.2 registrada).

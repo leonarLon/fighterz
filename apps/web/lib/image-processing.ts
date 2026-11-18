@@ -10,6 +10,34 @@ export type PreparedImage = { blob: Blob; width: number; height: number; ext: "w
 
 export class ImageError extends Error {}
 
+type Decoded = { source: CanvasImageSource; width: number; height: number; close: () => void };
+
+/**
+ * Decodifica a foto. Tenta createImageBitmap (rápido, respeita a orientação EXIF) e, se o navegador
+ * recusar (Safari antigo, HEIC, fotos muito grandes em alguns Android), cai para <img>, que usa o
+ * decodificador nativo do sistema e também aplica a orientação. Feedback de produção (18/11/2026).
+ */
+async function decodeImage(file: File): Promise<Decoded | null> {
+  try {
+    const bitmap = await createImageBitmap(file, { imageOrientation: "from-image" });
+    return { source: bitmap, width: bitmap.width, height: bitmap.height, close: () => bitmap.close() };
+  } catch {
+    // segue para o <img>
+  }
+  const url = URL.createObjectURL(file);
+  try {
+    const img = new Image();
+    img.decoding = "async";
+    img.src = url;
+    await img.decode();
+    if (!img.naturalWidth || !img.naturalHeight) return null;
+    return { source: img, width: img.naturalWidth, height: img.naturalHeight, close: () => URL.revokeObjectURL(url) };
+  } catch {
+    URL.revokeObjectURL(url);
+    return null;
+  }
+}
+
 /**
  * Valida pela assinatura do arquivo, redimensiona para no máximo 1600 px e reencoda em WebP
  * (JPEG se o navegador não gerar WebP). Reencodar no canvas descarta EXIF, inclusive GPS (ARCHITECTURE.md §6).
@@ -20,10 +48,8 @@ export async function prepareImage(file: File): Promise<PreparedImage> {
   const kind = detectImageKind(new Uint8Array(await file.slice(0, 32).arrayBuffer()));
   if (!kind) throw new ImageError(`"${file.name}" não é uma imagem válida.`);
 
-  let bitmap: ImageBitmap;
-  try {
-    bitmap = await createImageBitmap(file, { imageOrientation: "from-image" });
-  } catch {
+  const bitmap = await decodeImage(file);
+  if (!bitmap) {
     throw new ImageError(
       DECODABLE_IMAGE_KINDS.includes(kind)
         ? `Não foi possível ler "${file.name}".`
@@ -37,7 +63,7 @@ export async function prepareImage(file: File): Promise<PreparedImage> {
   canvas.height = height;
   const context = canvas.getContext("2d");
   if (!context) throw new ImageError("Seu navegador não conseguiu processar a imagem.");
-  context.drawImage(bitmap, 0, 0, width, height);
+  context.drawImage(bitmap.source, 0, 0, width, height);
   bitmap.close();
 
   const encode = (type: string, quality: number) =>
@@ -56,11 +82,13 @@ export async function prepareAvatar(file: File): Promise<PreparedImage> {
   if (file.size > MAX_ORIGINAL_IMAGE_BYTES) throw new ImageError("A foto passa de 15 MB.");
   const kind = detectImageKind(new Uint8Array(await file.slice(0, 32).arrayBuffer()));
   if (!kind) throw new ImageError("O arquivo não é uma imagem válida.");
-  let bitmap: ImageBitmap;
-  try {
-    bitmap = await createImageBitmap(file, { imageOrientation: "from-image" });
-  } catch {
-    throw new ImageError("Não foi possível ler a foto. Tente JPEG ou PNG.");
+  const bitmap = await decodeImage(file);
+  if (!bitmap) {
+    throw new ImageError(
+      kind === "heic"
+        ? "Este navegador não abre fotos HEIC. No iPhone, escolha a foto pela galeria ou exporte como JPEG."
+        : "Não foi possível ler a foto. Tente JPEG ou PNG.",
+    );
   }
   const side = Math.min(bitmap.width, bitmap.height);
   const size = Math.min(400, side);
@@ -69,7 +97,7 @@ export async function prepareAvatar(file: File): Promise<PreparedImage> {
   canvas.height = size;
   const context = canvas.getContext("2d");
   if (!context) throw new ImageError("Seu navegador não conseguiu processar a foto.");
-  context.drawImage(bitmap, (bitmap.width - side) / 2, (bitmap.height - side) / 2, side, side, 0, 0, size, size);
+  context.drawImage(bitmap.source, (bitmap.width - side) / 2, (bitmap.height - side) / 2, side, side, 0, 0, size, size);
   bitmap.close();
   const blob = await new Promise<Blob | null>((resolve) => canvas.toBlob(resolve, "image/webp", 0.85));
   if (blob && blob.type === "image/webp") return { blob, width: size, height: size, ext: "webp", contentType: "image/webp" };

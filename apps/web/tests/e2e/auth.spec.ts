@@ -59,9 +59,7 @@ test.describe("cadastro e login", () => {
 
   test("menor de 18 anos não consegue se cadastrar", async ({ page }) => {
     const user = uniqueUser("menor");
-    const today = new Date();
-    const seventeen = `${today.getFullYear() - 17}-01-01`;
-    await signUpViaUi(page, user, seventeen);
+    await signUpViaUi(page, user, "17");
     await expect(page.getByText("É preciso ter 18 anos ou mais para criar uma conta.")).toBeVisible();
     await expect(page.getByLabel("E-mail")).toHaveValue(user.email);
   });

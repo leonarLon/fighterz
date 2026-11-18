@@ -11,7 +11,7 @@ export default function TermsPage() {
       <PageHeader title="Termos de Uso" description="Versão preliminar." />
       <FormMessage status="error" message="Rascunho: texto em elaboração, sujeito a revisão jurídica." />
       <h2 className="font-display text-2xl font-semibold">1. Quem pode usar</h2>
-      <p>O Figtherz é destinado a pessoas com 18 anos ou mais. Contas de menores de idade são removidas.</p>
+      <p>O Fighterz é destinado a pessoas com 18 anos ou mais. Contas de menores de idade são removidas.</p>
       <h2 className="font-display text-2xl font-semibold">2. Conteúdo</h2>
       <p>
         Você é responsável pelo que publica. Treinos e competições são conteúdo legítimo. Violência real, humilhação,

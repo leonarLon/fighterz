@@ -77,7 +77,7 @@ O **ECA Digital (Lei 15.211/2025)** está em vigor desde **17/03/2026**. Segundo
 **Problema de custo zero:** verificação de idade confiável normalmente depende de serviços pagos (documento + biometria).
 
 **Recomendação para o MVP:** **somente maiores de 18 anos podem criar conta.** Menores podem aparecer apenas como *visitantes* (grades e academias públicas não exigem login).
-- Data de nascimento obrigatória no cadastro + declaração.
+- Idade obrigatória no cadastro + declaração (até 17/11/2026 era a data de nascimento; trocada por feedback de produção, ver DATA_MODEL.md §2). As duas formas são autodeclaração: nenhuma resolve a exigência de verificação do ECA Digital, que continua pendente.
 - Denúncia `minor_safety` com prioridade máxima e remoção de contas identificadas como de menores.
 - Academias podem divulgar turmas infantis (dados da aula), **sem** perfis de crianças.
 - Publicações com crianças identificáveis: aviso no upload sobre consentimento do responsável e regra nas diretrizes.

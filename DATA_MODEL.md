@@ -65,7 +65,7 @@ reports / moderation_actions / blocked_users
 Índices: unique(username), GIN(search_vector), GIN trigram(display_name).
 
 **user_settings** (1:1)
-`user_id PK FK`, `birth_date date not null` (**movida de `profiles` na Fase 2**: `profiles` é legível por todos, e a data de nascimento só serve para checar a idade. O usuário não pode alterá-la), `theme enum('light','dark','system') default 'system'`, `locale default 'pt-BR'`,
+`user_id PK FK`, `birth_date date null` (**movida de `profiles` na Fase 2**: `profiles` é legível por todos, e a data de nascimento só serve para checar a idade), `declared_age smallint null check 18..120` (**migration 19, 18/11/2026**: o cadastro passou a pedir a idade em vez da data; contas antigas mantêm `birth_date`, e uma das duas é obrigatória). O usuário não altera nenhuma das duas, `theme enum('light','dark','system') default 'system'`, `locale default 'pt-BR'`,
 visibilidade granular: `show_ranks`, `show_achievements`, `show_checkins`, `show_academies` (enum `visibility`: `public`,`followers`,`private`),
 notificações: `notify_likes`, `notify_comments`, `notify_follows`, `notify_mentions`, `notify_events` (bool),
 consentimentos LGPD: `terms_accepted_at`, `privacy_accepted_at`.

@@ -8,8 +8,12 @@ type Result = { ok: true; status?: "accepted" | "pending" } | { ok: false; messa
 
 const UUID = /^[0-9a-f-]{36}$/i;
 
-/** Segue (perfil público) ou envia solicitação (perfil privado). O banco decide o status. */
-export async function follow(targetId: string): Promise<Result> {
+/**
+ * Segue (perfil público) ou envia solicitação (perfil privado). O banco decide o status.
+ * `refresh: false` evita revalidar: no Next, revalidar numa action re-renderiza a página atual, e as
+ * sugestões do Início vazio sumiriam no primeiro follow.
+ */
+export async function follow(targetId: string, { refresh = true }: { refresh?: boolean } = {}): Promise<Result> {
   const user = await requireUser();
   if (!UUID.test(targetId) || targetId === user.id) return { ok: false, message: "Perfil inválido." };
   const supabase = await createClient();
@@ -23,16 +27,16 @@ export async function follow(targetId: string): Promise<Result> {
     .eq("follower_id", user.id)
     .eq("following_id", targetId)
     .maybeSingle();
-  revalidatePath("/u/[username]", "page");
+  if (refresh) revalidatePath("/u/[username]", "page");
   return { ok: true, status: data?.status ?? "pending" };
 }
 
 /** Deixar de seguir ou cancelar a solicitação. */
-export async function unfollow(targetId: string): Promise<Result> {
+export async function unfollow(targetId: string, { refresh = true }: { refresh?: boolean } = {}): Promise<Result> {
   const user = await requireUser();
   const supabase = await createClient();
   const { error } = await supabase.from("follows").delete().eq("follower_id", user.id).eq("following_id", targetId);
-  revalidatePath("/u/[username]", "page");
+  if (refresh) revalidatePath("/u/[username]", "page");
   return error ? { ok: false, message: "Não foi possível deixar de seguir." } : { ok: true };
 }
 

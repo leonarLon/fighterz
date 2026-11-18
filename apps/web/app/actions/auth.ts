@@ -17,8 +17,15 @@ import { writeThemeCookie } from "@/lib/theme";
 
 const TOO_MANY = "Muitas tentativas em pouco tempo. Aguarde alguns minutos e tente de novo.";
 
+// O limite de envio de e-mails é do servidor de e-mail do Supabase (por hora, para o site todo), não da pessoa.
+const EMAIL_LIMIT = "Não conseguimos enviar o e-mail agora porque o limite de envios do site foi atingido. Tente de novo em cerca de 1 hora.";
+
 function isRateLimited(code: string | undefined) {
   return code === "over_request_rate_limit" || code === "over_email_send_rate_limit";
+}
+
+function rateLimitMessage(code: string | undefined) {
+  return code === "over_email_send_rate_limit" ? EMAIL_LIMIT : TOO_MANY;
 }
 
 export async function signUp(_prev: FormState, formData: FormData): Promise<FormState> {
@@ -26,7 +33,7 @@ export async function signUp(_prev: FormState, formData: FormData): Promise<Form
     email: text(formData, "email"),
     username: text(formData, "username"),
     displayName: text(formData, "displayName"),
-    birthDate: text(formData, "birthDate"),
+    age: text(formData, "age"),
   };
   const parsed = signUpSchema.safeParse({
     ...values,
@@ -60,14 +67,15 @@ export async function signUp(_prev: FormState, formData: FormData): Promise<Form
       data: {
         username: input.username,
         display_name: input.displayName,
-        birth_date: input.birthDate,
+        age: input.age,
         accepted_terms: true,
       },
     },
   });
 
   if (error) {
-    if (isRateLimited(error.code)) return { status: "error", message: TOO_MANY, values };
+    console.error("signUp falhou", { code: error.code, status: error.status, message: error.message });
+    if (isRateLimited(error.code)) return { status: "error", message: rateLimitMessage(error.code), values };
     if (error.code === "weak_password") {
       return { status: "error", fieldErrors: { password: ["Senha fraca. Use letras e números, com 8+ caracteres."] }, values };
     }
@@ -121,7 +129,12 @@ export async function requestPasswordReset(_prev: FormState, formData: FormData)
   const { error } = await supabase.auth.resetPasswordForEmail(parsed.data.email, {
     redirectTo: `${env.siteUrl}${routes.resetPassword}`,
   });
-  if (error && isRateLimited(error.code)) return { status: "error", message: TOO_MANY, values };
+  if (error) {
+    // Registrado nos logs do servidor (Vercel): sem isto, falha de envio ficava invisível.
+    console.error("resetPasswordForEmail falhou", { code: error.code, status: error.status, message: error.message });
+    if (isRateLimited(error.code)) return { status: "error", message: rateLimitMessage(error.code), values };
+    return { status: "error", message: "Não conseguimos enviar o e-mail agora. Tente de novo em alguns minutos.", values };
+  }
 
   // Resposta idêntica exista ou não a conta.
   return {

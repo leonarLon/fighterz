@@ -35,7 +35,7 @@ export function FollowSuggestions({ people }: { people: Suggestion[] }) {
     setBusy(person.id);
     setMessage("");
     startTransition(async () => {
-      const result = current === "none" ? await follow(person.id) : await unfollow(person.id);
+      const result = current === "none" ? await follow(person.id, { refresh: false }) : await unfollow(person.id, { refresh: false });
       if (result.ok) {
         const next: State = current === "none" ? (result.status === "accepted" ? "accepted" : "pending") : "none";
         setStates((s) => ({ ...s, [person.id]: next }));

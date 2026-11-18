@@ -55,7 +55,7 @@ export default async function Landing({ searchParams }: { searchParams: Promise<
       </main>
 
       <footer className="flex flex-wrap gap-4 border-t border-border pt-6 text-[13px] text-muted">
-        <span>© {new Date().getFullYear()} Figtherz</span>
+        <span>© {new Date().getFullYear()} Fighterz</span>
         <a href={routes.terms} className="hover:text-text">
           Termos de Uso
         </a>

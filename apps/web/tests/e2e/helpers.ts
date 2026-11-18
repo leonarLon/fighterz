@@ -47,12 +47,12 @@ export async function linkFromEmail(email: string, pathPart: string): Promise<st
   return link!;
 }
 
-export async function signUpViaUi(page: Page, user: ReturnType<typeof uniqueUser>, birthDate = "1995-04-10") {
+export async function signUpViaUi(page: Page, user: ReturnType<typeof uniqueUser>, age = "30") {
   await page.goto("/cadastro");
   await page.getByLabel("Nome", { exact: true }).fill(user.displayName);
   await page.getByLabel("Nome de usuário").fill(user.username);
   await page.getByLabel("E-mail").fill(user.email);
-  await page.getByLabel("Data de nascimento").fill(birthDate);
+  await page.getByLabel("Idade", { exact: true }).fill(age);
   await page.getByLabel("Senha", { exact: true }).fill(user.password);
   await page.getByLabel("Confirmar senha").fill(user.password);
   await page.getByRole("checkbox").check();

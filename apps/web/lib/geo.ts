@@ -13,8 +13,8 @@ import type { createClient } from "@/lib/supabase/server";
 type Client = Awaited<ReturnType<typeof createClient>>;
 
 // COST_ZERO_POLICY.md §3: User-Agent identificando a aplicação (nunca o padrão da biblioteca).
-// Antes de publicar, defina APP_USER_AGENT com o e-mail de contato: "Figtherz/0.1 (contato: email@dominio)".
-const USER_AGENT = process.env.APP_USER_AGENT || "Figtherz/0.1 (ambiente de desenvolvimento local)";
+// Antes de publicar, defina APP_USER_AGENT com o e-mail de contato: "Fighterz/0.1 (contato: email@dominio)".
+const USER_AGENT = process.env.APP_USER_AGENT || "Fighterz/0.1 (ambiente de desenvolvimento local)";
 const TIMEOUT_MS = 6000;
 
 export type GeoError = "not_found" | "user_limit" | "busy" | "unavailable";

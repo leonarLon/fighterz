@@ -6,9 +6,9 @@ export function Logo({ href = "/", className }: { href?: string; className?: str
     <Link
       href={href}
       className={cn("font-display text-2xl font-bold uppercase leading-none tracking-wide", className)}
-      aria-label="Figtherz, página inicial"
+      aria-label="Fighterz, página inicial"
     >
-      Figther<span className="text-accent">z</span>
+      Fighter<span className="text-accent">z</span>
     </Link>
   );
 }
