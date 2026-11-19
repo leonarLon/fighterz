@@ -1,4 +1,4 @@
-import { Suspense, cache } from "react";
+import { Suspense } from "react";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -17,21 +17,10 @@ import type { Viewer } from "@/lib/post-types";
 import { getViewer } from "@/lib/viewer";
 import { routes } from "@/lib/routes";
 import { JourneyCard } from "./journey-card";
+import { loadProfile } from "./load-profile";
 import { ProfileActions } from "./profile-actions";
 
 type Props = { params: Promise<{ username: string }> };
-
-// cache(): generateMetadata e a página leem o mesmo perfil com uma consulta só.
-const loadProfile = cache(async (username: string) => {
-  const supabase = await createClient();
-  // RLS decide o que é visível (suspensos e quem me bloqueou não aparecem).
-  const { data } = await supabase
-    .from("profiles")
-    .select("id, username, display_name, avatar_path, bio, city, state, is_private, follower_count, following_count, post_count")
-    .eq("username", decodeURIComponent(username).toLowerCase())
-    .maybeSingle();
-  return data;
-});
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const profile = await loadProfile((await params).username);
@@ -63,9 +52,9 @@ export default async function PublicProfilePage({ params }: Props) {
   const canSeeContent = isOwner || (!blockedByMe && (!profile.is_private || followState === "accepted"));
   const location = [profile.city, profile.state].filter(Boolean).join(" · ");
   const stats = [
-    { label: plural(profile.post_count, "publicação", "publicações"), value: profile.post_count },
-    { label: plural(profile.follower_count, "seguidor", "seguidores"), value: profile.follower_count },
-    { label: "seguindo", value: profile.following_count },
+    { label: plural(profile.post_count, "publicação", "publicações"), value: profile.post_count, href: null },
+    { label: plural(profile.follower_count, "seguidor", "seguidores"), value: profile.follower_count, href: routes.followers(profile.username) },
+    { label: "seguindo", value: profile.following_count, href: routes.following(profile.username) },
   ];
 
   return (
@@ -112,14 +101,23 @@ export default async function PublicProfilePage({ params }: Props) {
           )
         )}
 
-        <dl className="mt-5 flex flex-wrap gap-x-6 gap-y-1">
-          {stats.map(({ label, value }) => (
-            <div key={label} className="flex gap-1">
-              <dt className="order-2 text-muted">{label}</dt>
-              <dd className="font-semibold tabular-nums">{compactCount(value)}</dd>
-            </div>
+        <ul className="mt-5 flex flex-wrap gap-x-6 gap-y-1">
+          {stats.map(({ label, value, href }) => (
+            <li key={label}>
+              {href && canSeeContent ? (
+                <Link href={href} className="inline-flex min-h-11 items-center gap-1 hover:underline">
+                  <span className="font-semibold tabular-nums">{compactCount(value)}</span>
+                  <span className="text-muted">{label}</span>
+                </Link>
+              ) : (
+                <span className="inline-flex min-h-11 items-center gap-1">
+                  <span className="font-semibold tabular-nums">{compactCount(value)}</span>
+                  <span className="text-muted">{label}</span>
+                </span>
+              )}
+            </li>
           ))}
-        </dl>
+        </ul>
 
         <div className="mt-5">
           {isOwner ? (

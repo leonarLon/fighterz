@@ -52,6 +52,16 @@ export async function respondFollowRequest(followerId: string, accept: boolean):
   return error ? { ok: false, message: "Não foi possível responder à solicitação." } : { ok: true };
 }
 
+/** Remover alguém que me segue (a RLS permite à parte seguida apagar a linha). */
+export async function removeFollower(followerId: string): Promise<Result> {
+  const user = await requireUser();
+  if (!UUID.test(followerId) || followerId === user.id) return { ok: false, message: "Perfil inválido." };
+  const supabase = await createClient();
+  const { error } = await supabase.from("follows").delete().eq("follower_id", followerId).eq("following_id", user.id);
+  // Sem revalidar: a linha some localmente da lista.
+  return error ? { ok: false, message: "Não foi possível remover o seguidor." } : { ok: true };
+}
+
 export async function setBlocked(targetId: string, blocked: boolean): Promise<Result> {
   const user = await requireUser();
   if (!UUID.test(targetId) || targetId === user.id) return { ok: false, message: "Perfil inválido." };

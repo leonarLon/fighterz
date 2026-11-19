@@ -32,6 +32,8 @@ export const routes = {
   newEvent: "/eventos/novo",
   editEvent: (id: string) => `/eventos/${id}/editar`,
   profile: (username: string) => `/u/${encodeURIComponent(username)}`,
+  followers: (username: string) => `/u/${encodeURIComponent(username)}/seguidores`,
+  following: (username: string) => `/u/${encodeURIComponent(username)}/seguindo`,
   signIn: "/entrar",
   signUp: "/cadastro",
   forgotPassword: "/recuperar-senha",

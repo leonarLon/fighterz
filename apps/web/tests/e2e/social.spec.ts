@@ -228,3 +228,44 @@ test("perfil próprio: atalhos para publicar e montar a jornada, sem travar", as
   await main.getByRole("link", { name: "Fazer a primeira publicação" }).click();
   await expect(page).toHaveURL(/\/publicar$/);
 });
+
+test.describe("gerenciar seguidores", () => {
+  test.skip(({ isMobile }) => isMobile, "fluxo de várias contas roda só no desktop");
+
+  test("ver listas, remover seguidor e deixar de seguir", async ({ browser }) => {
+    const a = await newUserPage(browser, "dono");
+    const b = await newUserPage(browser, "fa");
+
+    // B segue A e o atleta2.
+    await b.page.goto(`/u/${a.user.username}`);
+    await b.page.locator("main").getByRole("button", { name: "Seguir" }).click();
+    await expect(b.page.locator("main").getByRole("button", { name: "Seguindo" })).toBeVisible();
+
+    // A vê B nos seguidores (o número no perfil leva à lista) e remove.
+    await a.page.goto(`/u/${a.user.username}`);
+    await a.page.locator("main").getByRole("link", { name: /1\s*seguidor/ }).click();
+    await expect(a.page).toHaveURL(new RegExp(`/u/${a.user.username}/seguidores$`));
+    await expect(a.page.getByRole("heading", { name: "Seguidores", level: 1 })).toBeVisible();
+    await expect(a.page.locator("main").getByText(`@${b.user.username}`)).toBeVisible();
+    const results = await new AxeBuilder({ page: a.page }).withTags(["wcag2a", "wcag2aa", "wcag21a", "wcag21aa"]).analyze();
+    expect(results.violations.map((v) => v.id)).toEqual([]);
+    await a.page.getByRole("button", { name: /^Remover .* dos seguidores$/ }).click();
+    await expect(a.page.locator("main").getByText("Removido")).toBeVisible();
+    await a.page.reload();
+    await expect(a.page.locator("main").getByText(`@${b.user.username}`)).toBeHidden();
+
+    // B não segue mais A.
+    await b.page.goto(`/u/${a.user.username}`);
+    await expect(b.page.locator("main").getByRole("button", { name: "Seguir" })).toBeVisible();
+
+    // A segue o atleta2 e deixa de seguir pela lista "Seguindo".
+    await a.page.goto("/u/atleta2");
+    await a.page.locator("main").getByRole("button", { name: "Seguir" }).click();
+    await expect(a.page.locator("main").getByRole("button", { name: "Seguindo" })).toBeVisible();
+    await a.page.goto(`/u/${a.user.username}/seguindo`);
+    await a.page.getByRole("button", { name: /^Deixar de seguir / }).click();
+    await expect(a.page.getByRole("button", { name: /^Seguir / })).toBeVisible();
+    await a.page.reload();
+    await expect(a.page.getByText("Ainda não segue ninguém")).toBeVisible();
+  });
+});
