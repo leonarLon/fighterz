@@ -18,6 +18,17 @@ export async function GET(request: NextRequest) {
     const supabase = await createClient();
     const { error } = await supabase.auth.verifyOtp({ type, token_hash: tokenHash });
     if (!error) return NextResponse.redirect(new URL(next, request.url));
+    console.error("auth/confirm: verifyOtp falhou", { type, code: error.code, message: error.message });
+  }
+
+  // Link do modelo padrão do Supabase ({{ .ConfirmationURL }}): o Supabase valida e devolve ?code=
+  // para o redirectTo (fluxo PKCE). Funciona no mesmo navegador em que o pedido foi feito.
+  const code = searchParams.get("code");
+  if (code) {
+    const supabase = await createClient();
+    const { error } = await supabase.auth.exchangeCodeForSession(code);
+    if (!error) return NextResponse.redirect(new URL(next, request.url));
+    console.error("auth/confirm: exchangeCodeForSession falhou", { code: error.code, message: error.message });
   }
 
   const failure = new URL(routes.signIn, request.url);

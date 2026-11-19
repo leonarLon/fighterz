@@ -63,7 +63,8 @@ export async function signUp(_prev: FormState, formData: FormData): Promise<Form
     email: input.email,
     password: input.password,
     options: {
-      emailRedirectTo: `${env.siteUrl}${routes.feed}`,
+      // Passa pelo /auth/confirm: assim o link funciona com o nosso modelo de e-mail e com o padrão do Supabase.
+      emailRedirectTo: `${env.siteUrl}/auth/confirm?next=${encodeURIComponent(routes.feed)}`,
       data: {
         username: input.username,
         display_name: input.displayName,
@@ -127,7 +128,7 @@ export async function requestPasswordReset(_prev: FormState, formData: FormData)
 
   const supabase = await createClient();
   const { error } = await supabase.auth.resetPasswordForEmail(parsed.data.email, {
-    redirectTo: `${env.siteUrl}${routes.resetPassword}`,
+    redirectTo: `${env.siteUrl}/auth/confirm?type=recovery&next=${encodeURIComponent(routes.resetPassword)}`,
   });
   if (error) {
     // Registrado nos logs do servidor (Vercel): sem isto, falha de envio ficava invisível.
