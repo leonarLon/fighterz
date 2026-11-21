@@ -73,9 +73,26 @@ export async function removeJourneyArt(id: string): Promise<Result> {
   return { ok: true };
 }
 
+const UUID = /^[0-9a-f-]{36}$/i;
+
+/** Texto da graduação atual depois de salvar, para a pessoa ver na hora qual ficou valendo. */
+async function currentRankLabel(supabase: Awaited<ReturnType<typeof createClient>>, userMartialArtId: string) {
+  const { data } = await supabase
+    .from("journey_cards")
+    .select("martial_art_name, rank_name, current_degree")
+    .eq("id", userMartialArtId)
+    .maybeSingle();
+  if (!data?.rank_name) return "";
+  const degrees = data.current_degree ? ` · ${data.current_degree} ${data.current_degree === 1 ? "grau" : "graus"}` : "";
+  return ` Graduação atual em ${data.martial_art_name}: ${data.rank_name}${degrees}.`;
+}
+
+/** Registra uma graduação nova ou, com `promotionId`, corrige um registro existente. */
 export async function addPromotion(_prev: FormState, formData: FormData): Promise<FormState> {
   const user = await requireUser();
   const v = values(formData, ["userMartialArtId", "rankId", "degree", "promotedOn", "academyId", "teacherUsername", "notes"]);
+  const promotionId = text(formData, "promotionId");
+  if (promotionId && !UUID.test(promotionId)) return { status: "error", message: "Registro inválido.", values: v };
   const parsed = promotionSchema.safeParse(v);
   if (!parsed.success) return fromZodError(parsed.error, v);
   const d = parsed.data;
@@ -106,22 +123,26 @@ export async function addPromotion(_prev: FormState, formData: FormData): Promis
     teacherId = teacher.user_id;
   }
 
-  const { error } = await supabase.from("rank_promotions").insert({
-    user_martial_art_id: d.userMartialArtId,
-    user_id: user.id,
+  const fields = {
     rank_id: d.rankId,
     degree: d.degree,
     promoted_on: d.promotedOn,
     academy_id: d.academyId,
     teacher_id: teacherId,
     notes: d.notes,
-  });
-  if (error) return { status: "error", message: message(error, "Não foi possível registrar a graduação."), values: v };
-  revalidatePath(routes.journey);
-  return {
-    status: "success",
-    message: teacherId ? "Graduação registrada. O professor vai receber o pedido de confirmação." : "Graduação registrada.",
   };
+  // RLS: só o dono escreve. No update, `.select()` devolve vazio se o registro não for da pessoa.
+  const { data: saved, error } = promotionId
+    ? await supabase.from("rank_promotions").update(fields).eq("id", promotionId).eq("user_martial_art_id", d.userMartialArtId).select("id")
+    : await supabase.from("rank_promotions").insert({ ...fields, user_martial_art_id: d.userMartialArtId, user_id: user.id }).select("id");
+  if (error) return { status: "error", message: message(error, "Não foi possível salvar a graduação."), values: v };
+  if (!saved?.length) return { status: "error", message: "Registro não encontrado.", values: v };
+  revalidatePath(routes.journey);
+  revalidatePath("/u/[username]", "page");
+  const current = await currentRankLabel(supabase, d.userMartialArtId);
+  const base = promotionId ? "Graduação corrigida." : "Graduação registrada.";
+  const teacherNote = teacherId ? " O professor vai receber o pedido de confirmação." : "";
+  return { status: "success", message: `${base}${current}${teacherNote}` };
 }
 
 export async function deletePromotion(id: string): Promise<Result> {

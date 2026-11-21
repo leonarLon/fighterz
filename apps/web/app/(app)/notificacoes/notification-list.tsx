@@ -111,7 +111,7 @@ function Row({ item }: { item: NotificationItem }) {
           </Link>
         </p>
         <p className="text-[13px] text-muted">
-          <time dateTime={item.createdAt}>{timeAgo(item.createdAt)}</time>
+          <time dateTime={item.createdAt} suppressHydrationWarning>{timeAgo(item.createdAt)}</time>
         </p>
 
         {done ? (

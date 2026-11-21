@@ -96,7 +96,7 @@ Check: `current_degree <= rank.max_degrees` (via trigger).
 
 **rank_promotions**: histórico
 `id`, `user_martial_art_id FK cascade`, `rank_id FK`, `degree smallint`, `promoted_on date`, `academy_id FK nullable`, `promoted_by_teacher_id FK nullable`, `verification enum('self_reported','teacher_confirmed')`, `notes`.
-A graduação atual é atualizada por trigger a partir da promoção mais recente, para não haver duas fontes divergentes.
+A graduação atual é atualizada por trigger a partir das promoções, para não haver duas fontes divergentes. **Desde a migration 20 (21/11/2026) é a maior faixa e grau registrados** (`ordinal desc, degree desc`, desempate pela data); antes era a de data mais recente, o que escondia faixas registradas com data antiga.
 Confirmação: só o professor indicado pode mudar para `teacher_confirmed` (função RPC dedicada).
 
 ### 4.3 Academias, unidades e aulas

@@ -47,26 +47,55 @@ export function AddArtForm({ arts }: { arts: Option[] }) {
 
 type RankOption = Option & { maxDegrees: number };
 
+export type PromotionInitial = {
+  id: string;
+  rankId: string;
+  degree: number;
+  promotedOn: string;
+  academyId: string | null;
+  teacherUsername: string | null;
+  notes: string | null;
+  confirmed: boolean;
+};
+
 export function PromotionForm({
   userMartialArtId,
   ranks,
   academies,
+  initial,
 }: {
   userMartialArtId: string;
   ranks: RankOption[];
   academies: Option[];
+  /** Com `initial`, o formulário corrige um registro existente. */
+  initial?: PromotionInitial;
 }) {
   const [state, action, pending] = useActionState(addPromotion, idleState);
-  const v = state.values;
+  const v = state.values ?? (initial
+    ? {
+        rankId: initial.rankId,
+        degree: String(initial.degree),
+        promotedOn: initial.promotedOn,
+        academyId: initial.academyId ?? "",
+        teacherUsername: initial.teacherUsername ? `@${initial.teacherUsername}` : "",
+        notes: initial.notes ?? "",
+      }
+    : undefined);
   const e = state.fieldErrors ?? {};
   const [rankId, setRankId] = useState(v?.rankId ?? "");
   const max = ranks.find((r) => r.id === rankId)?.maxDegrees ?? 0;
-  const id = (name: string) => `${name}-${userMartialArtId.slice(0, 8)}`;
+  const id = (name: string) => `${name}-${(initial?.id ?? userMartialArtId).slice(0, 8)}`;
 
   return (
     <form action={action} className="space-y-4" noValidate>
       <FormMessage status={state.status} message={state.message} />
       <input type="hidden" name="userMartialArtId" value={userMartialArtId} />
+      {initial && <input type="hidden" name="promotionId" value={initial.id} />}
+      {initial?.confirmed && (
+        <p className="rounded-md border border-border bg-bg px-3 py-2 text-[13px] text-muted">
+          Este registro foi confirmado pelo professor. Se mudar faixa, graus, data ou professor, ele volta a ser autodeclarado.
+        </p>
+      )}
       <div className="grid gap-4 sm:grid-cols-[1fr_9rem]">
         <SelectField
           id={id("rankId")}
@@ -133,7 +162,7 @@ export function PromotionForm({
       />
       <TextareaField id={id("notes")} name="notes" label="Observações (opcional)" rows={2} maxLength={500} defaultValue={v?.notes ?? ""} errors={e.notes} />
       <Button type="submit" loading={pending}>
-        Registrar graduação
+        {initial ? "Salvar correção" : "Registrar graduação"}
       </Button>
     </form>
   );

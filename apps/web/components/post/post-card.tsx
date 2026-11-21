@@ -104,7 +104,7 @@ export function PostCard({ post, viewer, onDeleted }: { post: PostView; viewer: 
           </Link>
           <p className="flex flex-wrap items-center gap-x-1.5 text-[13px] text-muted">
             <Link href={postUrl} className="hover:underline">
-              <time dateTime={post.createdAt}>{timeAgo(post.createdAt)}</time>
+              <time dateTime={post.createdAt} suppressHydrationWarning>{timeAgo(post.createdAt)}</time>
             </Link>
             <span aria-hidden>·</span>
             <VisibilityIcon aria-label={VISIBILITY_LABELS[post.visibility]} className="size-3.5" />

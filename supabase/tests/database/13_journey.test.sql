@@ -16,6 +16,7 @@ select id as bjj from public.martial_arts where slug = 'jiu-jitsu' \gset
 select id as mt from public.martial_arts where slug = 'muay-thai' \gset
 select r.id as branca from public.martial_art_ranks r where r.martial_art_id = :'bjj' and r.ordinal = 1 \gset
 select r.id as azul from public.martial_art_ranks r where r.martial_art_id = :'bjj' and r.ordinal = 2 \gset
+select r.id as roxa from public.martial_art_ranks r where r.martial_art_id = :'bjj' and r.ordinal = 3 \gset
 select r.id as coral from public.martial_art_ranks r where r.martial_art_id = :'bjj' and r.ordinal = 6 \gset
 select r.id as kruang from public.martial_art_ranks r where r.martial_art_id = :'mt' and r.ordinal = 1 \gset
 insert into public.academies (name, created_by) values ('Academia Jornada', :'mestre') returning id as acad \gset
@@ -71,7 +72,7 @@ select throws_ok(
 select results_eq(
   format($$ select rank_name, current_degree::int from public.journey_cards where id = %L $$, :'uma'),
   $$ values ('Faixa Azul'::text, 4) $$,
-  'graduação atual = promoção mais recente'
+  'graduação atual = maior faixa e grau registrados'
 );
 select lives_ok(
   format($$ insert into public.rank_promotions (user_martial_art_id, rank_id, degree, promoted_on) values (%L, %L, 2, '2021-06-01') $$, :'uma', :'branca'),
@@ -85,7 +86,7 @@ select throws_ok(
   '23514', 'teacher_not_approved', 'só professor aprovado é indicado'
 );
 select lives_ok(
-  format($$ insert into public.rank_promotions (user_martial_art_id, rank_id, degree, promoted_on, teacher_id, academy_id) values (%L, %L, 0, '2024-02-01', %L, %L) $$, :'uma', :'azul', :'mestre', :'acad'),
+  format($$ insert into public.rank_promotions (user_martial_art_id, rank_id, degree, promoted_on, teacher_id, academy_id) values (%L, %L, 0, '2024-02-01', %L, %L) $$, :'uma', :'roxa', :'mestre', :'acad'),
   'indica o professor'
 );
 select id as promo from public.rank_promotions where teacher_id = :'mestre' \gset
@@ -109,7 +110,7 @@ select is((select count(*)::int from public.notifications where recipient_id = :
 select tests.authenticate_as(:'atleta');
 select results_eq(
   format($$ select rank_name, current_degree::int, current_confirmed from public.journey_cards where id = %L $$, :'uma'),
-  $$ values ('Faixa Azul'::text, 0, true) $$,
+  $$ values ('Faixa Roxa'::text, 0, true) $$,
   'graduação atual confirmada'
 );
 select lives_ok(format($$ update public.rank_promotions set degree = 1 where id = %L $$, :'promo'), 'atleta edita o grau');

@@ -1,6 +1,6 @@
 import AxeBuilder from "@axe-core/playwright";
 import { test as base, expect, type Browser, type BrowserContext, type Page } from "@playwright/test";
-import { createConfirmedUser, DEMO, signInViaUi } from "./helpers";
+import { createConfirmedUser, DEMO, signInViaUi, signOutViaUi } from "./helpers";
 
 // Testes automatizados não buscam tiles do OpenStreetMap (política de uso dos tiles do OSM).
 async function blockTiles(context: BrowserContext) {
@@ -134,7 +134,7 @@ test.describe("aceite da Fase 5: graduação BJJ com graus validados e confirmad
     await form.getByLabel("Data da graduação").fill("2025-03-15");
     await form.getByLabel("Professor que graduou (opcional)").fill("@atleta2");
     await form.getByRole("button", { name: "Registrar graduação" }).click();
-    await expect(p.getByText("Graduação registrada. O professor vai receber o pedido de confirmação.")).toBeVisible();
+    await expect(p.getByText(/^Graduação registrada\. Graduação atual em Jiu-Jitsu Brasileiro: Faixa Azul · 2 graus\. O professor vai receber o pedido de confirmação\.$/)).toBeVisible();
     await expect(p.getByText("Faixa Azul · 2 graus").first()).toBeVisible();
     await expect(p.getByText(/aguardando @atleta2/)).toBeVisible();
 
@@ -196,4 +196,53 @@ test.describe("aceite da Fase 5: graduação BJJ com graus validados e confirmad
     await owner.context.close();
     await fan.context.close();
   });
+});
+
+// Regressão do bug de graduação (21/11/2026): faixa maior com data anterior não virava a atual.
+test("graduação: faixa maior com data antiga vira a atual, corrigir funciona e persiste após sair e entrar", async ({ page }) => {
+  const user = await createConfirmedUser(page, "graduacao");
+  await page.goto("/jornada");
+  await page.getByLabel("Modalidade", { exact: true }).selectOption({ label: "Jiu-Jitsu Brasileiro" });
+  await page.getByRole("button", { name: "Adicionar modalidade" }).click();
+  await expect(page.getByRole("heading", { level: 3, name: "Jiu-Jitsu Brasileiro" })).toBeVisible();
+
+  async function register(rank: string, degree: string, date: string) {
+    const details = page.locator("details", { has: page.getByText("Registrar graduação em Jiu-Jitsu Brasileiro") });
+    if (!(await details.evaluate((d: HTMLDetailsElement) => d.open))) await details.locator("summary").click();
+    const form = details.locator("form");
+    await form.getByLabel("Graduação", { exact: true }).selectOption({ label: rank });
+    await form.getByLabel("Graus").selectOption(degree);
+    await form.getByLabel("Data da graduação").fill(date);
+    await form.getByRole("button", { name: "Registrar graduação" }).click();
+  }
+
+  await register("Faixa Azul", "2", "2026-10-01");
+  await expect(page.getByText(/Graduação atual em Jiu-Jitsu Brasileiro: Faixa Azul · 2 graus\./)).toBeVisible();
+
+  // O caso do bug: roxa com data ANTERIOR à azul.
+  await register("Faixa Roxa", "0", "2025-01-10");
+  await expect(page.getByText(/Graduação atual em Jiu-Jitsu Brasileiro: Faixa Roxa\./)).toBeVisible();
+  await page.reload();
+  const current = page.getByText("Graduação atual (a maior registrada)").locator("..");
+  await expect(current).toContainText("Faixa Roxa");
+
+  // Corrigir o registro da roxa para marrom 1 grau.
+  await page.locator("summary", { hasText: "Corrigir Faixa Roxa de" }).click();
+  const edit = page.locator("form", { has: page.getByRole("button", { name: "Salvar correção" }) });
+  await edit.getByLabel("Graduação", { exact: true }).selectOption({ label: "Faixa Marrom" });
+  await edit.getByLabel("Graus").selectOption("1");
+  await edit.getByRole("button", { name: "Salvar correção" }).click();
+  await expect(page.getByText(/Graduação corrigida\. Graduação atual em Jiu-Jitsu Brasileiro: Faixa Marrom · 1 grau\./)).toBeVisible();
+  expect(await axe(page)).toEqual([]);
+
+  // Persiste após recarregar, sair e entrar, e aparece no perfil.
+  await page.reload();
+  await expect(page.getByText("Graduação atual (a maior registrada)").locator("..")).toContainText("Faixa Marrom · 1 grau");
+  await signOutViaUi(page);
+  await signInViaUi(page, user.email, user.password);
+  await expect(page).toHaveURL(/\/inicio$/);
+  await page.goto("/jornada");
+  await expect(page.getByText("Graduação atual (a maior registrada)").locator("..")).toContainText("Faixa Marrom · 1 grau");
+  await page.goto(`/u/${user.username}`);
+  await expect(page.locator("main")).toContainText("Faixa Marrom · 1 grau");
 });

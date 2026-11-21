@@ -142,7 +142,7 @@ function CommentItem({
               {comment.author.displayName}
             </Link>{" "}
             <span className="text-[13px] text-muted">
-              <time dateTime={comment.createdAt}>{timeAgo(comment.createdAt)}</time>
+              <time dateTime={comment.createdAt} suppressHydrationWarning>{timeAgo(comment.createdAt)}</time>
             </span>
           </p>
           <p className="whitespace-pre-line break-words">{comment.body}</p>

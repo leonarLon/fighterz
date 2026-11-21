@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { CalendarCheck, ChevronLeft, ChevronRight, Dumbbell, Medal, Plus, Trophy } from "lucide-react";
+import { CalendarCheck, ChevronLeft, ChevronRight, Dumbbell, Medal, Pencil, Plus, Trophy } from "lucide-react";
 import {
   ACHIEVEMENT_TYPE_LABELS,
   MEDAL_LABELS,
@@ -111,6 +111,7 @@ export default async function JourneyPage({ searchParams }: { searchParams: Prom
                   </div>
                   {j.has_ranks && (
                     <div className="mt-3">
+                      <p className="mb-1 text-[13px] font-semibold text-muted">{j.rank_name ? "Graduação atual (a maior registrada)" : "Nenhuma graduação registrada"}</p>
                       <RankBelt
                         name={j.rank_name}
                         color={j.rank_color}
@@ -140,6 +141,28 @@ export default async function JourneyPage({ searchParams }: { searchParams: Prom
                               </p>
                             </div>
                             <DeleteButton kind="promotion" id={p.id!} label={`Apagar ${p.rank_name} de ${formatDate(p.promoted_on!)}`} />
+                            <details className="w-full">
+                              <summary className="flex min-h-11 w-fit cursor-pointer items-center gap-1 text-sm font-semibold text-accent">
+                                <Pencil aria-hidden className="size-4" /> Corrigir {p.rank_name} de {formatDate(p.promoted_on!)}
+                              </summary>
+                              <div className="mt-2">
+                                <PromotionForm
+                                  userMartialArtId={j.id!}
+                                  ranks={artRanks.map((r) => ({ id: r.id, name: r.name, maxDegrees: r.max_degrees }))}
+                                  academies={academies}
+                                  initial={{
+                                    id: p.id!,
+                                    rankId: p.rank_id!,
+                                    degree: p.degree ?? 0,
+                                    promotedOn: p.promoted_on!,
+                                    academyId: p.academy_id,
+                                    teacherUsername: p.teacher_username,
+                                    notes: p.notes,
+                                    confirmed: p.verification === "teacher_confirmed",
+                                  }}
+                                />
+                              </div>
+                            </details>
                           </li>
                         ))}
                       </ol>
