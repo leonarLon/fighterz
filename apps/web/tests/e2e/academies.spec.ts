@@ -300,3 +300,27 @@ test.describe("TotalPass, Wellhub e diária por unidade", () => {
     expect(update.data ?? []).toEqual([]);
   });
 });
+
+test.describe("regressão: selects não voltam ao padrão após erro de validação", () => {
+  test("aula nova mantém dia e nível escolhidos depois de corrigir o nome", async ({ page, isMobile }) => {
+    test.skip(isMobile, "fluxo de gestão roda no desktop");
+    await signInViaUi(page, "atleta5@figtherz.local", "Figtherz123");
+    await expect(page).toHaveURL(/\/inicio$/);
+    await page.goto("/academias/arena-norte-muay-thai/gerenciar");
+    await page.getByRole("button", { name: "Nova aula" }).click();
+    const classForm = page.locator("form", { has: page.getByRole("button", { name: "Adicionar aula" }) });
+    await classForm.getByLabel("Dia").selectOption({ label: "Sexta" });
+    await classForm.getByLabel("Nível").selectOption({ label: "Avançado" });
+    await classForm.getByLabel("Início").fill("06:15");
+    await classForm.getByLabel("Fim").fill("07:15");
+    await classForm.getByRole("button", { name: "Adicionar aula" }).click();
+    await expect(classForm.getByText("Dê um nome à aula.")).toBeVisible();
+    await expect(classForm.getByLabel("Dia")).toHaveValue("5");
+    const name = `Sparring ${Date.now().toString(36)}`;
+    await classForm.getByLabel("Nome da aula").fill(name);
+    await classForm.getByRole("button", { name: "Adicionar aula" }).click();
+    await expect(page.getByText(new RegExp(`Sex 06:15–07:15 · ${name}`))).toBeVisible();
+    await page.goto("/academias/arena-norte-muay-thai");
+    await expect(page.getByText(name).first()).toBeVisible();
+  });
+});

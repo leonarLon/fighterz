@@ -429,3 +429,37 @@ begin
   values (v_post, v_dono, 'Chegou a coleção nova de kimonos trançados! Cupom TATAME10 na primeira compra.', 'public', v_loja, now() - interval '3 hours');
 end;
 $$;
+
+-- Planos e assinaturas fictícios (Fase 6). Preço é só referência: não há pagamento na plataforma.
+do $$
+declare
+  v_admin uuid := (select id from public.profiles where username = 'admin');
+  p_acad  uuid;
+  p_biz   uuid;
+  v_sub   uuid;
+begin
+  insert into public.plans (slug, name, description, price_label, audience, sort_order) values
+    ('academia-destaque', 'Academia Destaque', 'Galeria maior e destaque na lista de academias.', 'R$ 49/mês (referência)', 'academy', 1)
+    returning id into p_acad;
+  insert into public.plans (slug, name, description, price_label, audience, sort_order) values
+    ('pagina-pro', 'Página Pro', 'Catálogo maior, mais promoções e destaque na lista de páginas.', 'R$ 39/mês (referência)', 'business', 2)
+    returning id into p_biz;
+  insert into public.plan_features (plan_id, feature_key, value) values
+    (p_acad, 'gallery_photos', 40), (p_acad, 'featured_listing', 1),
+    (p_biz, 'catalog_items', 100), (p_biz, 'active_promotions', 15), (p_biz, 'featured_listing', 1);
+
+  insert into public.subscriptions (plan_id, academy_id, starts_on, ends_on, notes, created_by)
+  values (p_acad, (select id from public.academies where slug = 'tatame-central'),
+          (now() at time zone 'America/Sao_Paulo')::date - 10, (now() at time zone 'America/Sao_Paulo')::date + 80,
+          'Parceria de lançamento (demonstração)', v_admin)
+  returning id into v_sub;
+  insert into public.subscription_events (subscription_id, action, to_status, reason, actor_id)
+  values (v_sub, 'created', 'active', 'Parceria de lançamento (demonstração)', v_admin);
+
+  insert into public.subscriptions (plan_id, business_id, notes, created_by)
+  values (p_biz, (select id from public.businesses where slug = 'kimonos-tatame-forte'), 'Demonstração', v_admin)
+  returning id into v_sub;
+  insert into public.subscription_events (subscription_id, action, to_status, reason, actor_id)
+  values (v_sub, 'created', 'active', 'Demonstração', v_admin);
+end;
+$$;

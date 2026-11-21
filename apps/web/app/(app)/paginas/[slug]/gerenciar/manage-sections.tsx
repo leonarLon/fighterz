@@ -65,13 +65,18 @@ export function BusinessInfoSection({ data, arts }: { data: BusinessData; arts: 
   const [state, action, pending] = useActionState(updateBusiness.bind(null, business.id), idleState);
   const v = state.values;
   const e = state.fieldErrors ?? {};
+  const [category, setCategory] = useState<string>(v?.category ?? business.category);
+  const [uf, setUf] = useState<string>(v?.state ?? business.state ?? "");
   return (
     <Card>
       <h2 className="mb-4 font-display text-2xl font-semibold">Dados da página</h2>
       <form action={action} className="space-y-4" noValidate>
         <FormMessage status={state.status} message={state.message} />
+        {/* Selects controlados + campos ocultos (o React reinicia o form após cada envio). */}
+        <input type="hidden" name="category" value={category} />
+        <input type="hidden" name="state" value={uf} />
         <InputField id="business-name" name="name" label="Nome" required maxLength={80} defaultValue={v?.name ?? business.name} errors={e.name} />
-        <SelectField id="business-category" name="category" label="Tipo" defaultValue={v?.category ?? business.category} errors={e.category}>
+        <SelectField id="business-category" name={undefined} label="Tipo" value={category} onChange={(ev) => setCategory(ev.target.value)} errors={e.category}>
           {BUSINESS_CATEGORIES.map((c) => (
             <option key={c} value={c}>
               {BUSINESS_CATEGORY_LABELS[c]}
@@ -100,7 +105,7 @@ export function BusinessInfoSection({ data, arts }: { data: BusinessData; arts: 
           />
           <InputField id="business-contactPhone" name="contactPhone" label="Telefone" defaultValue={v?.contactPhone ?? business.contact_phone ?? ""} errors={e.contactPhone} />
           <InputField id="business-city" name="city" label="Cidade (opcional)" maxLength={80} defaultValue={v?.city ?? business.city ?? ""} errors={e.city} />
-          <SelectField id="business-state" name="state" label="Estado (opcional)" defaultValue={v?.state ?? business.state ?? ""} errors={e.state}>
+          <SelectField id="business-state" name={undefined} label="Estado (opcional)" value={uf} onChange={(ev) => setUf(ev.target.value)} errors={e.state}>
             <option value="">—</option>
             {BRAZILIAN_STATES.map((s) => (
               <option key={s} value={s}>
@@ -136,6 +141,7 @@ function ItemForm({ businessId, item, onDone }: { businessId: string; item?: Cat
   const key = item?.id.slice(0, 8) ?? "novo";
   const [priceStatus, setPriceStatus] = useState<string>(v?.priceStatus ?? item?.price_status ?? "undisclosed");
   const [isActive, setIsActive] = useState(v ? v.isActive === "on" : (item?.is_active ?? true));
+  const [kind, setKind] = useState<string>(v?.kind ?? item?.kind ?? "product");
 
   return (
     <form action={action} className="space-y-3" noValidate aria-label={item ? `Editar ${item.name}` : "Novo item do catálogo"}>
@@ -143,8 +149,9 @@ function ItemForm({ businessId, item, onDone }: { businessId: string; item?: Cat
       {/* Valores controlados vão em campos ocultos: o React reinicia o form após cada envio. */}
       <input type="hidden" name="priceStatus" value={priceStatus} />
       <input type="hidden" name="isActive" value={isActive ? "on" : ""} />
+      <input type="hidden" name="kind" value={kind} />
       <div className="grid gap-3 sm:grid-cols-[10rem_1fr]">
-        <SelectField id={`item-kind-${key}`} name="kind" label="Tipo" defaultValue={v?.kind ?? item?.kind ?? "product"}>
+        <SelectField id={`item-kind-${key}`} name={undefined} label="Tipo" value={kind} onChange={(ev) => setKind(ev.target.value)}>
           {CATALOG_ITEM_KINDS.map((k) => (
             <option key={k} value={k}>
               {CATALOG_ITEM_LABELS[k]}

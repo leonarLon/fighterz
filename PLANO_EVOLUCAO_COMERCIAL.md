@@ -100,10 +100,10 @@ Todas aditivas (nenhuma coluna existente é apagada). Toda view nova com `revoke
 |---|---|---|---|---|---|---|---|---|---|---|
 | Bug de graduação | ✅ (reproduzido) | ✅ | ✅ (publicado 21/11) | — (regra no banco) | ✅ pgTAP 20 | ✅ | ✅ RLS | ✅ suíte completa | ✅ | ✅ |
 | TotalPass / Wellhub / diária | ✅ | ✅ | ✅ (publicado 21/11) | ✅ | ✅ pgTAP 21 | ✅ | ✅ RLS + API | ✅ suíte completa | ✅ | ✅ |
-| Perfil comercial de academia | ✅ | ✅ | ✅ (local) | — | ✅ pgTAP 22 | ✅ | ✅ RLS + Storage | ✅ suíte completa | ✅ | ⬜ aceite + produção |
-| Páginas de marca, loja e serviço | ✅ | ✅ | ✅ (local) | ✅ | ✅ pgTAP 23 | ✅ | ✅ RLS + API | ✅ suíte completa | ✅ | ⬜ aceite + produção |
-| Planos e assinaturas | ✅ | ✅ | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ |
-| Professores gratuitos | ✅ | ✅ | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ |
+| Perfil comercial de academia | ✅ | ✅ | ✅ (publicado 21/11) | — | ✅ pgTAP 22 | ✅ | ✅ RLS + Storage | ✅ suíte completa | ✅ | ✅ |
+| Páginas de marca, loja e serviço | ✅ | ✅ | ✅ (publicado 21/11) | ✅ | ✅ pgTAP 23 | ✅ | ✅ RLS + API | ✅ suíte completa | ✅ | ✅ |
+| Planos e assinaturas | ✅ | ✅ | ✅ (local) | ✅ | ✅ pgTAP 24 | ✅ | ✅ RLS + API | ✅ suíte completa | ✅ | ⬜ aceite + produção |
+| Professores gratuitos | ✅ | ✅ | ✅ (sem mudança) | — | ✅ pgTAP 24 | ✅ | ✅ | ✅ suíte completa | ✅ | ⬜ aceite |
 | Detecção de publicidade indevida | ✅ | ✅ | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ |
 | Painel administrativo | ✅ | ✅ | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ |
 | Cobertura e documentação | ✅ | ✅ | ⬜ | — | — | — | — | — | ⬜ | ⬜ |

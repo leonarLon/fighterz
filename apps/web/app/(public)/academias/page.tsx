@@ -18,7 +18,7 @@ export default async function AcademiesPage({ searchParams }: { searchParams: Pr
   const user = await getCurrentUser();
   const art = sp.modalidade && /^[0-9a-f-]{36}$/i.test(sp.modalidade) ? sp.modalidade : undefined;
 
-  const [{ data: arts }, { data: academies }, mine] = await Promise.all([
+  const [{ data: arts }, { data: found }, mine, { data: featuredIds }] = await Promise.all([
     supabase.from("martial_arts").select("id, name").order("sort_order"),
     supabase.rpc("search_academies", {
       p_query: sp.q?.trim() || undefined,
@@ -33,7 +33,11 @@ export default async function AcademiesPage({ searchParams }: { searchParams: Pr
           .eq("user_id", user.id)
           .in("status", ["active", "pending"])
       : Promise.resolve({ data: [] }),
+    supabase.rpc("featured_entities", { p_kind: "academy" }),
   ]);
+  // Destaque (benefício de plano) vem primeiro e é sinalizado.
+  const featured = new Set((featuredIds ?? []) as unknown as string[]);
+  const academies = [...(found ?? [])].sort((a, b) => Number(featured.has(b.id)) - Number(featured.has(a.id)));
 
   const myAcademies = (mine.data ?? []) as unknown as { role: keyof typeof MEMBERSHIP_ROLE_LABELS; status: string; academies: { slug: string; name: string } }[];
 
@@ -97,6 +101,7 @@ export default async function AcademiesPage({ searchParams }: { searchParams: Pr
                   {a.name}
                   {a.is_verified && <BadgeCheck aria-label="Verificada" className="size-5 text-accent" />}
                 </p>
+                {featured.has(a.id) && <p className="text-[12px] font-semibold uppercase tracking-wide text-accent">Em destaque</p>}
                 <p className="text-sm text-muted">{a.martial_arts.join(" · ")}</p>
                 <p className="mt-1 text-[13px] text-muted">{a.cities.join(", ") || "Endereço não informado"}</p>
               </Link>

@@ -130,6 +130,13 @@ Modalidades: `academy_martial_arts(academy_id, martial_art_id)`.
 - `business_promotions`: `title`, `description`, `coupon_code` (maiúsculas), `url`, `starts_on`, `ends_on`. Público vê só as vigentes; limite `business_promotions_limit()` (5 vigentes ou futuras).
 - `posts.business_id`: "publicar como página" por `create_page_post()` (só gestão ativa, página ativa). O autor continua responsável; o post sai do perfil pessoal (`get_profile_posts`) e aparece na página (`get_business_posts`). `post_cards` ganhou `business_name/slug/logo_path`.
 
+**plans / plan_features / subscriptions / subscription_events** (migration 24: planos administrados, sem pagamento)
+- `plans`: `slug`, `name`, `description`, `price_label` (texto de referência), `audience enum('academy','business','both')`, `is_active`, `sort_order`. Leitura pública dos ativos; escrita só admin (RLS) com auditoria.
+- `plan_features(plan_id, feature_key, value)`: chaves válidas definidas por `default_entitlement()` (galeria 12, catálogo 30, promoções 5, destaque 0).
+- `subscriptions`: `plan_id`, `academy_id` **ou** `business_id`, `status enum('active','suspended','cancelled','expired')`, `starts_on`, `ends_on`, `notes`, `created_by`. Uma ativa/suspensa por entidade. Leitura: admin e gestão da entidade. Escrita só pelas funções `admin_*` (exigem `has_role('admin')`).
+- `subscription_events`: histórico append-only (criada, mudança de situação, troca de plano/validade, expirada), com motivo e ator.
+- `entitlement(kind, id, key)` = maior entre o padrão e o plano da assinatura ativa e vigente. Expiração diária por pg_cron (`expire_subscriptions`).
+
 Índices: GiST(location), btree(state, city, neighborhood) com `unaccent(lower())`.
 
 **academy_memberships**

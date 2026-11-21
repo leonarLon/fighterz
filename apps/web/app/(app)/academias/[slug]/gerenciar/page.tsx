@@ -10,6 +10,7 @@ import { Card } from "@/components/ui/card";
 import { PageHeader } from "@/components/ui/page-header";
 import { CoverImageUpload } from "@/components/media/cover-image-upload";
 import { GalleryManager } from "@/components/media/gallery-manager";
+import { PlanStatusCard } from "@/components/plans/plan-status-card";
 import { AcademyInfoSection, ClassesSection, TeamSection, UnitsSection } from "./manage-sections";
 
 type Props = { params: Promise<{ slug: string }> };
@@ -45,6 +46,7 @@ export default async function ManageAcademyPage({ params }: Props) {
             <GalleryManager academyId={data.academy.id} photos={data.photos} limit={data.galleryLimit} />
           </div>
         </Card>
+        <PlanStatusCard kind="academy" entityId={data.academy.id} />
         <UnitsSection data={data} />
         <ClassesSection data={data} />
         <TeamSection data={data} />

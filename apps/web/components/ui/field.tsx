@@ -78,9 +78,13 @@ export function SelectField({
   children,
   ...props
 }: Common & SelectHTMLAttributes<HTMLSelectElement>) {
+  // O React reinicia o <form> depois de cada action e o select volta à opção marcada na montagem
+  // (defaultValue não é reaplicado). Recriar o select quando o valor padrão muda mantém a escolha
+  // devolvida pela action após um erro de validação.
+  const resetKey = props.defaultValue !== undefined ? String(props.defaultValue) : undefined;
   return (
     <FieldShell id={id} label={label} help={help} errors={errors}>
-      <select id={id} name={id} {...a11y(id, help, errors)} className={cn(control, className)} {...props}>
+      <select key={resetKey} id={id} name={id} {...a11y(id, help, errors)} className={cn(control, className)} {...props}>
         {children}
       </select>
     </FieldShell>

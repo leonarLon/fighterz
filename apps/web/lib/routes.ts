@@ -28,6 +28,8 @@ export const routes = {
   adminEvents: "/admin/eventos",
   adminMartialArts: "/admin/modalidades",
   adminHistory: "/admin/historico",
+  adminPlans: "/admin/planos",
+  adminSubscriptions: "/admin/assinaturas",
   adminSettings: "/admin/configuracoes",
   journey: "/jornada",
   newCheckin: "/jornada/treino",

@@ -18,7 +18,13 @@ export default async function AdminLayout({ children }: { children: ReactNode })
     ...(access.admin ? [{ href: routes.adminTeachers, label: "Professores", badge: o.pending_teachers }] : []),
     { href: routes.adminAcademies, label: "Academias" },
     { href: routes.adminEvents, label: "Eventos" },
-    ...(access.admin ? [{ href: routes.adminMartialArts, label: "Modalidades" }] : []),
+    ...(access.admin
+      ? [
+          { href: routes.adminPlans, label: "Planos" },
+          { href: routes.adminSubscriptions, label: "Assinaturas" },
+          { href: routes.adminMartialArts, label: "Modalidades" },
+        ]
+      : []),
     { href: routes.adminHistory, label: "Histórico" },
     ...(access.admin ? [{ href: routes.adminSettings, label: "Configurações" }] : []),
   ];

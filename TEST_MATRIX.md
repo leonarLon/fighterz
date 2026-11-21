@@ -33,7 +33,14 @@
 | Páginas de marca, loja e serviço | Publicar como página | Só gestão publica; post fora do perfil pessoal; aparece na página | Integração + E2E | `23_businesses.test.sql`, `commercial.spec.ts` | ✅ |
 | Páginas de marca, loja e serviço | Fluxo completo | Criar (tipo obrigatório), dados, item com erro e correção, promoção, convite aceito, publicar como página, visitante vê, ocultar → 404 | E2E | `commercial.spec.ts` | ✅ |
 | Páginas de marca, loja e serviço | API direta | Demo não edita, não cadastra item, não publica como a loja, não lista membros | Segurança (E2E) | `commercial.spec.ts` | ✅ |
-| Planos e assinaturas | Só admin escreve; benefício verificado no banco | — | pgTAP + E2E | — | ⬜ Fase 6 |
-| Professores gratuitos | Nenhum recurso de professor depende de plano | — | pgTAP + E2E | — | ⬜ Fase 6 |
+| Planos e assinaturas | Só admin escreve planos e benefícios (auditado) | Usuário não cria/altera; benefício desconhecido recusado; visitante vê planos ativos; auditoria registra | Segurança (pgTAP) | `24_plans_subscriptions.test.sql` | ✅ |
+| Planos e assinaturas | Benefício verificado no banco | Sem plano: 12/30/5; com plano: 40/100; suspensa e cancelada voltam ao padrão; destaque só com plano ativo | Integração (pgTAP) | `24_plans_subscriptions.test.sql` | ✅ |
+| Planos e assinaturas | Ciclo da assinatura | Só admin cria; público do plano confere; uma aberta por entidade; motivo obrigatório; transições inválidas negadas; renovação; expiração diária (pg_cron); histórico append-only | Integração (pgTAP) | `24_plans_subscriptions.test.sql` | ✅ |
+| Planos e assinaturas | Validação de entrada | Benefícios (inteiros, vazio = padrão), slug, preço só texto, datas, motivo | Unitário (Vitest) | `packages/core/src/plans.test.ts` | ✅ |
+| Planos e assinaturas | Fluxo admin + dono | Criar plano (erro e correção), associar, duplicada recusada, dono vê limite 25, suspender (motivo), dono vê suspensa e limite 12, reativar, cancelar, histórico (axe) | E2E | `apps/web/tests/e2e/plans.spec.ts` | ✅ |
+| Planos e assinaturas | Destaque sinalizado | Academia e página com plano aparecem primeiro com "Em destaque" | E2E | `plans.spec.ts` | ✅ |
+| Planos e assinaturas | Acesso indevido | Demo recebe 404 no painel; API: não se dá plano, não insere, não altera benefício, não lê assinaturas | Segurança (E2E) | `plans.spec.ts` | ✅ |
+| Professores gratuitos | Nenhum recurso de professor depende de plano | Nenhuma política das tabelas de professor cita plano/assinatura; professor sem plano cria perfil; área do professor sem menção a assinatura | pgTAP + E2E | `24_plans_subscriptions.test.sql`, `plans.spec.ts` | ✅ |
+| Formulários (regressão) | Select mantém a escolha após erro de validação | Aula nova: dia escolhido continua após erro de nome e é salvo; plano criado com o público certo | E2E | `academies.spec.ts`, `plans.spec.ts` | ✅ |
 | Detecção comercial | Score explicável, sem punição automática, recurso | — | Vitest + pgTAP + E2E | — | ⬜ Fase 7 |
 | Painel administrativo | Ações autorizadas no banco e auditadas | — | pgTAP + E2E | — | ⬜ Fase 8 |

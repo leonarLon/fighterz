@@ -16,3 +16,4 @@ export * from './schemas/academy';
 export * from './domain/journey';
 export * from './schemas/journey';
 export * from './schemas/business';
+export * from './schemas/plans';

@@ -33,12 +33,16 @@ export default async function BusinessesPage({ searchParams }: { searchParams: P
   // Escapa curingas do ILIKE para buscar o texto literal.
   if (q) query = query.ilike("name", `%${q.replace(/[\\%_]/g, (c) => `\\${c}`)}%`);
 
-  const [{ data: list }, mine] = await Promise.all([
+  const [{ data: rows }, mine, { data: featuredIds }] = await Promise.all([
     query,
     user
       ? supabase.from("business_members").select("role, status, businesses(id, slug, name)").eq("user_id", user.id)
       : Promise.resolve({ data: [] }),
+    supabase.rpc("featured_entities", { p_kind: "business" }),
   ]);
+  // Destaque (benefício de plano) vem primeiro e é sinalizado: nunca disfarçado de resultado comum.
+  const featured = new Set((featuredIds ?? []) as unknown as string[]);
+  const list = [...(rows ?? [])].sort((a, b) => Number(featured.has(b.id)) - Number(featured.has(a.id)));
   const myPages = (mine.data ?? []) as unknown as {
     role: "owner" | "admin";
     status: "pending" | "active";
@@ -128,6 +132,7 @@ export default async function BusinessesPage({ searchParams }: { searchParams: P
                     {b.name}
                     {b.is_verified && <BadgeCheck aria-label="Verificada" className="size-5 text-accent" />}
                   </span>
+                  {featured.has(b.id) && <span className="text-[12px] font-semibold uppercase tracking-wide text-accent">Em destaque</span>}
                   <span className="block text-sm text-muted">
                     {BUSINESS_CATEGORY_LABELS[b.category]}
                     {b.city ? ` · ${b.city}${b.state ? `/${b.state}` : ""}` : ""}

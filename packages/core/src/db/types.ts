@@ -721,6 +721,40 @@ isOneToOne: false
       referencedColumns: ["id"]
     }
                   ]
+                },"plan_features": {
+                  Row: {
+                    "feature_key": string,"plan_id": string,"value": number
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "feature_key": string,"plan_id": string,"value": number
+                  }
+                  Update: {
+                    "feature_key"?: string,"plan_id"?: string,"value"?: number
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "plan_features_plan_id_fkey"
+      columns: ["plan_id"]
+isOneToOne: false
+      referencedRelation: "plans"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"plans": {
+                  Row: {
+                    "audience": Database["public"]['Enums']["plan_audience"],"created_at": string,"description": string | null,"id": string,"is_active": boolean,"name": string,"price_label": string | null,"slug": string,"sort_order": number,"updated_at": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "audience"?: Database["public"]['Enums']["plan_audience"],"created_at"?: string,"description"?: string | null,"id"?: string,"is_active"?: boolean,"name": string,"price_label"?: string | null,"slug": string,"sort_order"?: number,"updated_at"?: string
+                  }
+                  Update: {
+                    "audience"?: Database["public"]['Enums']["plan_audience"],"created_at"?: string,"description"?: string | null,"id"?: string,"is_active"?: boolean,"name"?: string,"price_label"?: string | null,"slug"?: string,"sort_order"?: number,"updated_at"?: string
+                  }
+                  Relationships: [
+                    
+                  ]
                 },"platform_settings": {
                   Row: {
                     "announcement": string | null,"id": boolean,"signups_open": boolean,"updated_at": string,"updated_by": string | null
@@ -1018,6 +1052,76 @@ isOneToOne: false
                   }
                   Relationships: [
                     
+                  ]
+                },"subscription_events": {
+                  Row: {
+                    "action": string,"actor_id": string | null,"created_at": string,"details": NonNullable<Json>,"from_status": Database["public"]['Enums']["subscription_status"] | null,"id": string,"reason": string | null,"subscription_id": string,"to_status": Database["public"]['Enums']["subscription_status"] | null
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "action": string,"actor_id"?: string | null,"created_at"?: string,"details"?: NonNullable<Json>,"from_status"?: Database["public"]['Enums']["subscription_status"] | null,"id"?: string,"reason"?: string | null,"subscription_id": string,"to_status"?: Database["public"]['Enums']["subscription_status"] | null
+                  }
+                  Update: {
+                    "action"?: string,"actor_id"?: string | null,"created_at"?: string,"details"?: NonNullable<Json>,"from_status"?: Database["public"]['Enums']["subscription_status"] | null,"id"?: string,"reason"?: string | null,"subscription_id"?: string,"to_status"?: Database["public"]['Enums']["subscription_status"] | null
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "subscription_events_actor_id_fkey"
+      columns: ["actor_id"]
+isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "subscription_events_subscription_id_fkey"
+      columns: ["subscription_id"]
+isOneToOne: false
+      referencedRelation: "subscription_cards"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "subscription_events_subscription_id_fkey"
+      columns: ["subscription_id"]
+isOneToOne: false
+      referencedRelation: "subscriptions"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"subscriptions": {
+                  Row: {
+                    "academy_id": string | null,"business_id": string | null,"created_at": string,"created_by": string | null,"ends_on": string | null,"id": string,"notes": string | null,"plan_id": string,"starts_on": string,"status": Database["public"]['Enums']["subscription_status"],"updated_at": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "academy_id"?: string | null,"business_id"?: string | null,"created_at"?: string,"created_by"?: string | null,"ends_on"?: string | null,"id"?: string,"notes"?: string | null,"plan_id": string,"starts_on"?: string,"status"?: Database["public"]['Enums']["subscription_status"],"updated_at"?: string
+                  }
+                  Update: {
+                    "academy_id"?: string | null,"business_id"?: string | null,"created_at"?: string,"created_by"?: string | null,"ends_on"?: string | null,"id"?: string,"notes"?: string | null,"plan_id"?: string,"starts_on"?: string,"status"?: Database["public"]['Enums']["subscription_status"],"updated_at"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "subscriptions_academy_id_fkey"
+      columns: ["academy_id"]
+isOneToOne: false
+      referencedRelation: "academies"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "subscriptions_business_id_fkey"
+      columns: ["business_id"]
+isOneToOne: false
+      referencedRelation: "businesses"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "subscriptions_created_by_fkey"
+      columns: ["created_by"]
+isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "subscriptions_plan_id_fkey"
+      columns: ["plan_id"]
+isOneToOne: false
+      referencedRelation: "plans"
+      referencedColumns: ["id"]
+    }
                   ]
                 },"teacher_martial_arts": {
                   Row: {
@@ -1536,6 +1640,32 @@ isOneToOne: false
       referencedColumns: ["id"]
     }
                   ]
+                },"subscription_cards": {
+                  Row: {
+                    "academy_id": string | null,"business_id": string | null,"created_at": string,"ends_on": string | null,"entity_kind": string | null,"entity_name": string | null,"entity_slug": string | null,"id": string,"notes": string | null,"plan_id": string,"plan_name": string,"plan_price_label": string | null,"starts_on": string,"status": Database["public"]['Enums']["subscription_status"],"updated_at": string
+                  }
+                  ComputedFields: never
+                  Relationships: [
+                    {
+      foreignKeyName: "subscriptions_academy_id_fkey"
+      columns: ["academy_id"]
+isOneToOne: false
+      referencedRelation: "academies"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "subscriptions_business_id_fkey"
+      columns: ["business_id"]
+isOneToOne: false
+      referencedRelation: "businesses"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "subscriptions_plan_id_fkey"
+      columns: ["plan_id"]
+isOneToOne: false
+      referencedRelation: "plans"
+      referencedColumns: ["id"]
+    }
+                  ]
                 },"teacher_cards": {
                   Row: {
                     "access_plans": string | null,"avatar_path": string | null,"bio": string | null,"certifications": NonNullable<Json>,"city": string | null,"contact_email": string | null,"contact_phone": string | null,"display_name": string,"experience_years": number | null,"lineage": string | null,"martial_arts": Json | null,"professional_name": string,"social_links": NonNullable<Json>,"state": string | null,"user_id": string,"username": string | null
@@ -1556,10 +1686,19 @@ isOneToOne: true
             "academy_gallery_limit":
 { Args: { "p_academy": string }; Returns: number
                            },
+"admin_change_subscription":
+{ Args: { "p_ends_on": string,"p_plan": string,"p_reason": string,"p_subscription": string }; Returns: undefined
+                           },
+"admin_create_subscription":
+{ Args: { "p_academy"?: string,"p_business"?: string,"p_ends_on"?: string,"p_notes"?: string,"p_plan": string,"p_starts_on"?: string }; Returns: string
+                           },
 "admin_search_users":
 { Args: { "p_limit"?: number,"p_query"?: string,"p_status"?: Database["public"]['Enums']["account_status"] }; Returns: {
               "created_at": string,"display_name": string,"email": string,"id": string,"open_reports": number,"post_count": number,"roles": (Database["public"]['Enums']["platform_role"])[],"status": Database["public"]['Enums']["account_status"],"suspended_until": string,"suspension_reason": string,"username": string
             }[]
+                           },
+"admin_set_subscription_status":
+{ Args: { "p_reason": string,"p_status": Database["public"]['Enums']["subscription_status"],"p_subscription": string }; Returns: undefined
                            },
 "business_catalog_limit":
 { Args: { "p_business": string }; Returns: number
@@ -1615,6 +1754,9 @@ isOneToOne: true
 "create_post":
 { Args: { "p_caption": string,"p_id": string,"p_location_label"?: string,"p_martial_art_id"?: string,"p_media"?: Json,"p_visibility"?: Database["public"]['Enums']["visibility"] }; Returns: string
                            },
+"default_entitlement":
+{ Args: { "p_key": string }; Returns: number
+                           },
 "delete_comment":
 { Args: { "p_comment_id": string }; Returns: undefined
                            },
@@ -1627,8 +1769,17 @@ isOneToOne: true
 "enforce_rate_limit":
 { Args: { "p_key": string,"p_max": number,"p_window": string }; Returns: undefined
                            },
+"entitlement":
+{ Args: { "p_entity": string,"p_key": string,"p_kind": string }; Returns: number
+                           },
 "event_owner_visible":
 { Args: { "p_academy": string,"p_created_by": string }; Returns: boolean
+                           },
+"expire_subscriptions":
+{ Args: Record<PropertyKey, never>; Returns: number
+                           },
+"featured_entities":
+{ Args: { "p_kind": string }; Returns: string[]
                            },
 "geocode_cache_get":
 { Args: { "p_hash": string }; Returns: Json
@@ -1939,6 +2090,9 @@ isOneToOne: true
 "request_membership":
 { Args: { "p_academy": string,"p_role": Database["public"]['Enums']["membership_role"] }; Returns: Database["public"]['Enums']["membership_status"]
                            },
+"require_platform_admin":
+{ Args: Record<PropertyKey, never>; Returns: undefined
+                           },
 "respond_business_invite":
 { Args: { "p_accept": boolean,"p_business": string }; Returns: undefined
                            },
@@ -1980,7 +2134,7 @@ isOneToOne: true
                            }
           }
           Enums: {
-            "academy_status": "active"|"hidden"|"suspended","account_status": "active"|"suspended"|"deleted","achievement_type": "competition_result"|"milestone"|"certification"|"other","business_category": "brand"|"store"|"service","business_member_status": "pending"|"active","business_role": "owner"|"admin","business_status": "active"|"hidden"|"suspended","catalog_item_kind": "product"|"service","class_level": "all"|"beginner"|"intermediate"|"advanced"|"kids"|"competition","class_status": "active"|"paused"|"cancelled","coords_source": "manual"|"nominatim","event_interest_kind": "interested"|"saved","event_status": "draft"|"published"|"cancelled","event_type": "championship"|"seminar"|"open_mat"|"graduation"|"workshop"|"special_training"|"other","follow_status": "pending"|"accepted","medal": "gold"|"silver"|"bronze","media_status": "uploading"|"processing"|"ready"|"failed","media_type": "image"|"video","membership_requester": "user"|"academy","membership_role": "owner"|"admin"|"teacher"|"student","membership_status": "pending"|"active"|"rejected"|"left","mention_status": "pending"|"approved"|"rejected","moderation_action": "remove_content"|"restore_content"|"dismiss_reports"|"warn"|"suspend"|"unsuspend"|"ban"|"verify"|"unverify","moderation_status": "visible"|"under_review"|"removed","notification_type": "follow"|"follow_request"|"like"|"comment"|"reply"|"mention"|"class_update"|"event_update"|"promotion_confirmed"|"membership_request"|"moderation"|"promotion_request"|"business_invite","platform_role": "moderator"|"admin"|"superadmin","post_kind": "standard"|"checkin"|"achievement"|"event_share","price_status": "paid"|"free"|"undisclosed","rank_track": "adult"|"kids","report_reason": "spam"|"harassment"|"violence"|"nudity"|"minor_safety"|"impersonation"|"misinformation"|"other","report_status": "open"|"in_review"|"resolved"|"dismissed","report_target": "post"|"comment"|"profile"|"academy"|"event","teacher_status": "pending"|"approved"|"rejected"|"revoked","theme_preference": "light"|"dark"|"system","unit_access_kind": "totalpass"|"wellhub"|"day_pass","verification_status": "self_reported"|"teacher_confirmed","visibility": "public"|"followers"|"private"
+            "academy_status": "active"|"hidden"|"suspended","account_status": "active"|"suspended"|"deleted","achievement_type": "competition_result"|"milestone"|"certification"|"other","business_category": "brand"|"store"|"service","business_member_status": "pending"|"active","business_role": "owner"|"admin","business_status": "active"|"hidden"|"suspended","catalog_item_kind": "product"|"service","class_level": "all"|"beginner"|"intermediate"|"advanced"|"kids"|"competition","class_status": "active"|"paused"|"cancelled","coords_source": "manual"|"nominatim","event_interest_kind": "interested"|"saved","event_status": "draft"|"published"|"cancelled","event_type": "championship"|"seminar"|"open_mat"|"graduation"|"workshop"|"special_training"|"other","follow_status": "pending"|"accepted","medal": "gold"|"silver"|"bronze","media_status": "uploading"|"processing"|"ready"|"failed","media_type": "image"|"video","membership_requester": "user"|"academy","membership_role": "owner"|"admin"|"teacher"|"student","membership_status": "pending"|"active"|"rejected"|"left","mention_status": "pending"|"approved"|"rejected","moderation_action": "remove_content"|"restore_content"|"dismiss_reports"|"warn"|"suspend"|"unsuspend"|"ban"|"verify"|"unverify","moderation_status": "visible"|"under_review"|"removed","notification_type": "follow"|"follow_request"|"like"|"comment"|"reply"|"mention"|"class_update"|"event_update"|"promotion_confirmed"|"membership_request"|"moderation"|"promotion_request"|"business_invite","plan_audience": "academy"|"business"|"both","platform_role": "moderator"|"admin"|"superadmin","post_kind": "standard"|"checkin"|"achievement"|"event_share","price_status": "paid"|"free"|"undisclosed","rank_track": "adult"|"kids","report_reason": "spam"|"harassment"|"violence"|"nudity"|"minor_safety"|"impersonation"|"misinformation"|"other","report_status": "open"|"in_review"|"resolved"|"dismissed","report_target": "post"|"comment"|"profile"|"academy"|"event","subscription_status": "active"|"suspended"|"cancelled"|"expired","teacher_status": "pending"|"approved"|"rejected"|"revoked","theme_preference": "light"|"dark"|"system","unit_access_kind": "totalpass"|"wellhub"|"day_pass","verification_status": "self_reported"|"teacher_confirmed","visibility": "public"|"followers"|"private"
           }
           CompositeTypes: {
             [_ in never]: never
@@ -2100,7 +2254,7 @@ export const Constants = {
           }
         },"public": {
           Enums: {
-            "academy_status": ["active", "hidden", "suspended"],"account_status": ["active", "suspended", "deleted"],"achievement_type": ["competition_result", "milestone", "certification", "other"],"business_category": ["brand", "store", "service"],"business_member_status": ["pending", "active"],"business_role": ["owner", "admin"],"business_status": ["active", "hidden", "suspended"],"catalog_item_kind": ["product", "service"],"class_level": ["all", "beginner", "intermediate", "advanced", "kids", "competition"],"class_status": ["active", "paused", "cancelled"],"coords_source": ["manual", "nominatim"],"event_interest_kind": ["interested", "saved"],"event_status": ["draft", "published", "cancelled"],"event_type": ["championship", "seminar", "open_mat", "graduation", "workshop", "special_training", "other"],"follow_status": ["pending", "accepted"],"medal": ["gold", "silver", "bronze"],"media_status": ["uploading", "processing", "ready", "failed"],"media_type": ["image", "video"],"membership_requester": ["user", "academy"],"membership_role": ["owner", "admin", "teacher", "student"],"membership_status": ["pending", "active", "rejected", "left"],"mention_status": ["pending", "approved", "rejected"],"moderation_action": ["remove_content", "restore_content", "dismiss_reports", "warn", "suspend", "unsuspend", "ban", "verify", "unverify"],"moderation_status": ["visible", "under_review", "removed"],"notification_type": ["follow", "follow_request", "like", "comment", "reply", "mention", "class_update", "event_update", "promotion_confirmed", "membership_request", "moderation", "promotion_request", "business_invite"],"platform_role": ["moderator", "admin", "superadmin"],"post_kind": ["standard", "checkin", "achievement", "event_share"],"price_status": ["paid", "free", "undisclosed"],"rank_track": ["adult", "kids"],"report_reason": ["spam", "harassment", "violence", "nudity", "minor_safety", "impersonation", "misinformation", "other"],"report_status": ["open", "in_review", "resolved", "dismissed"],"report_target": ["post", "comment", "profile", "academy", "event"],"teacher_status": ["pending", "approved", "rejected", "revoked"],"theme_preference": ["light", "dark", "system"],"unit_access_kind": ["totalpass", "wellhub", "day_pass"],"verification_status": ["self_reported", "teacher_confirmed"],"visibility": ["public", "followers", "private"]
+            "academy_status": ["active", "hidden", "suspended"],"account_status": ["active", "suspended", "deleted"],"achievement_type": ["competition_result", "milestone", "certification", "other"],"business_category": ["brand", "store", "service"],"business_member_status": ["pending", "active"],"business_role": ["owner", "admin"],"business_status": ["active", "hidden", "suspended"],"catalog_item_kind": ["product", "service"],"class_level": ["all", "beginner", "intermediate", "advanced", "kids", "competition"],"class_status": ["active", "paused", "cancelled"],"coords_source": ["manual", "nominatim"],"event_interest_kind": ["interested", "saved"],"event_status": ["draft", "published", "cancelled"],"event_type": ["championship", "seminar", "open_mat", "graduation", "workshop", "special_training", "other"],"follow_status": ["pending", "accepted"],"medal": ["gold", "silver", "bronze"],"media_status": ["uploading", "processing", "ready", "failed"],"media_type": ["image", "video"],"membership_requester": ["user", "academy"],"membership_role": ["owner", "admin", "teacher", "student"],"membership_status": ["pending", "active", "rejected", "left"],"mention_status": ["pending", "approved", "rejected"],"moderation_action": ["remove_content", "restore_content", "dismiss_reports", "warn", "suspend", "unsuspend", "ban", "verify", "unverify"],"moderation_status": ["visible", "under_review", "removed"],"notification_type": ["follow", "follow_request", "like", "comment", "reply", "mention", "class_update", "event_update", "promotion_confirmed", "membership_request", "moderation", "promotion_request", "business_invite"],"plan_audience": ["academy", "business", "both"],"platform_role": ["moderator", "admin", "superadmin"],"post_kind": ["standard", "checkin", "achievement", "event_share"],"price_status": ["paid", "free", "undisclosed"],"rank_track": ["adult", "kids"],"report_reason": ["spam", "harassment", "violence", "nudity", "minor_safety", "impersonation", "misinformation", "other"],"report_status": ["open", "in_review", "resolved", "dismissed"],"report_target": ["post", "comment", "profile", "academy", "event"],"subscription_status": ["active", "suspended", "cancelled", "expired"],"teacher_status": ["pending", "approved", "rejected", "revoked"],"theme_preference": ["light", "dark", "system"],"unit_access_kind": ["totalpass", "wellhub", "day_pass"],"verification_status": ["self_reported", "teacher_confirmed"],"visibility": ["public", "followers", "private"]
           }
         }
 } as const

@@ -8,6 +8,7 @@ import { requireUser } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 import { routes } from "@/lib/routes";
 import { CoverImageUpload } from "@/components/media/cover-image-upload";
+import { PlanStatusCard } from "@/components/plans/plan-status-card";
 import { Card } from "@/components/ui/card";
 import { PageHeader } from "@/components/ui/page-header";
 import { BusinessInfoSection, CatalogSection, MembersSection, PromotionsSection, VisibilitySection } from "./manage-sections";
@@ -46,6 +47,7 @@ export default async function ManageBusinessPage({ params }: Props) {
             <CoverImageUpload entity="business" entityId={business.id} slot="banner" path={business.cover_path} name={business.name} />
           </div>
         </Card>
+        <PlanStatusCard kind="business" entityId={business.id} />
         <CatalogSection data={data} />
         <PromotionsSection data={data} />
         <MembersSection data={data} viewerId={user.id} />
