@@ -12,6 +12,7 @@ export type CatalogItem = {
   price_status: "paid" | "free" | "undisclosed";
   price_cents: number | null;
   url: string | null;
+  image_path: string | null;
   is_active: boolean;
   position: number;
 };
@@ -27,7 +28,7 @@ export type BusinessPromotion = {
 };
 
 const BUSINESS_COLUMNS =
-  "id, slug, name, category, description, logo_path, cover_path, website, instagram, contact_email, contact_phone, city, state, martial_art_ids, status, is_verified";
+  "id, slug, name, category, description, logo_path, cover_path, website, instagram, contact_email, contact_phone, city, state, martial_art_ids, status, is_verified, follower_count";
 
 /** Tudo que a página comercial precisa, já filtrado pela RLS (visitante ou gestão). */
 export const loadBusiness = cache(async (slug: string) => {
@@ -36,10 +37,10 @@ export const loadBusiness = cache(async (slug: string) => {
   if (!business) return null;
 
   const user = await getCurrentUser();
-  const [items, promotions, isManager, members, arts, catalogLimit, promotionsLimit, posts] = await Promise.all([
+  const [items, promotions, isManager, members, arts, catalogLimit, promotionsLimit, posts, following] = await Promise.all([
     supabase
       .from("business_items")
-      .select("id, kind, name, description, price_status, price_cents, url, is_active, position")
+      .select("id, kind, name, description, price_status, price_cents, url, image_path, is_active, position")
       .eq("business_id", business.id)
       .order("position")
       .order("created_at"),
@@ -61,6 +62,9 @@ export const loadBusiness = cache(async (slug: string) => {
     supabase.rpc("business_catalog_limit", { p_business: business.id }),
     supabase.rpc("business_promotions_limit", { p_business: business.id }),
     loadBusinessPosts(supabase, business.id),
+    user
+      ? supabase.from("business_followers").select("user_id").eq("business_id", business.id).eq("user_id", user.id).maybeSingle()
+      : Promise.resolve({ data: null }),
   ]);
 
   const memberRows = (members.data ?? []) as unknown as {
@@ -88,6 +92,7 @@ export const loadBusiness = cache(async (slug: string) => {
     catalogLimit: catalogLimit.data ?? 30,
     promotionsLimit: promotionsLimit.data ?? 5,
     posts,
+    following: Boolean(following.data),
     viewerId: user?.id ?? null,
   };
 });

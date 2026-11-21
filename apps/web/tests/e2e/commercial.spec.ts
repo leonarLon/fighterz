@@ -119,6 +119,8 @@ test.describe("página de marca, loja ou serviço (gestão)", () => {
     await page.locator("summary", { hasText: "Adicionar item" }).click();
     const itemForm = page.getByRole("form", { name: "Novo item do catálogo" });
     await itemForm.getByLabel("Nome").fill("Luva de boxe 12 oz");
+    await itemForm.getByLabel("Adicionar foto do item").setInputFiles({ name: "luva.png", mimeType: "image/png", buffer: makePng(600, 600) });
+    await expect(itemForm.getByText("Foto pronta. Salve o item para publicar.")).toBeVisible();
     await itemForm.getByLabel("Tem preço").check();
     await itemForm.getByRole("button", { name: "Adicionar ao catálogo" }).click();
     await expect(itemForm.getByText("Informe o valor. Ex.: 199,90")).toBeVisible();
@@ -164,6 +166,8 @@ test.describe("página de marca, loja ou serviço (gestão)", () => {
     await visitor.page.goto(`/paginas/${slug}`);
     await expect(visitor.page.getByRole("heading", { name, level: 1 })).toBeVisible();
     await expect(visitor.page.getByText("R$ 249,90")).toBeVisible();
+    // A foto escolhida antes do erro de validação continua e é publicada.
+    await expect(visitor.page.getByRole("img", { name: "Foto de Luva de boxe 12 oz" })).toBeVisible();
     await expect(visitor.page.getByText("ABERTURA15")).toBeVisible();
     await expect(visitor.page.getByText(caption)).toBeVisible();
 
@@ -188,5 +192,33 @@ test.describe("página de marca, loja ou serviço (gestão)", () => {
     expect(post.error?.message).toBe("not_business_manager");
     const members = await client.from("business_members").select("user_id").eq("business_id", biz!.id);
     expect(members.data ?? []).toEqual([]);
+  });
+});
+
+test.describe("seguir página comercial", () => {
+  test("seguir leva os posts da página ao Início; deixar de seguir tira", async ({ page }) => {
+    await createConfirmedUser(page, "fa");
+    await page.goto("/inicio");
+    await expect(page.getByText("Chegou a coleção nova de kimonos trançados!")).toHaveCount(0);
+
+    await page.goto("/paginas/kimonos-tatame-forte");
+    await page.getByRole("button", { name: "Seguir página" }).click();
+    await expect(page.getByRole("button", { name: "Seguindo" })).toHaveAttribute("aria-pressed", "true");
+    await page.goto("/inicio");
+    await expect(page.getByText("Chegou a coleção nova de kimonos trançados!")).toBeVisible();
+    await expect(page.getByText("Publicado como página")).toBeVisible();
+
+    await page.goto("/paginas/kimonos-tatame-forte");
+    await expect(page.getByText(/1 seguidor|\d+ seguidores/)).toBeVisible();
+    await page.getByRole("button", { name: "Seguindo" }).click();
+    await expect(page.getByRole("button", { name: "Seguir página" })).toBeVisible();
+    await page.goto("/inicio");
+    await expect(page.getByText("Chegou a coleção nova de kimonos trançados!")).toHaveCount(0);
+  });
+
+  test("visitante é levado ao login para seguir", async ({ page }) => {
+    await page.goto("/paginas/kimonos-tatame-forte");
+    await page.getByRole("link", { name: "Entrar para seguir" }).click();
+    await expect(page).toHaveURL(/\/entrar\?next=%2Fpaginas%2Fkimonos-tatame-forte/);
   });
 });

@@ -2,7 +2,7 @@
 
 import { useActionState, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { Eye, EyeOff, Pencil, Plus, Trash2, UserMinus } from "lucide-react";
+import { Eye, EyeOff, ImagePlus, Pencil, Plus, Trash2, UserMinus } from "lucide-react";
 import {
   BRAZILIAN_STATES,
   BUSINESS_CATEGORIES,
@@ -26,6 +26,9 @@ import {
 } from "@/app/actions/businesses";
 import type { BusinessData, BusinessPromotion, CatalogItem } from "@/lib/businesses";
 import { idleState } from "@/lib/form-state";
+import { createClient } from "@/lib/supabase/client";
+import { COVERS_BUCKET, coverUrl, newCoverPath } from "@/lib/covers";
+import { ImageError, prepareAvatar } from "@/lib/image-processing";
 import { MartialArtCheckboxes } from "@/components/academy/martial-art-checkboxes";
 import { Avatar } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
@@ -142,6 +145,29 @@ function ItemForm({ businessId, item, onDone }: { businessId: string; item?: Cat
   const [priceStatus, setPriceStatus] = useState<string>(v?.priceStatus ?? item?.price_status ?? "undisclosed");
   const [isActive, setIsActive] = useState(v ? v.isActive === "on" : (item?.is_active ?? true));
   const [kind, setKind] = useState<string>(v?.kind ?? item?.kind ?? "product");
+  // Foto: processada no aparelho (quadrada, 400 px, sem GPS) e enviada ao escolher; o caminho vai no envio do form.
+  const [imagePath, setImagePath] = useState<string>(item?.image_path ?? "");
+  const [imageNotice, setImageNotice] = useState<{ ok: boolean; text: string } | null>(null);
+  const [uploading, startUpload] = useTransition();
+  function chooseImage(file: File | undefined, input: HTMLInputElement) {
+    input.value = "";
+    if (!file) return;
+    startUpload(async () => {
+      try {
+        const image = await prepareAvatar(file);
+        const path = newCoverPath("business", businessId, "item", image.ext);
+        const supabase = createClient();
+        const { error } = await supabase.storage.from(COVERS_BUCKET).upload(path, image.blob, { contentType: image.contentType });
+        if (error) throw new ImageError("Falha ao enviar a foto. Tente de novo.");
+        // Foto escolhida antes e ainda não salva: apaga para não sobrar arquivo.
+        if (imagePath && imagePath !== item?.image_path) await supabase.storage.from(COVERS_BUCKET).remove([imagePath]);
+        setImagePath(path);
+        setImageNotice({ ok: true, text: "Foto pronta. Salve o item para publicar." });
+      } catch (error) {
+        setImageNotice({ ok: false, text: error instanceof ImageError ? error.message : "Não foi possível usar essa foto." });
+      }
+    });
+  }
 
   return (
     <form action={action} className="space-y-3" noValidate aria-label={item ? `Editar ${item.name}` : "Novo item do catálogo"}>
@@ -150,6 +176,7 @@ function ItemForm({ businessId, item, onDone }: { businessId: string; item?: Cat
       <input type="hidden" name="priceStatus" value={priceStatus} />
       <input type="hidden" name="isActive" value={isActive ? "on" : ""} />
       <input type="hidden" name="kind" value={kind} />
+      <input type="hidden" name="imagePath" value={imagePath} />
       <div className="grid gap-3 sm:grid-cols-[10rem_1fr]">
         <SelectField id={`item-kind-${key}`} name={undefined} label="Tipo" value={kind} onChange={(ev) => setKind(ev.target.value)}>
           {CATALOG_ITEM_KINDS.map((k) => (
@@ -200,6 +227,39 @@ function ItemForm({ businessId, item, onDone }: { businessId: string; item?: Cat
           errors={e.price}
         />
       )}
+      <div className="space-y-2">
+        <p className="text-sm font-semibold">Foto (opcional)</p>
+        <div className="flex flex-wrap items-center gap-3">
+          {imagePath ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img src={coverUrl(imagePath) ?? ""} alt="Foto atual do item" className="size-20 rounded-md border border-border object-cover" />
+          ) : (
+            <span className="flex size-20 items-center justify-center rounded-md border border-border bg-accent-soft text-[12px] text-muted">Sem foto</span>
+          )}
+          <input
+            id={`item-image-${key}`}
+            type="file"
+            accept="image/*"
+            className="sr-only"
+            disabled={uploading}
+            onChange={(e) => chooseImage(e.target.files?.[0], e.target)}
+          />
+          <label
+            htmlFor={`item-image-${key}`}
+            className="inline-flex min-h-11 cursor-pointer items-center gap-2 rounded-md border border-border px-4 font-semibold hover:bg-bg has-[:disabled]:opacity-60"
+          >
+            <ImagePlus aria-hidden className="size-4" /> {imagePath ? "Trocar foto do item" : "Adicionar foto do item"}
+          </label>
+          {imagePath && (
+            <Button type="button" variant="ghost" onClick={() => setImagePath("")}>
+              <Trash2 aria-hidden className="size-4" /> Remover foto
+            </Button>
+          )}
+        </div>
+        <p aria-live="polite" className={imageNotice?.ok === false ? "text-[13px] text-danger empty:hidden" : "text-[13px] text-success empty:hidden"}>
+          {uploading ? "Enviando…" : (imageNotice?.text ?? "")}
+        </p>
+      </div>
       <InputField
         id={`item-url-${key}`}
         name="url"
@@ -212,7 +272,7 @@ function ItemForm({ businessId, item, onDone }: { businessId: string; item?: Cat
         <input type="checkbox" checked={isActive} onChange={(ev) => setIsActive(ev.target.checked)} className="size-5 accent-(--primary)" />
         Mostrar na página pública
       </label>
-      <Button type="submit" variant={item ? "secondary" : "primary"} loading={pending}>
+      <Button type="submit" variant={item ? "secondary" : "primary"} loading={pending} disabled={uploading}>
         {item ? "Salvar item" : (
           <>
             <Plus aria-hidden className="size-4" /> Adicionar ao catálogo

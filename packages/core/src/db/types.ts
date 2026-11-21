@@ -283,6 +283,32 @@ isOneToOne: false
       referencedColumns: ["id"]
     }
                   ]
+                },"business_followers": {
+                  Row: {
+                    "business_id": string,"created_at": string,"user_id": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "business_id": string,"created_at"?: string,"user_id": string
+                  }
+                  Update: {
+                    "business_id"?: string,"created_at"?: string,"user_id"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "business_followers_business_id_fkey"
+      columns: ["business_id"]
+isOneToOne: false
+      referencedRelation: "businesses"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "business_followers_user_id_fkey"
+      columns: ["user_id"]
+isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    }
+                  ]
                 },"business_items": {
                   Row: {
                     "business_id": string,"created_at": string,"description": string | null,"id": string,"image_path": string | null,"is_active": boolean,"kind": Database["public"]['Enums']["catalog_item_kind"],"name": string,"position": number,"price_cents": number | null,"price_status": Database["public"]['Enums']["price_status"],"updated_at": string,"url": string | null
@@ -357,14 +383,14 @@ isOneToOne: false
                   ]
                 },"businesses": {
                   Row: {
-                    "category": Database["public"]['Enums']["business_category"],"city": string | null,"contact_email": string | null,"contact_phone": string | null,"cover_path": string | null,"created_at": string,"created_by": string | null,"description": string | null,"id": string,"instagram": string | null,"is_verified": boolean,"logo_path": string | null,"martial_art_ids": (string)[],"name": string,"search_vector": unknown,"slug": string,"state": string | null,"status": Database["public"]['Enums']["business_status"],"updated_at": string,"website": string | null
+                    "category": Database["public"]['Enums']["business_category"],"city": string | null,"contact_email": string | null,"contact_phone": string | null,"cover_path": string | null,"created_at": string,"created_by": string | null,"description": string | null,"follower_count": number,"id": string,"instagram": string | null,"is_verified": boolean,"logo_path": string | null,"martial_art_ids": (string)[],"name": string,"search_vector": unknown,"slug": string,"state": string | null,"status": Database["public"]['Enums']["business_status"],"updated_at": string,"website": string | null
                   }
                   ComputedFields: never
                   Insert: {
-                    "category": Database["public"]['Enums']["business_category"],"city"?: string | null,"contact_email"?: string | null,"contact_phone"?: string | null,"cover_path"?: string | null,"created_at"?: string,"created_by"?: string | null,"description"?: string | null,"id"?: string,"instagram"?: string | null,"is_verified"?: boolean,"logo_path"?: string | null,"martial_art_ids"?: (string)[],"name": string,"search_vector"?: never,"slug": string,"state"?: string | null,"status"?: Database["public"]['Enums']["business_status"],"updated_at"?: string,"website"?: string | null
+                    "category": Database["public"]['Enums']["business_category"],"city"?: string | null,"contact_email"?: string | null,"contact_phone"?: string | null,"cover_path"?: string | null,"created_at"?: string,"created_by"?: string | null,"description"?: string | null,"follower_count"?: number,"id"?: string,"instagram"?: string | null,"is_verified"?: boolean,"logo_path"?: string | null,"martial_art_ids"?: (string)[],"name": string,"search_vector"?: never,"slug": string,"state"?: string | null,"status"?: Database["public"]['Enums']["business_status"],"updated_at"?: string,"website"?: string | null
                   }
                   Update: {
-                    "category"?: Database["public"]['Enums']["business_category"],"city"?: string | null,"contact_email"?: string | null,"contact_phone"?: string | null,"cover_path"?: string | null,"created_at"?: string,"created_by"?: string | null,"description"?: string | null,"id"?: string,"instagram"?: string | null,"is_verified"?: boolean,"logo_path"?: string | null,"martial_art_ids"?: (string)[],"name"?: string,"search_vector"?: never,"slug"?: string,"state"?: string | null,"status"?: Database["public"]['Enums']["business_status"],"updated_at"?: string,"website"?: string | null
+                    "category"?: Database["public"]['Enums']["business_category"],"city"?: string | null,"contact_email"?: string | null,"contact_phone"?: string | null,"cover_path"?: string | null,"created_at"?: string,"created_by"?: string | null,"description"?: string | null,"follower_count"?: number,"id"?: string,"instagram"?: string | null,"is_verified"?: boolean,"logo_path"?: string | null,"martial_art_ids"?: (string)[],"name"?: string,"search_vector"?: never,"slug"?: string,"state"?: string | null,"status"?: Database["public"]['Enums']["business_status"],"updated_at"?: string,"website"?: string | null
                   }
                   Relationships: [
                     {
@@ -1809,6 +1835,9 @@ isOneToOne: true
                            },
 "admin_set_subscription_status":
 { Args: { "p_reason": string,"p_status": Database["public"]['Enums']["subscription_status"],"p_subscription": string }; Returns: undefined
+                           },
+"backfill_commercial_signals":
+{ Args: Record<PropertyKey, never>; Returns: number
                            },
 "business_catalog_limit":
 { Args: { "p_business": string }; Returns: number

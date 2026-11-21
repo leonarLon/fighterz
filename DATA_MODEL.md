@@ -143,6 +143,8 @@ Modalidades: `academy_martial_arts(academy_id, martial_art_id)`.
 - `commercial_reviews`: `status open|dismissed|warned|actioned|reverted`, `score`, `reasons` (foto dos sinais), decisão com motivo. Uma aberta por pessoa; após decisão, só conteúdo novo reabre.
 - `commercial_appeals`: um recurso por revisão (`message` 10–1000), `status open|accepted|rejected`, resposta. Aceito desfaz a revisão e restaura os posts removidos.
 
+**business_followers** (migration 27): `business_id`, `user_id`, `created_at`, PK composta; `businesses.follower_count` mantido por trigger. Cada pessoa vê só os próprios vínculos. `get_home_feed` inclui posts públicos das páginas seguidas.
+
 Índices: GiST(location), btree(state, city, neighborhood) com `unaccent(lower())`.
 
 **academy_memberships**

@@ -2,7 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import { businessPromotionSchema, businessSchema, catalogItemSchema, newBusinessSchema } from "@figtherz/core";
+import { businessPromotionSchema, businessSchema, catalogItemSchema, coverPathPattern, newBusinessSchema } from "@figtherz/core";
 import { createClient } from "@/lib/supabase/server";
 import { requireUser } from "@/lib/auth";
 import { COVERS_BUCKET } from "@/lib/covers";
@@ -120,6 +120,17 @@ export async function deleteBusiness(businessId: string): Promise<Result> {
   redirect(`${routes.businesses}?excluida=1`);
 }
 
+export async function setBusinessFollow(businessId: string, follow: boolean): Promise<Result> {
+  const user = await requireUser();
+  const supabase = await createClient();
+  const { error } = follow
+    ? await supabase.from("business_followers").upsert({ business_id: businessId, user_id: user.id }, { ignoreDuplicates: true })
+    : await supabase.from("business_followers").delete().eq("business_id", businessId).eq("user_id", user.id);
+  if (error) return { ok: false, message: message(error, "Não foi possível seguir a página.") };
+  revalidatePath(routes.feed);
+  return { ok: true };
+}
+
 // ---------------------------------------------------------------------------
 // Administradores
 // ---------------------------------------------------------------------------
@@ -163,7 +174,17 @@ export async function saveCatalogItem(businessId: string, itemId: string | null,
   const parsed = catalogItemSchema.safeParse({ ...values, kind: values.kind || "product", isActive: values.isActive === "on" });
   if (!parsed.success) return fromZodError(parsed.error, values);
   const d = parsed.data;
+  // Foto já enviada ao bucket pelo navegador; o banco confere pasta e existência do arquivo.
+  const imagePath = text(formData, "imagePath") || null;
+  if (imagePath && !coverPathPattern("business", businessId, "item").test(imagePath)) {
+    return { status: "error", message: "Foto inválida. Envie de novo.", values };
+  }
+  const supabase = await createClient();
+  const { data: previous } = itemId
+    ? await supabase.from("business_items").select("image_path").eq("id", itemId).maybeSingle()
+    : { data: null };
   const row = {
+    image_path: imagePath,
     kind: d.kind,
     name: d.name,
     description: d.description,
@@ -172,11 +193,11 @@ export async function saveCatalogItem(businessId: string, itemId: string | null,
     url: d.url,
     is_active: d.isActive,
   };
-  const supabase = await createClient();
   const { data, error } = itemId
     ? await supabase.from("business_items").update(row).eq("id", itemId).eq("business_id", businessId).select("id")
     : await supabase.from("business_items").insert({ ...row, business_id: businessId }).select("id");
   if (error || !data?.length) return { status: "error", message: message(error ?? { code: "42501" }, "Não foi possível salvar o item."), values };
+  if (previous?.image_path && previous.image_path !== imagePath) await supabase.storage.from(COVERS_BUCKET).remove([previous.image_path]);
   await revalidateBusiness(businessId);
   return { status: "success", message: itemId ? "Item atualizado." : "Item adicionado ao catálogo.", values: itemId ? values : undefined };
 }
@@ -184,8 +205,10 @@ export async function saveCatalogItem(businessId: string, itemId: string | null,
 export async function deleteCatalogItem(businessId: string, itemId: string): Promise<Result> {
   await requireUser();
   const supabase = await createClient();
-  const { data, error } = await supabase.from("business_items").delete().eq("id", itemId).eq("business_id", businessId).select("id");
+  const { data, error } = await supabase.from("business_items").delete().eq("id", itemId).eq("business_id", businessId).select("image_path");
   if (error || !data?.length) return { ok: false, message: message(error ?? { code: "42501" }, "Não foi possível apagar o item.") };
+  const images = data.map((d) => d.image_path).filter((p): p is string => Boolean(p));
+  if (images.length) await supabase.storage.from(COVERS_BUCKET).remove(images);
   await revalidateBusiness(businessId);
   return { ok: true, message: "Item apagado." };
 }

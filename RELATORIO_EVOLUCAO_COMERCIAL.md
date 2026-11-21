@@ -14,7 +14,8 @@ O projeto existente foi evoluído, sem reescrita, em 6 entregas publicadas:
 | 6 | Planos e assinaturas administrados pela equipe; professores continuam gratuitos | 24 | `ac98fdd` |
 | 7 | Detecção de publicidade em perfis pessoais, com revisão humana e recurso | 25 | `69db72c` |
 | 8 | Painel admin integrado (páginas na moderação, selo, números, histórico) | 26 | `ac3a7f8` |
-| 9–10 | Cobertura, regressão completa, documentação e este relatório | — | este commit |
+| 9–10 | Cobertura, regressão completa, documentação e este relatório | — | `e9abbf8` |
+| Pós | Seguir páginas comerciais, foto nos itens do catálogo, análise única dos posts antigos | 27 | ver git log |
 
 Regras do projeto mantidas em todas as fases: custo zero (nenhum serviço pago; a única dependência nova é `@vitest/coverage-v8`, MIT e local), sem IA, permissões no banco (RLS e funções), 18+, e autorização antes de qualquer mudança remota.
 
@@ -95,9 +96,8 @@ Sobre a cobertura: ela mede as regras de negócio do `packages/core`. As regras 
 
 ## 7. Limitações conhecidas e próximos passos sugeridos
 
-1. **Foto nos itens do catálogo:** o banco já aceita (`business_items.image_path`), falta a tela.
-2. **Seguir uma página comercial e métricas de página:** não implementados. Nenhum benefício de plano promete isso.
-3. **Detecção retroativa:** a detecção vale para posts novos e mudanças de bio. Os posts anteriores à migration 25 não foram analisados.
+1. ~~Foto nos itens do catálogo~~ e ~~seguir página comercial~~: feitos depois do relatório (migration 27). Métricas de página continuam fora, e nenhum benefício de plano promete isso.
+2. ~~Detecção retroativa~~: os posts pessoais dos últimos 30 dias foram analisados uma vez na migration 27. Posts mais antigos não contam para o risco, que usa uma janela de 30 dias.
 4. **Imagens não são analisadas** pela detecção (custo zero e sem IA). Só o texto conta.
 5. **Uso comercial na Vercel Hobby:** os termos proíbem uso comercial no plano gratuito. Se os planos passarem a ser cobrados, mesmo fora da plataforma, será preciso trocar a hospedagem antes (`COST_ZERO_POLICY.md`).
 6. **Storage gratuito de 1 GB:** acompanhar o uso conforme galerias e logos crescerem. Os limites por plano ajudam a controlar.

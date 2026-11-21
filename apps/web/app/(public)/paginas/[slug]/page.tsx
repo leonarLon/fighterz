@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { AtSign, BadgeCheck, ExternalLink, Globe, Mail, MapPin, Newspaper, Phone, Settings, Tag } from "lucide-react";
-import { BUSINESS_CATEGORY_LABELS, CATALOG_ITEM_LABELS, formatBrl, formatDate } from "@figtherz/core";
+import { BUSINESS_CATEGORY_LABELS, CATALOG_ITEM_LABELS, compactCount, formatBrl, formatDate } from "@figtherz/core";
 import { loadBusiness, type CatalogItem } from "@/lib/businesses";
 import { loadMoreBusinessPosts } from "@/app/actions/posts";
 import { getViewer } from "@/lib/viewer";
@@ -13,6 +13,8 @@ import { ButtonLink } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { EmptyState } from "@/components/ui/empty-state";
 import { ReportButton } from "@/components/report/report-button";
+import { coverUrl } from "@/lib/covers";
+import { FollowBusinessButton } from "./follow-button";
 
 type Props = { params: Promise<{ slug: string }> };
 
@@ -51,13 +53,15 @@ export default async function BusinessPage({ params }: Props) {
                 {business.name}
                 {business.is_verified && <BadgeCheck aria-label="Página verificada" className="size-6 text-accent" />}
               </h1>
-              {(business.city || martialArts.length > 0) && (
-                <p className="mt-1 text-muted">
-                  {[business.city ? `${business.city}${business.state ? `/${business.state}` : ""}` : null, martialArts.map((m) => m.name).join(" · ") || null]
-                    .filter(Boolean)
-                    .join(" · ")}
-                </p>
-              )}
+              <p className="mt-1 text-muted">
+                {[
+                  business.city ? `${business.city}${business.state ? `/${business.state}` : ""}` : null,
+                  martialArts.map((m) => m.name).join(" · ") || null,
+                  `${compactCount(business.follower_count)} ${business.follower_count === 1 ? "seguidor" : "seguidores"}`,
+                ]
+                  .filter(Boolean)
+                  .join(" · ")}
+              </p>
             </div>
           </div>
           {isManager && (
@@ -110,8 +114,15 @@ export default async function BusinessPage({ params }: Props) {
             </li>
           )}
         </ul>
+        <div className="mt-5">
+          {data.viewerId ? (
+            <FollowBusinessButton businessId={business.id} following={data.following} />
+          ) : (
+            <ButtonLink href={`${routes.signIn}?next=${encodeURIComponent(routes.business(business.slug))}`}>Entrar para seguir</ButtonLink>
+          )}
+        </div>
         {!isManager && (
-          <div className="mt-4">
+          <div className="mt-2">
             <ReportButton
               targetType="business"
               targetId={business.id}
@@ -163,6 +174,19 @@ export default async function BusinessPage({ params }: Props) {
           <ul className="grid gap-3 sm:grid-cols-2">
             {visibleItems.map((item) => (
               <li key={item.id} className="flex flex-col rounded-lg border border-border bg-surface p-4">
+                {item.image_path && (
+                  // Foto quadrada já otimizada no envio (400 px, sem GPS).
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    src={coverUrl(item.image_path) ?? ""}
+                    alt={`Foto de ${item.name}`}
+                    width={400}
+                    height={400}
+                    loading="lazy"
+                    decoding="async"
+                    className="mb-3 aspect-square w-full rounded-md bg-accent-soft object-cover"
+                  />
+                )}
                 <p className="text-[12px] font-semibold uppercase tracking-wide text-muted">{CATALOG_ITEM_LABELS[item.kind]}</p>
                 <h3 className="font-semibold">{item.name}</h3>
                 {item.description && <p className="mt-1 whitespace-pre-line text-sm">{item.description}</p>}
