@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { Award, ExternalLink, Mail, Phone } from "lucide-react";
+import { Award, ExternalLink, Mail, Phone, Ticket } from "lucide-react";
 import { formatAddress } from "@figtherz/core";
 import { createClient } from "@/lib/supabase/server";
 import { routes } from "@/lib/routes";
@@ -80,6 +80,15 @@ export default async function TeacherPage({ params }: Props) {
         )}
         {teacher.bio && <p className="mt-4 whitespace-pre-line">{teacher.bio}</p>}
         {teacher.lineage && <p className="mt-2 text-sm text-muted">Linhagem: {teacher.lineage}</p>}
+        {teacher.access_plans && (
+          <p className="mt-3 flex items-start gap-1.5 text-sm">
+            <Ticket aria-hidden className="mt-0.5 size-4 shrink-0 text-accent" />
+            <span className="whitespace-pre-line">
+              <span className="font-semibold">Planos aceitos onde dá aula: </span>
+              {teacher.access_plans}
+            </span>
+          </p>
+        )}
 
         {certifications.length > 0 && (
           <ul className="mt-4 space-y-1 text-sm">

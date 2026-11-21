@@ -11,6 +11,7 @@ export * from './domain/text';
 export * from './schemas/social';
 export * from './domain/schedule';
 export * from './domain/address';
+export * from './domain/money';
 export * from './schemas/academy';
 export * from './domain/journey';
 export * from './schemas/journey';

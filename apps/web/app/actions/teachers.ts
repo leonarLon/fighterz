@@ -10,7 +10,7 @@ import { routes } from "@/lib/routes";
 /** Cria ou edita o perfil profissional. O status é decidido no banco (pendente até o admin aprovar). */
 export async function saveTeacherProfile(_prev: FormState, formData: FormData): Promise<FormState> {
   const user = await requireUser();
-  const keys = ["professionalName", "bio", "experienceYears", "lineage", "certifications", "contactEmail", "contactPhone", "socialLinks"];
+  const keys = ["professionalName", "bio", "experienceYears", "lineage", "accessPlans", "certifications", "contactEmail", "contactPhone", "socialLinks"];
   const values = Object.fromEntries(keys.map((k) => [k, text(formData, k)]));
   const artIds = formData.getAll("martialArtIds").filter((v): v is string => typeof v === "string");
 
@@ -30,6 +30,7 @@ export async function saveTeacherProfile(_prev: FormState, formData: FormData): 
     bio: d.bio,
     experience_years: d.experienceYears ?? null,
     lineage: d.lineage,
+    access_plans: d.accessPlans,
     certifications: d.certifications,
     contact_email: d.contactEmail,
     contact_phone: d.contactPhone,

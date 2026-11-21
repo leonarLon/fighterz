@@ -13,6 +13,7 @@ export type TeacherFormValues = {
   bio: string;
   experienceYears: string;
   lineage: string;
+  accessPlans: string;
   certifications: string;
   contactEmail: string;
   contactPhone: string;
@@ -52,9 +53,26 @@ export function TeacherForm({ arts, initial, isNew }: { arts: Art[]; initial: Te
         />
         <InputField id="lineage" label="Linhagem (opcional)" maxLength={300} defaultValue={v?.lineage ?? initial.lineage} errors={e.lineage} />
       </div>
+      <TextareaField
+        id="accessPlans"
+        label="Planos aceitos onde dou aula (opcional)"
+        rows={2}
+        maxLength={500}
+        help="Ex.: Tatame Central aceita TotalPass Silver e Wellhub Gold; diária na Equipe Raiz."
+        defaultValue={v?.accessPlans ?? initial.accessPlans}
+        errors={e.accessPlans}
+      />
 
       <fieldset aria-describedby={e.martialArts ? "arts-error" : undefined}>
         <legend className="mb-2 text-sm font-semibold">Modalidades que você ensina</legend>
+        {/* Valores enviados a partir do estado: o React reinicia o formulário depois de cada envio e
+            caixas/seleções controladas podem voltar ao padrão no DOM (perderiam a escolha após um erro). */}
+        {Object.entries(selected).map(([artId, rankId]) => (
+          <span key={artId} hidden>
+            <input type="hidden" name="martialArtIds" value={artId} />
+            <input type="hidden" name={`rank-${artId}`} value={rankId} />
+          </span>
+        ))}
         <ul className="space-y-2">
           {arts.map((art) => {
             const checked = art.id in selected;
@@ -63,7 +81,6 @@ export function TeacherForm({ arts, initial, isNew }: { arts: Art[]; initial: Te
                 <label className="flex min-h-9 flex-1 items-center gap-2 text-sm">
                   <input
                     type="checkbox"
-                    name="martialArtIds"
                     value={art.id}
                     checked={checked}
                     onChange={(ev) =>
@@ -82,7 +99,6 @@ export function TeacherForm({ arts, initial, isNew }: { arts: Art[]; initial: Te
                   <label className="flex items-center gap-2 text-sm">
                     <span className="sr-only">Sua graduação em {art.name}</span>
                     <select
-                      name={`rank-${art.id}`}
                       value={selected[art.id]}
                       onChange={(ev) => setSelected((cur) => ({ ...cur, [art.id]: ev.target.value }))}
                       className="min-h-9 rounded-md border border-border bg-surface px-2"

@@ -35,6 +35,7 @@ export default async function TeacherAreaPage() {
     bio: profile?.bio ?? "",
     experienceYears: profile?.experience_years?.toString() ?? "",
     lineage: profile?.lineage ?? "",
+    accessPlans: profile?.access_plans ?? "",
     certifications: certs.map((c) => [c.title, c.issuer, c.year].filter(Boolean).join(" — ")).join("\n"),
     contactEmail: profile?.contact_email ?? "",
     contactPhone: profile?.contact_phone ?? "",

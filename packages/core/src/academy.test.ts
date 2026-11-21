@@ -100,6 +100,13 @@ describe('schemas da Fase 4', () => {
     expect(teacherProfileSchema.parse({ ...base, socialLinks: ['https://x.com/prof'], contactEmail: '' }).contactEmail).toBeNull();
   });
 
+  it('professor: planos aceitos onde dá aula (opcional, até 500)', () => {
+    const base = { professionalName: 'Prof', showContact: false, socialLinks: [], martialArts: [{ martialArtId: uuid, rankId: '' }] };
+    expect(teacherProfileSchema.parse({ ...base, accessPlans: '  Tatame aceita TotalPass Gold  ' }).accessPlans).toBe('Tatame aceita TotalPass Gold');
+    expect(teacherProfileSchema.parse({ ...base, accessPlans: '' }).accessPlans).toBeNull();
+    expect(teacherProfileSchema.safeParse({ ...base, accessPlans: 'x'.repeat(501) }).success).toBe(false);
+  });
+
   it('academia: instagram com ou sem @', () => {
     expect(academySchema.parse({ name: 'Tatame', martialArtIds: [uuid], instagram: '@tatame.demo' }).instagram).toBe('tatame.demo');
   });

@@ -98,8 +98,8 @@ Todas aditivas (nenhuma coluna existente é apagada). Toda view nova com `revoke
 
 | Funcionalidade | Analisado | Planejado | Implementado | Unit | Integração | E2E | Segurança | Regressão | Docs | Validado |
 |---|---|---|---|---|---|---|---|---|---|---|
-| Bug de graduação | ✅ (reproduzido) | ✅ | ✅ (local) | — (regra no banco) | ✅ pgTAP 20 | ✅ | ✅ RLS | ✅ suíte completa | ✅ | ⬜ aceite + produção |
-| TotalPass / Wellhub / diária | ✅ | ✅ | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ |
+| Bug de graduação | ✅ (reproduzido) | ✅ | ✅ (publicado 21/11) | — (regra no banco) | ✅ pgTAP 20 | ✅ | ✅ RLS | ✅ suíte completa | ✅ | ✅ |
+| TotalPass / Wellhub / diária | ✅ | ✅ | ✅ (local) | ✅ | ✅ pgTAP 21 | ✅ | ✅ RLS + API | ✅ suíte completa | ✅ | ⬜ aceite + produção |
 | Perfil comercial de academia | ✅ | ✅ | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ |
 | Páginas de marca, loja e serviço | ✅ | ✅ | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ |
 | Planos e assinaturas | ✅ | ✅ | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ |

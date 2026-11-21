@@ -1,6 +1,7 @@
 import { z } from 'zod';
 import { CLASS_LEVELS, CLASS_STATUSES } from '../domain/schedule';
 import { normalizeCep } from '../domain/address';
+import { MAX_PRICE_CENTS, MIN_PRICE_CENTS, parseBrl } from '../domain/money';
 import { BRAZILIAN_STATES, usernameSchema } from './profile';
 
 const optional = (max: number, message: string) =>
@@ -49,6 +50,7 @@ export const teacherProfileSchema = z.object({
   bio: optional(2000, 'A apresentação pode ter no máximo 2000 caracteres.'),
   experienceYears: z.coerce.number().int().min(0, 'Valor inválido.').max(80, 'Valor inválido.').optional().nullable(),
   lineage: optional(300, 'Máximo de 300 caracteres.'),
+  accessPlans: optional(500, 'Máximo de 500 caracteres.'),
   certifications: z.string().max(4000).optional().transform((value) => parseCertifications(value ?? '')),
   contactEmail: email,
   contactPhone: phone,
@@ -136,3 +138,68 @@ export const MEMBERSHIP_ROLE_LABELS = {
   teacher: 'Professor',
   student: 'Aluno',
 } as const;
+
+// ---------------------------------------------------------------------------
+// TotalPass, Wellhub e diária por unidade (PLANO_EVOLUCAO_COMERCIAL.md §4)
+// ---------------------------------------------------------------------------
+export const UNIT_ACCESS_KINDS = ['totalpass', 'wellhub', 'day_pass'] as const;
+export type UnitAccessKind = (typeof UNIT_ACCESS_KINDS)[number];
+export const UNIT_ACCESS_LABELS: Record<UnitAccessKind, string> = { totalpass: 'TotalPass', wellhub: 'Wellhub', day_pass: 'Diária' };
+
+export const PRICE_STATUSES = ['paid', 'free', 'undisclosed'] as const;
+export type PriceStatus = (typeof PRICE_STATUSES)[number];
+export const PRICE_STATUS_LABELS: Record<PriceStatus, string> = { paid: 'Paga', free: 'Gratuita', undisclosed: 'Valor não divulgado' };
+
+/** Planos aceitos digitados em uma linha ("Silver, Gold") ou um por linha. */
+export function parsePlanList(input: string): string[] {
+  return input
+    .split(/[,\n]/)
+    .map((p) => p.trim())
+    .filter(Boolean);
+}
+
+export const unitAccessSchema = z
+  .object({
+    kind: z.enum(UNIT_ACCESS_KINDS),
+    accepted: z.boolean(),
+    plans: z.string().max(600).optional().default(''),
+    martialArtIds: z.array(z.uuid()).max(20).default([]),
+    restrictions: optional(500, 'Máximo de 500 caracteres.'),
+    accessHours: optional(300, 'Máximo de 300 caracteres.'),
+    notes: optional(500, 'Máximo de 500 caracteres.'),
+    priceStatus: z.union([z.enum(PRICE_STATUSES), z.literal('')]).optional().default(''),
+    price: z.string().trim().max(30).optional().default(''),
+  })
+  .transform((d, ctx) => {
+    const plans = d.kind === 'day_pass' ? [] : parsePlanList(d.plans);
+    if (plans.length > 10) ctx.addIssue({ code: 'custom', path: ['plans'], message: 'Informe no máximo 10 planos.' });
+    if (plans.some((p) => p.length > 40)) ctx.addIssue({ code: 'custom', path: ['plans'], message: 'Cada plano pode ter até 40 caracteres.' });
+    if (new Set(plans.map((p) => p.toLowerCase())).size !== plans.length)
+      ctx.addIssue({ code: 'custom', path: ['plans'], message: 'Há planos repetidos.' });
+
+    let priceStatus: PriceStatus | null = null;
+    let priceCents: number | null = null;
+    if (d.kind === 'day_pass' && d.accepted) {
+      if (!d.priceStatus) ctx.addIssue({ code: 'custom', path: ['priceStatus'], message: 'Diga se a diária é paga, gratuita ou se o valor não é divulgado.' });
+      else priceStatus = d.priceStatus;
+      if (priceStatus === 'paid') {
+        priceCents = parseBrl(d.price);
+        if (priceCents === null) ctx.addIssue({ code: 'custom', path: ['price'], message: 'Informe o valor. Ex.: 40,00' });
+        else if (priceCents < MIN_PRICE_CENTS || priceCents > MAX_PRICE_CENTS)
+          ctx.addIssue({ code: 'custom', path: ['price'], message: 'Valor deve ficar entre R$ 1,00 e R$ 100.000,00.' });
+      }
+    }
+    return {
+      kind: d.kind,
+      accepted: d.accepted,
+      plans,
+      martialArtIds: d.accepted ? [...new Set(d.martialArtIds)] : [],
+      restrictions: d.restrictions,
+      accessHours: d.accessHours,
+      notes: d.notes,
+      priceStatus,
+      priceCents,
+    };
+  });
+
+export type UnitAccessInput = z.infer<typeof unitAccessSchema>;

@@ -77,7 +77,7 @@ consentimentos LGPD: `terms_accepted_at`, `privacy_accepted_at`.
 Função `has_role(role)` `security definer stable` usada nas políticas.
 
 **teacher_profiles** (1:0..1)
-`user_id PK FK`, `professional_name`, `bio`, `experience_years`, `lineage text` (ex.: "linhagem"), `certifications jsonb` (lista de {título, emissor, ano}), `contact_email`, `contact_phone`, `show_contact bool default false`, `social_links jsonb` (validado: só URLs https), `status enum('pending','approved','rejected','revoked')`, `reviewed_by`, `reviewed_at`, `review_notes`.
+`user_id PK FK`, `professional_name`, `bio`, `experience_years`, `lineage text` (ex.: "linhagem"), `access_plans text` (≤ 500, planos aceitos onde dá aula, migration 21), `certifications jsonb` (lista de {título, emissor, ano}), `contact_email`, `contact_phone`, `show_contact bool default false`, `social_links jsonb` (validado: só URLs https), `status enum('pending','approved','rejected','revoked')`, `reviewed_by`, `reviewed_at`, `review_notes`.
 Modalidades ensinadas: `teacher_martial_arts(teacher_id, martial_art_id, rank_id)` PK composta.
 
 ### 4.2 Modalidades e graduações
@@ -117,6 +117,9 @@ Modalidades: `academy_martial_arts(academy_id, martial_art_id)`.
 | coords_confirmed_at | timestamptz |
 | timezone | text default 'America/Sao_Paulo' |
 | is_active | bool |
+
+**academy_unit_access** (migration 21, 21/11/2026: TotalPass, Wellhub e diária **por unidade**)
+`id`, `unit_id FK`, `academy_id FK` (copiado da unidade por trigger), `kind enum('totalpass','wellhub','day_pass')`, `accepted bool`, `plans text[]` (até 10, sem repetição), `martial_art_ids uuid[]` (validados no trigger), `restrictions`, `access_hours`, `notes`, `price_status enum('paid','free','undisclosed')` e `price_cents int` (só diária; valor obrigatório quando paga e proibido nos outros casos), `updated_at`, `updated_by`. unique(unit_id, kind). Leitura pública se a academia é visível; escrita só `is_academy_manager` (owner/admin). Professor da academia **não** edita, a não ser que o dono o promova a admin.
 
 Índices: GiST(location), btree(state, city, neighborhood) com `unaccent(lower())`.
 

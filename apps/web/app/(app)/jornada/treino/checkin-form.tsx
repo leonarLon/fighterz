@@ -86,9 +86,10 @@ export function CheckinForm({
       <fieldset className="space-y-3 rounded-md border border-border p-3">
         <legend className="px-1 text-sm font-semibold">Feed</legend>
         <label className="flex items-start gap-3">
+          {/* Enviado a partir do estado (o React reinicia o formulário depois de cada envio). */}
+          <input type="hidden" name="share" value={share ? "on" : ""} />
           <input
             type="checkbox"
-            name="share"
             checked={share}
             onChange={(ev) => setShare(ev.target.checked)}
             className="mt-0.5 size-5 shrink-0 accent-(--primary)"

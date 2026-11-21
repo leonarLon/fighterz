@@ -1,3 +1,4 @@
+import AxeBuilder from "@axe-core/playwright";
 import { test as base, expect, type Browser, type BrowserContext } from "@playwright/test";
 import { createClient } from "@supabase/supabase-js";
 import { createConfirmedUser, localEnv, signInViaUi } from "./helpers";
@@ -44,6 +45,7 @@ test.describe("academias e aulas (visitante, sem login)", () => {
     }
     // Contato aparece porque o professor consentiu (show_contact)
     await expect(page.getByText("diego.ramos@figtherz.local")).toBeVisible();
+    await expect(page.locator("p", { hasText: "Planos aceitos onde dá aula:" })).toContainText("TotalPass Silver e Gold");
   });
 
   test("busca de aulas por filtros, cidade e distância", async ({ page, context }) => {
@@ -135,11 +137,12 @@ test.describe("gestão de academia e vínculos", () => {
 
   test("pedido de professor e aprovação pelo admin", async ({ browser }) => {
     const candidate = await newContext(browser);
-    await createConfirmedUser(candidate.page, "cand");
+    const candidateUser = await createConfirmedUser(candidate.page, "cand");
     const professionalName = `Professor E2E ${Date.now().toString(36)}`;
     await candidate.page.goto("/professor");
     await candidate.page.getByLabel("Nome profissional").fill(professionalName);
     await candidate.page.getByLabel("Muay Thai").check();
+    await candidate.page.getByLabel("Planos aceitos onde dou aula (opcional)").fill("Arena Norte aceita TotalPass e Wellhub Gold");
     await candidate.page.getByRole("button", { name: "Enviar pedido" }).click();
     await expect(candidate.page.getByText("Pedido enviado!")).toBeVisible();
     await candidate.page.reload();
@@ -159,7 +162,13 @@ test.describe("gestão de academia e vínculos", () => {
 
     await candidate.page.goto("/professor");
     await expect(candidate.page.getByText("Perfil profissional aprovado.")).toBeVisible();
-    await Promise.all([candidate.context.close(), admin.context.close()]);
+    await expect(candidate.page.getByLabel("Planos aceitos onde dou aula (opcional)")).toHaveValue("Arena Norte aceita TotalPass e Wellhub Gold");
+
+    // Visitante vê os planos citados no perfil público do professor
+    const visitor = await newContext(browser);
+    await visitor.page.goto(`/professores/${candidateUser.username}`);
+    await expect(visitor.page.locator("p", { hasText: "Planos aceitos onde dá aula:" })).toContainText("Arena Norte aceita TotalPass e Wellhub Gold");
+    await Promise.all([candidate.context.close(), admin.context.close(), visitor.context.close()]);
   });
 
   test("aluno pede vínculo e a academia aprova", async ({ browser }) => {
@@ -213,5 +222,81 @@ test.describe("API direta: academias respeitam a RLS", () => {
     // Proxy de geocodificação exige login (não vira proxy aberto para serviços públicos)
     const geo = await request.get("/api/geo/cep?cep=80020000");
     expect(geo.status()).toBe(401);
+  });
+});
+
+test.describe("TotalPass, Wellhub e diária por unidade", () => {
+  test("seed: cada unidade mostra as próprias regras para o visitante", async ({ page }) => {
+    await page.goto("/academias/tatame-central");
+    const centro = page.locator("li", { has: page.getByRole("heading", { name: "Sede Centro" }) });
+    await expect(centro.getByText("Aceita TotalPass")).toBeVisible();
+    await expect(centro.getByText("Silver, Gold").first()).toBeVisible();
+    await expect(centro.getByText("Diária: R$ 40,00")).toBeVisible();
+    const agua = page.locator("li", { has: page.getByRole("heading", { name: "Unidade Água Verde" }) });
+    await expect(agua.getByText("Não aceita TotalPass")).toBeVisible();
+    await expect(agua.getByText("Diária gratuita")).toBeVisible();
+    await page.goto("/academias/equipe-raiz-combate");
+    await expect(page.getByText("Diária: valor não divulgado")).toBeVisible();
+  });
+
+  test("dono informa, salva, recarrega e o público vê", async ({ page, browser, isMobile }) => {
+    test.skip(isMobile, "fluxo de gestão roda no desktop");
+    await signInViaUi(page, "atleta5@figtherz.local", "Figtherz123");
+    await expect(page).toHaveURL(/\/inicio$/);
+    await page.goto("/academias/arena-norte-muay-thai/gerenciar");
+    await page.locator("summary", { hasText: "TotalPass, Wellhub e diária · Tijuca" }).click();
+
+    const tp = page.getByRole("form", { name: "TotalPass na unidade Tijuca" });
+    await tp.getByLabel("Aceita TotalPass nesta unidade").check();
+    await tp.getByLabel("Planos aceitos (opcional)").fill("Silver, Gold");
+    await tp.getByLabel("Muay Thai").check();
+    await tp.getByLabel("Horários de acesso (opcional)").fill("Seg a sex, 7h às 21h");
+    await tp.getByRole("button", { name: "Salvar TotalPass" }).click();
+    await expect(tp.getByText("TotalPass salvo.")).toBeVisible();
+
+    const wh = page.getByRole("form", { name: "Wellhub na unidade Tijuca" });
+    await wh.getByLabel("Aceita Wellhub nesta unidade").uncheck();
+    await wh.getByRole("button", { name: "Salvar Wellhub" }).click();
+    await expect(wh.getByText("Wellhub salvo.")).toBeVisible();
+
+    const dp = page.getByRole("form", { name: "Diária na unidade Tijuca" });
+    await dp.getByLabel("Oferece diária nesta unidade").check();
+    await dp.getByLabel("Paga").check();
+    await dp.getByLabel("Valor (R$)").fill("");
+    await dp.getByRole("button", { name: "Salvar Diária" }).click();
+    await expect(dp.getByText("Informe o valor. Ex.: 40,00")).toBeVisible();
+    await dp.getByLabel("Valor (R$)").fill("45,50");
+    await dp.getByRole("button", { name: "Salvar Diária" }).click();
+    await expect(dp.getByText("Diária salvo.")).toBeVisible();
+
+    // Persistência: recarregar mantém os valores.
+    await page.reload();
+    await page.locator("summary", { hasText: "TotalPass, Wellhub e diária · Tijuca" }).click();
+    await expect(page.getByRole("form", { name: "TotalPass na unidade Tijuca" }).getByLabel("Planos aceitos (opcional)")).toHaveValue("Silver, Gold");
+    await expect(page.getByRole("form", { name: "Diária na unidade Tijuca" }).getByLabel("Valor (R$)")).toHaveValue("45,50");
+    const axe = await new AxeBuilder({ page }).withTags(["wcag2a", "wcag2aa", "wcag21a", "wcag21aa"]).analyze();
+    expect(axe.violations.map((v) => `${v.id}: ${v.nodes.map((n) => n.target.join(" ")).join(", ")}`)).toEqual([]);
+
+    // Visitante (sem login) vê na página pública.
+    const visitor = await newContext(browser);
+    await visitor.page.goto("/academias/arena-norte-muay-thai");
+    const unit = visitor.page.locator("li", { has: visitor.page.getByRole("heading", { name: "Tijuca" }) });
+    await expect(unit.getByText("Aceita TotalPass")).toBeVisible();
+    await expect(unit.getByText("Silver, Gold")).toBeVisible();
+    await expect(unit.getByText("Seg a sex, 7h às 21h")).toBeVisible();
+    await expect(unit.getByText("Não aceita Wellhub")).toBeVisible();
+    await expect(unit.getByText("Diária: R$ 45,50")).toBeVisible();
+    await visitor.context.close();
+  });
+
+  test("API direta: quem não gerencia não escreve", async () => {
+    const env = localEnv();
+    const client = createClient(env.NEXT_PUBLIC_SUPABASE_URL!, env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY!, { auth: { persistSession: false } });
+    await client.auth.signInWithPassword({ email: "demo@figtherz.local", password: "Figtherz123" });
+    const { data: unit } = await client.from("academy_units").select("id").eq("name", "Sede Centro").single();
+    const insert = await client.from("academy_unit_access").insert({ unit_id: unit!.id, academy_id: "00000000-0000-0000-0000-000000000000", kind: "wellhub", accepted: false });
+    expect(insert.error?.code).toBe("42501");
+    const update = await client.from("academy_unit_access").update({ price_cents: 1 }).eq("unit_id", unit!.id).select();
+    expect(update.data ?? []).toEqual([]);
   });
 });

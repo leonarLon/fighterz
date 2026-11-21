@@ -154,6 +154,9 @@ begin
     (u[6], 'Kru Igor Mendes', 'Muay Thai tradicional, condicionamento e técnica.', 9, null, false, null, '[]', '[]'),
     (u[7], 'Juliana Prado', 'Judô para adultos iniciantes.', 6, null, false, null, '[]', '[]');
   update public.teacher_profiles set status = 'approved', reviewed_at = now() where user_id in (u[2], u[6]);
+  update public.teacher_profiles
+     set access_plans = 'Tatame Central (Sede Centro): TotalPass Silver e Gold, Wellhub Basic e Silver. Equipe Raiz: diária na recepção.'
+   where user_id = u[2];
   insert into public.teacher_martial_arts (teacher_id, martial_art_id, rank_id) values
     (u[2], bjj, (select id from public.martial_art_ranks where martial_art_id = bjj and name = 'Faixa Preta')),
     (u[6], mt,  (select id from public.martial_art_ranks where martial_art_id = mt and name = 'Kruang Preto')),
@@ -185,6 +188,15 @@ begin
   values (a3, 'Pinheiros', '05422000', 'Rua Modelo', '300', 'Pinheiros', 'São Paulo', 'SP', -23.5670, -46.6920) returning id into u3;
   insert into public.academy_units (academy_id, name, postal_code, street, number, neighborhood, city, state, latitude, longitude)
   values (a4, 'Tijuca', '20510000', 'Rua Demonstração', '77', 'Tijuca', 'Rio de Janeiro', 'RJ', -22.9250, -43.2320) returning id into u4;
+
+  -- TotalPass, Wellhub e diária (fictícios): cada unidade com regras próprias.
+  insert into public.academy_unit_access (unit_id, kind, accepted, plans, martial_art_ids, access_hours, restrictions, price_status, price_cents) values
+    (u1a, 'totalpass', true, array['Silver', 'Gold'], array[bjj, mt], 'Seg a sex, 6h às 22h', 'Só nas aulas abertas da grade', null, null),
+    (u1a, 'wellhub', true, array['Basic', 'Silver'], array[bjj], 'Seg a sáb', null, null, null),
+    (u1a, 'day_pass', true, '{}', array[bjj, mt], null, 'Trazer kimono', 'paid', 4000),
+    (u1b, 'totalpass', false, '{}', '{}', null, null, null, null),
+    (u1b, 'day_pass', true, '{}', '{}', null, 'Primeira aula experimental', 'free', null),
+    (u2, 'day_pass', true, '{}', '{}', null, null, 'undisclosed', null);
 
   -- Vínculos ativos (aceite mútuo simulado no seed)
   insert into public.academy_memberships (academy_id, user_id, role, status, requested_by, approved_at) values

@@ -2,7 +2,15 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import { academySchema, classSchema, inviteSchema, unitSchema } from "@figtherz/core";
+import {
+  academySchema,
+  classSchema,
+  inviteSchema,
+  unitSchema,
+  unitAccessSchema,
+  UNIT_ACCESS_LABELS,
+  type UnitAccessKind,
+} from "@figtherz/core";
 import { createClient } from "@/lib/supabase/server";
 import { requireUser } from "@/lib/auth";
 import { fromZodError, text, type FormState } from "@/lib/form-state";
@@ -19,6 +27,9 @@ const ERRORS: Record<string, string> = {
   teacher_not_active_in_academy: "Esse professor não tem vínculo ativo com a academia.",
   unit_not_in_academy: "A unidade não pertence a esta academia.",
   forbidden: "Você não tem permissão para isso.",
+  "42501": "Você não tem permissão para alterar esta unidade.",
+  martial_art_not_found: "Modalidade inválida.",
+  account_suspended: "Sua conta está suspensa.",
 };
 
 function message(error: { code?: string; message?: string } | null, fallback: string) {
@@ -142,6 +153,50 @@ export async function saveUnit(academyId: string, unitId: string | null, _prev: 
 
   revalidateAcademy(await slugOf(academyId));
   return { status: "success", message: unitId ? "Unidade atualizada." : "Unidade criada." };
+}
+
+/** TotalPass, Wellhub ou diária de uma unidade. A RLS garante que só a gestão da academia escreve. */
+export async function saveUnitAccess(academyId: string, unitId: string, kind: UnitAccessKind, _prev: FormState, formData: FormData): Promise<FormState> {
+  await requireUser();
+  const values = {
+    accepted: formData.get("accepted") === "on" ? "on" : "",
+    plans: text(formData, "plans"),
+    restrictions: text(formData, "restrictions"),
+    accessHours: text(formData, "accessHours"),
+    notes: text(formData, "notes"),
+    priceStatus: text(formData, "priceStatus"),
+    price: text(formData, "price"),
+  };
+  const parsed = unitAccessSchema.safeParse({
+    ...values,
+    kind,
+    accepted: values.accepted === "on",
+    martialArtIds: formData.getAll("martialArtIds").map(String),
+  });
+  if (!parsed.success) return fromZodError(parsed.error, values);
+  const d = parsed.data;
+  const row = {
+    accepted: d.accepted,
+    plans: d.plans,
+    martial_art_ids: d.martialArtIds,
+    restrictions: d.restrictions,
+    access_hours: d.accessHours,
+    notes: d.notes,
+    price_status: d.priceStatus,
+    price_cents: d.priceCents,
+  };
+
+  const supabase = await createClient();
+  // Sem upsert: o UPDATE não tem permissão nas colunas unit_id/kind (o ON CONFLICT tentaria escrevê-las).
+  const { data: existing } = await supabase.from("academy_unit_access").select("id").eq("unit_id", unitId).eq("kind", kind).maybeSingle();
+  const { data: saved, error } = existing
+    ? await supabase.from("academy_unit_access").update(row).eq("id", existing.id).select("id")
+    : await supabase.from("academy_unit_access").insert({ ...row, unit_id: unitId, academy_id: academyId, kind }).select("id");
+  if (error) return { status: "error", message: message(error, "Não foi possível salvar."), values };
+  if (!saved?.length) return { status: "error", message: "Você não tem permissão para alterar esta unidade.", values };
+
+  revalidateAcademy(await slugOf(academyId));
+  return { status: "success", message: `${UNIT_ACCESS_LABELS[kind]} salvo.` };
 }
 
 export async function deleteUnit(academyId: string, unitId: string): Promise<Result> {

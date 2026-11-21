@@ -2,8 +2,8 @@
 
 import { useActionState, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { Check, Eye, EyeOff, MapPin, Pencil, Plus, Trash2, UserMinus, X } from "lucide-react";
-import { CLASS_LEVEL_LABELS, MEMBERSHIP_ROLE_LABELS, WEEKDAY_SHORT, formatAddress, formatTime } from "@figtherz/core";
+import { Check, Eye, EyeOff, MapPin, Pencil, Plus, Ticket, Trash2, UserMinus, X } from "lucide-react";
+import { CLASS_LEVEL_LABELS, MEMBERSHIP_ROLE_LABELS, UNIT_ACCESS_KINDS, WEEKDAY_SHORT, formatAddress, formatTime } from "@figtherz/core";
 import {
   deleteClass,
   deleteUnit,
@@ -22,6 +22,7 @@ import { InputField, SelectField, TextareaField } from "@/components/ui/field";
 import { FormMessage } from "@/components/ui/form-message";
 import { ClassForm } from "./class-form";
 import { UnitForm } from "./unit-form";
+import { UnitAccessForm } from "./unit-access-form";
 
 type Props = { data: AcademyData; arts: { id: string; name: string }[] };
 
@@ -120,6 +121,25 @@ export function UnitsSection({ data }: { data: AcademyData }) {
                     <Trash2 aria-hidden className="size-4" />
                   </Button>
                 </div>
+                <details className="w-full rounded-md border border-border">
+                  <summary className="flex min-h-11 cursor-pointer items-center gap-2 px-3 text-sm font-semibold">
+                    <Ticket aria-hidden className="size-4 text-accent" /> TotalPass, Wellhub e diária · {unit.name}
+                  </summary>
+                  <div className="divide-y divide-border border-t border-border">
+                    {UNIT_ACCESS_KINDS.map((kind) => (
+                      <div key={kind} className="p-3">
+                        <UnitAccessForm
+                          academyId={data.academy.id}
+                          unitId={unit.id}
+                          unitName={unit.name}
+                          kind={kind}
+                          current={data.access.find((a) => a.unit_id === unit.id && a.kind === kind)}
+                          arts={data.martialArts.map((m) => ({ id: m.id, name: m.name }))}
+                        />
+                      </div>
+                    ))}
+                  </div>
+                </details>
               </div>
             )}
           </li>

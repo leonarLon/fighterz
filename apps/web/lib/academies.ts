@@ -21,6 +21,22 @@ export type Unit = {
   is_active: boolean;
 };
 
+/** TotalPass, Wellhub ou diária de uma unidade (tabela academy_unit_access). */
+export type UnitAccess = {
+  id: string;
+  unit_id: string;
+  kind: "totalpass" | "wellhub" | "day_pass";
+  accepted: boolean;
+  plans: string[];
+  martial_art_ids: string[];
+  restrictions: string | null;
+  access_hours: string | null;
+  notes: string | null;
+  price_status: "paid" | "free" | "undisclosed" | null;
+  price_cents: number | null;
+  updated_at: string;
+};
+
 export type ClassRow = ScheduleItem & {
   unit_id: string;
   martial_art_id: string;
@@ -42,7 +58,7 @@ export const loadAcademy = cache(async (slug: string) => {
   if (!academy) return null;
 
   const user = await getCurrentUser();
-  const [arts, units, classes, staff, isManager, mine, following] = await Promise.all([
+  const [arts, units, classes, staff, isManager, mine, following, access] = await Promise.all([
     supabase.from("academy_martial_arts").select("martial_art_id, martial_arts(name, slug, sort_order)").eq("academy_id", academy.id),
     supabase.from("academy_units").select(UNIT_COLUMNS).eq("academy_id", academy.id).order("name"),
     supabase
@@ -62,6 +78,10 @@ export const loadAcademy = cache(async (slug: string) => {
     user
       ? supabase.from("academy_followers").select("user_id").eq("academy_id", academy.id).eq("user_id", user.id).maybeSingle()
       : Promise.resolve({ data: null }),
+    supabase
+      .from("academy_unit_access")
+      .select("id, unit_id, kind, accepted, plans, martial_art_ids, restrictions, access_hours, notes, price_status, price_cents, updated_at")
+      .eq("academy_id", academy.id),
   ]);
 
   return {
@@ -70,6 +90,7 @@ export const loadAcademy = cache(async (slug: string) => {
       .map((a) => ({ id: a.martial_art_id, ...(a.martial_arts as unknown as { name: string; slug: string; sort_order: number }) }))
       .sort((a, b) => a.sort_order - b.sort_order),
     units: (units.data ?? []) as Unit[],
+    access: (access.data ?? []) as UnitAccess[],
     classes: (classes.data ?? []) as unknown as ClassRow[],
     members: (staff.data ?? []).map((m) => ({
       userId: m.user_id,

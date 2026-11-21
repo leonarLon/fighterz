@@ -8,6 +8,7 @@ import { createClient } from "@/lib/supabase/server";
 import { routes } from "@/lib/routes";
 import { AddressActions } from "@/components/academy/address-actions";
 import { ScheduleGrid } from "@/components/academy/schedule-grid";
+import { UnitAccessInfo } from "@/components/academy/unit-access-info";
 import { LeafletMap } from "@/components/map/map";
 import { Avatar } from "@/components/ui/avatar";
 import { BeltDivider } from "@/components/ui/belt";
@@ -155,6 +156,7 @@ export default async function AcademyPage({ params }: Props) {
                 <div className="mt-3">
                   <AddressActions address={unit} name={`${academy.name} · ${unit.name}`} />
                 </div>
+                <UnitAccessInfo items={data.access.filter((a) => a.unit_id === unit.id)} arts={martialArts} />
               </Card>
             </li>
           ))}
