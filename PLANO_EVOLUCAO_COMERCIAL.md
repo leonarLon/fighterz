@@ -1,6 +1,6 @@
 # Plano de evolução: comercial, planos e correções (21/11/2026)
 
-> Status: **Fases 1 e 2 concluídas. Decisões do usuário (21/11/2026): graduação atual = maior faixa e grau; marcas/lojas/serviços como página separada; execução fase a fase. Fase 3 (graduação) implementada localmente.** Cada fase abaixo só começa com o "pode seguir" do usuário. Migrations remotas e publicação continuam exigindo autorização separada.
+> Status: **Concluído em 22/11/2026.** Fases 3 a 8 publicadas (migrations 20–26), Fases 9–10 (cobertura, regressão, documentação) feitas. Relatório final em `RELATORIO_EVOLUCAO_COMERCIAL.md`.
 
 ## 1. Auditoria: o que já existe e será reaproveitado
 
@@ -105,5 +105,5 @@ Todas aditivas (nenhuma coluna existente é apagada). Toda view nova com `revoke
 | Planos e assinaturas | ✅ | ✅ | ✅ (publicado 22/11) | ✅ | ✅ pgTAP 24 | ✅ | ✅ RLS + API | ✅ suíte completa | ✅ | ✅ |
 | Professores gratuitos | ✅ | ✅ | ✅ (sem mudança) | — | ✅ pgTAP 24 | ✅ | ✅ | ✅ suíte completa | ✅ | ✅ |
 | Detecção de publicidade indevida | ✅ | ✅ | ✅ (publicado 22/11) | ✅ | ✅ pgTAP 25 | ✅ | ✅ RLS + API | ✅ suíte completa | ✅ | ✅ |
-| Painel administrativo | ✅ | ✅ | ✅ (local) | — | ✅ pgTAP 26 | ✅ | ✅ papéis | ✅ suíte completa | ✅ | ⬜ aceite + produção |
-| Cobertura e documentação | ✅ | ✅ | ⬜ | — | — | — | — | — | ⬜ | ⬜ |
+| Painel administrativo | ✅ | ✅ | ✅ (publicado 22/11) | — | ✅ pgTAP 26 | ✅ | ✅ papéis | ✅ suíte completa | ✅ | ✅ |
+| Cobertura e documentação | ✅ | ✅ | ✅ (core 94,5% instr. / 87,4% desvios) | — | — | — | — | ✅ suíte completa | ✅ relatório final | ⬜ aceite |

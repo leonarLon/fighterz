@@ -4,7 +4,7 @@
 
 Rede social para praticantes, professores e academias de artes marciais e esportes de combate: comunidade, descoberta de academias e aulas, perfil profissional, jornada de evolução, registro de treinos, eventos e moderação. Construída sob uma **política de custo zero**.
 
-> **Status:** Fases 1 a 7 aceitas (Fase 7 em 14/11/2026). Tudo roda 100% local (Supabase CLI + Docker). Publicação só com autorização. Ver `PRODUCT_ROADMAP.md`.
+> **Status:** Fases 1 a 7 aceitas (14/11/2026), publicado em https://fighterz-mu.vercel.app. Evolução comercial (21–22/11/2026) publicada: TotalPass/Wellhub/diária, perfil comercial de academia, páginas de marca/loja/serviço, planos administrados, detecção de publicidade com revisão e recurso. Desenvolvimento local (Supabase CLI + Docker); migrations remotas e publicação só com autorização. Ver [RELATORIO_EVOLUCAO_COMERCIAL.md](RELATORIO_EVOLUCAO_COMERCIAL.md).
 
 ## Documentação
 | Documento | Conteúdo |
@@ -20,6 +20,9 @@ Rede social para praticantes, professores e academias de artes marciais e esport
 | [COST_ESTIMATE.md](COST_ESTIMATE.md) | Estimativa de custos e limitações |
 | [DEPLOYMENT.md](DEPLOYMENT.md) | Instalação, execução local, migrations, testes, checklist de publicação |
 | [MOBILE_PLAN.md](MOBILE_PLAN.md) | Plano do app Expo (React Native) |
+| [PLANO_EVOLUCAO_COMERCIAL.md](PLANO_EVOLUCAO_COMERCIAL.md) | Auditoria, decisões e checklist da evolução comercial |
+| [TEST_MATRIX.md](TEST_MATRIX.md) | Matriz de rastreabilidade: requisito → cenário → teste |
+| [RELATORIO_EVOLUCAO_COMERCIAL.md](RELATORIO_EVOLUCAO_COMERCIAL.md) | Relatório final da evolução comercial |
 
 ## Início rápido
 Pré-requisitos: Node 20+, Docker Desktop.
@@ -41,8 +44,20 @@ As mesmas contas existem no site publicado (decisão de 14/11/2026), exceto que 
 | `atleta1@figtherz.local` … `atleta25@figtherz.local` | 25 atletas com posts, follows e comentários |
 | `atleta2`, `atleta6`, `atleta14`–`atleta18` | professores aprovados (atleta2 dá aula em 3 academias) |
 | `atleta7` | pedido de professor pendente |
-| `atleta1`, `atleta3`, `atleta4`, `atleta5` | donos das 4 academias fictícias |
+| `atleta1`, `atleta3`, `atleta4`, `atleta5` | donos das 4 academias fictícias (Tatame Central tem plano "Academia Destaque") |
+| `atleta3` (dono) e `atleta4` (admin) | página "Kimonos Tatame Forte" (loja com catálogo, promoção e plano "Página Pro") |
+| `atleta6` | página "Fisio Luta" (serviço verificado) |
+| `atleta24` | perfil com posts de venda: abre revisão em Administração → Publicidade |
 | `moderador@figtherz.local` | moderador |
 | `admin@figtherz.local` | superadmin |
 
 Detalhes, testes e publicação em [DEPLOYMENT.md](DEPLOYMENT.md).
+
+## Testes
+```
+npm run db:test                          # pgTAP (banco, RLS, regras)
+npm test                                 # Vitest (core + web)
+npm run test:coverage -w @figtherz/core  # cobertura das regras de negócio do core
+npm run test:e2e                         # Playwright (desktop + celular, com axe)
+npm run typecheck && npm run lint -w web
+```
