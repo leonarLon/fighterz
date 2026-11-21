@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Bell, Bookmark, Building2, CalendarDays, CalendarSearch, Compass, GraduationCap, Medal, House, Plus, Settings, UserRound, type LucideIcon } from "lucide-react";
+import { Bell, Bookmark, Building2, CalendarDays, CalendarSearch, Compass, GraduationCap, Medal, House, Plus, Settings, Store, UserRound, type LucideIcon } from "lucide-react";
 import { routes } from "@/lib/routes";
 import { cn } from "@/components/ui/cn";
 import { Logo } from "@/components/ui/logo";
@@ -29,6 +29,7 @@ const secondary: Item[] = [
   { href: routes.events, label: "Eventos", icon: CalendarDays },
   { href: routes.classes, label: "Aulas", icon: CalendarSearch },
   { href: routes.academies, label: "Academias", icon: Building2 },
+  { href: routes.businesses, label: "Marcas, lojas e serviços", icon: Store },
   { href: routes.teacherArea, label: "Área do professor", icon: GraduationCap },
 ];
 

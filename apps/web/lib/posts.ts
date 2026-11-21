@@ -50,6 +50,10 @@ export async function toPostViews(supabase: Client, rows: PostCardRow[]): Promis
     locationLabel: row.location_label,
     martialArtName: row.martial_art_name,
     academy: row.academy_name && row.academy_slug ? { name: row.academy_name, slug: row.academy_slug } : null,
+    business:
+      row.business_name && row.business_slug
+        ? { name: row.business_name, slug: row.business_slug, logoPath: row.business_logo_path }
+        : null,
     likeCount: row.like_count,
     commentCount: row.comment_count,
     createdAt: row.created_at,
@@ -102,6 +106,18 @@ export async function loadProfilePosts(supabase: Client, authorId: string, curso
   const c = decodeCursor(cursor);
   const { data } = await supabase.rpc("get_profile_posts", {
     p_author_id: authorId,
+    p_before_created_at: c?.createdAt,
+    p_before_id: c?.id,
+    p_limit: PAGE_SIZE,
+  });
+  const rows = data ?? [];
+  return { items: await toPostViews(supabase, rows), nextCursor: encodeCursor(rows, PAGE_SIZE) };
+}
+
+export async function loadBusinessPosts(supabase: Client, businessId: string, cursor?: string | null): Promise<Page> {
+  const c = decodeCursor(cursor);
+  const { data } = await supabase.rpc("get_business_posts", {
+    p_business: businessId,
     p_before_created_at: c?.createdAt,
     p_before_id: c?.id,
     p_limit: PAGE_SIZE,

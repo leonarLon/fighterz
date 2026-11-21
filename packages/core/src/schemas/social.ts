@@ -40,6 +40,8 @@ export const createPostSchema = z
       .optional()
       .transform((value) => value || null),
     media: z.array(postMediaInputSchema).max(MAX_IMAGES_PER_POST, `Até ${MAX_IMAGES_PER_POST} fotos por post.`),
+    /** Publicar como página comercial (marca, loja, serviço). O banco confere se a pessoa gerencia a página. */
+    businessId: z.union([uuid, z.literal('')]).optional().transform((value) => value || null),
   })
   .refine((data) => !data.media.some((m) => m.type === 'video') || data.media.length === 1, {
     path: ['media'],

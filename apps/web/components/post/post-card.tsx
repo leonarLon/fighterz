@@ -3,12 +3,13 @@
 import { useState, useTransition } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Bookmark, Dumbbell, Globe, Heart, Lock, MessageCircle, MoreHorizontal, Share2, Trash2, Flag, Users } from "lucide-react";
+import { Bookmark, Dumbbell, Globe, Heart, Lock, MessageCircle, MoreHorizontal, Share2, Store, Trash2, Flag, Users } from "lucide-react";
 import { compactCount, timeAgo, VISIBILITY_LABELS } from "@figtherz/core";
 import { deletePost, setLike, setSaved } from "@/app/actions/posts";
 import type { PostView, Viewer } from "@/lib/post-types";
 import { routes } from "@/lib/routes";
 import { Avatar } from "@/components/ui/avatar";
+import { PageLogo } from "@/components/media/page-banner";
 import { cn } from "@/components/ui/cn";
 import { Dialog } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -175,6 +176,22 @@ export function PostCard({ post, viewer, onDeleted }: { post: PostView; viewer: 
                 </Link>
               </>
             )}
+          </span>
+        </p>
+      )}
+
+      {post.business && (
+        <p className="mx-4 mb-3 flex items-center gap-2 rounded-md border border-border px-3 py-2 text-sm">
+          {post.business.logoPath ? (
+            <PageLogo path={post.business.logoPath} className="size-7" />
+          ) : (
+            <Store aria-hidden className="size-4 shrink-0 text-accent" />
+          )}
+          <span>
+            Publicado como página{" "}
+            <Link href={routes.business(post.business.slug)} className="font-semibold text-accent hover:underline">
+              {post.business.name}
+            </Link>
           </span>
         </p>
       )}

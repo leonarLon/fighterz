@@ -10,6 +10,8 @@ import { AddressActions } from "@/components/academy/address-actions";
 import { ScheduleGrid } from "@/components/academy/schedule-grid";
 import { UnitAccessInfo } from "@/components/academy/unit-access-info";
 import { LeafletMap } from "@/components/map/map";
+import { PageBanner, PageLogo } from "@/components/media/page-banner";
+import { PublicGallery } from "@/components/media/public-gallery";
 import { Avatar } from "@/components/ui/avatar";
 import { BeltDivider } from "@/components/ui/belt";
 import { ButtonLink } from "@/components/ui/button";
@@ -46,7 +48,10 @@ export default async function AcademyPage({ params }: Props) {
   return (
     <div className="space-y-6">
       <Card>
+        <PageBanner path={academy.cover_path} />
         <div className="flex flex-wrap items-start justify-between gap-3">
+          <div className="flex min-w-0 items-center gap-4">
+          <PageLogo path={academy.logo_path} />
           <div className="min-w-0">
             <h1 className="flex items-center gap-2 font-display text-3xl font-bold leading-tight lg:text-4xl">
               {academy.name}
@@ -55,6 +60,7 @@ export default async function AcademyPage({ params }: Props) {
             <p className="mt-1 text-muted">
               {martialArts.map((m) => m.name).join(" · ") || "Artes marciais"} · {compactCount(academy.follower_count)} seguidores
             </p>
+          </div>
           </div>
           {isManager && (
             <ButtonLink href={routes.manageAcademy(academy.slug)} variant="secondary">
@@ -128,6 +134,8 @@ export default async function AcademyPage({ params }: Props) {
         </div>
         <BeltDivider className="mt-6" />
       </Card>
+
+      <PublicGallery photos={data.photos} name={academy.name} />
 
       <section aria-labelledby="grade">
         <h2 id="grade" className="mb-3 font-display text-2xl font-semibold">

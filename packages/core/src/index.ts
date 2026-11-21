@@ -15,3 +15,4 @@ export * from './domain/money';
 export * from './schemas/academy';
 export * from './domain/journey';
 export * from './schemas/journey';
+export * from './schemas/business';

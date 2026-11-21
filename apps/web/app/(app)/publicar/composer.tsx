@@ -21,7 +21,16 @@ import { FormMessage } from "@/components/ui/form-message";
 
 type Draft = { key: string; file: File; preview: string; alt: string; kind: "image" | "video" };
 
-export function Composer({ userId, martialArts }: { userId: string; martialArts: { id: string; name: string }[] }) {
+export function Composer({
+  userId,
+  martialArts,
+  pages = [],
+}: {
+  userId: string;
+  martialArts: { id: string; name: string }[];
+  pages?: { id: string; name: string }[];
+}) {
+  const [businessId, setBusinessId] = useState("");
   const router = useRouter();
   const fileInput = useRef<HTMLInputElement>(null);
   const videoInput = useRef<HTMLInputElement>(null);
@@ -132,6 +141,7 @@ export function Composer({ userId, martialArts }: { userId: string; martialArts:
         martialArtId,
         locationLabel: location,
         media,
+        businessId,
       });
       if (!result.ok) throw new ImageError(result.message);
       router.push(`/p/${result.id}`);
@@ -253,6 +263,22 @@ export function Composer({ userId, martialArts }: { userId: string; martialArts:
         </p>
       </div>
 
+      {pages.length > 0 && (
+        <SelectField
+          id="businessId"
+          label="Publicar como"
+          help="Conteúdo de venda e divulgação vai para a sua página comercial, não para o perfil pessoal."
+          value={businessId}
+          onChange={(e) => setBusinessId(e.target.value)}
+        >
+          <option value="">Meu perfil pessoal</option>
+          {pages.map((p) => (
+            <option key={p.id} value={p.id}>
+              Página: {p.name}
+            </option>
+          ))}
+        </SelectField>
+      )}
       <div className="grid gap-4 sm:grid-cols-2">
         <SelectField id="visibility" label="Quem pode ver" value={visibility} onChange={(e) => setVisibility(e.target.value as typeof visibility)}>
           {VISIBILITIES.map((v) => (

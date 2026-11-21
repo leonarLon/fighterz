@@ -21,6 +21,8 @@ export type PostView = {
   martialArtName: string | null;
   /** Academia citada no post (registro de treino). */
   academy: { name: string; slug: string } | null;
+  /** Publicado como página comercial (o autor continua sendo o responsável). */
+  business: { name: string; slug: string; logoPath: string | null } | null;
   likeCount: number;
   commentCount: number;
   createdAt: string;

@@ -3,33 +3,7 @@ import { CLASS_LEVELS, CLASS_STATUSES } from '../domain/schedule';
 import { normalizeCep } from '../domain/address';
 import { MAX_PRICE_CENTS, MIN_PRICE_CENTS, parseBrl } from '../domain/money';
 import { BRAZILIAN_STATES, usernameSchema } from './profile';
-
-const optional = (max: number, message: string) =>
-  z
-    .string()
-    .trim()
-    .max(max, message)
-    .optional()
-    .transform((value) => value || null);
-
-const https = z
-  .string()
-  .trim()
-  .regex(/^https:\/\/[^\s<>"]{3,}$/, 'Use um link completo começando com https://')
-  .max(300, 'Link muito longo.');
-
-const phone = z
-  .string()
-  .trim()
-  .regex(/^\+?[0-9 ()-]{8,20}$/, 'Telefone inválido. Ex.: (41) 99999-0000')
-  .optional()
-  .or(z.literal(''))
-  .transform((value) => value || null);
-
-const email = z
-  .union([z.email('E-mail inválido.').max(254), z.literal('')])
-  .optional()
-  .transform((value) => value || null);
+import { email, https, optional, phone } from './fields';
 
 /** "Faixa preta — Federação X — 2020", uma por linha. */
 export function parseCertifications(text: string) {

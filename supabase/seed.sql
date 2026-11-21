@@ -385,3 +385,47 @@ begin
   end loop;
 end;
 $$;
+
+-- Páginas comerciais fictícias (Fase 5 da evolução comercial): loja e serviço com catálogo, promoção e post.
+do $$
+declare
+  v_loja  uuid;
+  v_fisio uuid;
+  v_dono  uuid := (select id from public.profiles where username = 'atleta3');
+  v_adm   uuid := (select id from public.profiles where username = 'atleta4');
+  v_fisio_dono uuid := (select id from public.profiles where username = 'atleta6');
+  v_post  uuid := gen_random_uuid();
+  bjj     uuid := (select id from public.martial_arts where slug = 'jiu-jitsu');
+  mt      uuid := (select id from public.martial_arts where slug = 'muay-thai');
+begin
+  insert into public.businesses (slug, name, category, description, website, instagram, city, state, martial_art_ids, created_by)
+  values ('kimonos-tatame-forte', 'Kimonos Tatame Forte', 'store',
+          'Kimonos, faixas e rash guards para treino e competição. Loja fictícia de demonstração.',
+          'https://example.com/tatame-forte', 'tatameforte.demo', 'Curitiba', 'PR', array[bjj], v_dono)
+  returning id into v_loja;
+  insert into public.businesses (slug, name, category, description, city, state, martial_art_ids, created_by, is_verified)
+  values ('fisio-luta', 'Fisio Luta', 'service',
+          'Fisioterapia esportiva para atletas de luta: prevenção, recuperação de lesões e retorno ao tatame. Serviço fictício.',
+          'São Paulo', 'SP', array[bjj, mt], v_fisio_dono, true)
+  returning id into v_fisio;
+
+  insert into public.business_members (business_id, user_id, role, status, invited_by) values
+    (v_loja, v_dono, 'owner', 'active', v_dono),
+    (v_loja, v_adm, 'admin', 'active', v_dono),
+    (v_fisio, v_fisio_dono, 'owner', 'active', v_fisio_dono);
+
+  insert into public.business_items (business_id, kind, name, description, price_status, price_cents, url, position) values
+    (v_loja, 'product', 'Kimono Trançado A2', 'Trançado leve, aprovado para competição.', 'paid', 44990, 'https://example.com/tatame-forte/kimono-a2', 0),
+    (v_loja, 'product', 'Faixa colorida', 'Todas as cores da graduação adulta.', 'paid', 5990, null, 1),
+    (v_loja, 'product', 'Rash guard manga longa', null, 'undisclosed', null, null, 2),
+    (v_fisio, 'service', 'Avaliação fisioterapêutica', 'Primeira consulta com plano de tratamento.', 'paid', 18000, null, 0),
+    (v_fisio, 'service', 'Palestra de prevenção de lesões para academias', null, 'free', null, null, 1);
+
+  insert into public.business_promotions (business_id, title, description, coupon_code, starts_on, ends_on) values
+    (v_loja, 'Semana do faixa branca', '10% de desconto no primeiro kimono.', 'TATAME10',
+     (now() at time zone 'America/Sao_Paulo')::date - 2, (now() at time zone 'America/Sao_Paulo')::date + 30);
+
+  insert into public.posts (id, author_id, caption, visibility, business_id, created_at)
+  values (v_post, v_dono, 'Chegou a coleção nova de kimonos trançados! Cupom TATAME10 na primeira compra.', 'public', v_loja, now() - interval '3 hours');
+end;
+$$;

@@ -52,13 +52,13 @@ export const loadAcademy = cache(async (slug: string) => {
   const supabase = await createClient();
   const { data: academy } = await supabase
     .from("academies")
-    .select("id, slug, name, description, website, instagram, contact_email, contact_phone, status, is_verified, follower_count")
+    .select("id, slug, name, description, website, instagram, contact_email, contact_phone, status, is_verified, follower_count, logo_path, cover_path")
     .eq("slug", slug)
     .maybeSingle();
   if (!academy) return null;
 
   const user = await getCurrentUser();
-  const [arts, units, classes, staff, isManager, mine, following, access] = await Promise.all([
+  const [arts, units, classes, staff, isManager, mine, following, access, photos, galleryLimit] = await Promise.all([
     supabase.from("academy_martial_arts").select("martial_art_id, martial_arts(name, slug, sort_order)").eq("academy_id", academy.id),
     supabase.from("academy_units").select(UNIT_COLUMNS).eq("academy_id", academy.id).order("name"),
     supabase
@@ -82,6 +82,13 @@ export const loadAcademy = cache(async (slug: string) => {
       .from("academy_unit_access")
       .select("id, unit_id, kind, accepted, plans, martial_art_ids, restrictions, access_hours, notes, price_status, price_cents, updated_at")
       .eq("academy_id", academy.id),
+    supabase
+      .from("academy_photos")
+      .select("id, path, caption, width, height")
+      .eq("academy_id", academy.id)
+      .order("position")
+      .order("created_at"),
+    supabase.rpc("academy_gallery_limit", { p_academy: academy.id }),
   ]);
 
   return {
@@ -91,6 +98,8 @@ export const loadAcademy = cache(async (slug: string) => {
       .sort((a, b) => a.sort_order - b.sort_order),
     units: (units.data ?? []) as Unit[],
     access: (access.data ?? []) as UnitAccess[],
+    photos: photos.data ?? [],
+    galleryLimit: galleryLimit.data ?? 12,
     classes: (classes.data ?? []) as unknown as ClassRow[],
     members: (staff.data ?? []).map((m) => ({
       userId: m.user_id,

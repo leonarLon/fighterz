@@ -36,6 +36,7 @@ const copy: Record<string, { text: string; icon: typeof Heart }> = {
   promotion_request: { text: "pediu que você confirme uma graduação", icon: Medal },
   promotion_confirmed: { text: "confirmou sua graduação", icon: BadgeCheck },
   event_update: { text: "atualizou um evento que você marcou interesse", icon: CalendarDays },
+  business_invite: { text: "convidou você para administrar uma página comercial", icon: Building2 },
 };
 
 export function NotificationList({ items }: { items: NotificationItem[] }) {
@@ -73,6 +74,7 @@ function targetOf(item: NotificationItem): string {
   if (item.type === "moderation") return routes.teacherArea;
   if (item.type === "promotion_request") return `${routes.teacherArea}#graduacoes-pendentes`;
   if (item.type === "promotion_confirmed") return routes.journey;
+  if (item.type === "business_invite") return `${routes.businesses}#convites`;
   if (item.event) return routes.event(item.event.id);
   if (item.actor) return routes.profile(item.actor.username);
   return routes.notifications;

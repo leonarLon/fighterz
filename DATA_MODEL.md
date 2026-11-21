@@ -121,6 +121,15 @@ Modalidades: `academy_martial_arts(academy_id, martial_art_id)`.
 **academy_unit_access** (migration 21, 21/11/2026: TotalPass, Wellhub e diária **por unidade**)
 `id`, `unit_id FK`, `academy_id FK` (copiado da unidade por trigger), `kind enum('totalpass','wellhub','day_pass')`, `accepted bool`, `plans text[]` (até 10, sem repetição), `martial_art_ids uuid[]` (validados no trigger), `restrictions`, `access_hours`, `notes`, `price_status enum('paid','free','undisclosed')` e `price_cents int` (só diária; valor obrigatório quando paga e proibido nos outros casos), `updated_at`, `updated_by`. unique(unit_id, kind). Leitura pública se a academia é visível; escrita só `is_academy_manager` (owner/admin). Professor da academia **não** edita, a não ser que o dono o promova a admin.
 
+**academy_photos** (migration 22): `id`, `academy_id FK`, `path` (bucket `covers`, `academy/<id>/gallery-*.webp|jpg`, unique), `caption ≤ 200` (texto alternativo), `width`, `height`, `position`, `created_by`. Limite por `academy_gallery_limit()` (12 sem plano). `academies.logo_path`/`cover_path` passam a ter formato checado e exigir o arquivo enviado. Bucket `covers`: público para leitura, escrita só para a gestão da entidade dona da pasta (`can_manage_cover_path`).
+
+**businesses** (migration 23: páginas de marca, loja e serviço, separadas do perfil pessoal)
+`id`, `slug unique`, `name`, `category enum('brand','store','service')`, `description`, `logo_path`, `cover_path`, `website`, `instagram`, `contact_email`, `contact_phone`, `city`, `state`, `martial_art_ids uuid[]`, `status enum('active','hidden','suspended')`, `is_verified`, `created_by`, `search_vector`. Criada só por `create_business()` (3/dia). Gestão alterna ativa/oculta; suspensão e selo são da moderação.
+- `business_members(business_id, user_id, role owner|admin, status pending|active, invited_by)`: convite pelo dono (`invite_business_admin`, notificação `business_invite`), aceite (`respond_business_invite`), saída/remoção (`remove_business_member`; dono não sai). Visível só para a própria pessoa e a gestão.
+- `business_items`: produto ou serviço, `price_status` + `price_cents` (mesma regra da diária), `url https`, `image_path` (opcional, sem tela ainda), `is_active`. Limite `business_catalog_limit()` (30).
+- `business_promotions`: `title`, `description`, `coupon_code` (maiúsculas), `url`, `starts_on`, `ends_on`. Público vê só as vigentes; limite `business_promotions_limit()` (5 vigentes ou futuras).
+- `posts.business_id`: "publicar como página" por `create_page_post()` (só gestão ativa, página ativa). O autor continua responsável; o post sai do perfil pessoal (`get_profile_posts`) e aparece na página (`get_business_posts`). `post_cards` ganhou `business_name/slug/logo_path`.
+
 Índices: GiST(location), btree(state, city, neighborhood) com `unaccent(lower())`.
 
 **academy_memberships**

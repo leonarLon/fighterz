@@ -23,8 +23,16 @@
 | TotalPass / Wellhub / diária | API direta | Demo não insere nem altera | Segurança (E2E) | `academies.spec.ts` | ✅ |
 | Professor cita planos aceitos | Texto opcional (até 500), só o dono edita, público só se aprovado, sem custo | Professor informa, limite, terceiro não altera, pendente não aparece, visitante vê | pgTAP + Vitest | `21_unit_access.test.sql`, `academy.test.ts` | ✅ |
 | Professor cita planos aceitos | Fluxo completo | Pedido com planos, aprovação, campo mantido, visitante vê em /professores | E2E | `academies.spec.ts` | ✅ |
-| Perfil comercial de academia | Banner, galeria, limites por plano | — | pgTAP + E2E | — | ⬜ Fase 5 |
-| Páginas de marca, loja e serviço | Membros owner/admin, catálogo, promoções | — | pgTAP + E2E | — | ⬜ Fase 5 |
+| Perfil comercial de academia | Bucket covers: só a gestão escreve na pasta da academia | Dono envia; outra academia, professor, visitante e caminho inválido não | Segurança (pgTAP) | `22_academy_media.test.sql` | ✅ |
+| Perfil comercial de academia | Logo/banner só com arquivo enviado e da própria pasta | Pasta de outra academia e arquivo não enviado recusados; terceiro não altera | Integração (pgTAP) | `22_academy_media.test.sql` | ✅ |
+| Perfil comercial de academia | Galeria com limite (12, Fase 6 liga ao plano) | Legenda normalizada, 13ª foto recusada, academia oculta não expõe, terceiro não apaga | Integração (pgTAP) | `22_academy_media.test.sql` | ✅ |
+| Perfil comercial de academia | Fluxo do dono | Logo, banner e foto com legenda; visitante vê; apagar some do público (axe) | E2E | `apps/web/tests/e2e/commercial.spec.ts` | ✅ |
+| Páginas de marca, loja e serviço | Criação só por função; dono + admins com aceite | Slug, dono ativo, convite/aceite, admin não convida, saída, dono não sai, membros não públicos | Segurança (pgTAP) | `23_businesses.test.sql` | ✅ |
+| Páginas de marca, loja e serviço | Gestão não suspende nem se dá selo; oculta some | Status/selo negados, modalidade inválida, conta suspensa bloqueada | Segurança (pgTAP) | `23_businesses.test.sql` | ✅ |
+| Páginas de marca, loja e serviço | Catálogo e promoções sem preço inventado, com limites | Pago exige valor, gratuito sem valor, inativo oculto, limite 30, cupom normalizado, datas, só vigente é pública | Integração (pgTAP) + Unitário | `23_businesses.test.sql`, `commercial.test.ts` | ✅ |
+| Páginas de marca, loja e serviço | Publicar como página | Só gestão publica; post fora do perfil pessoal; aparece na página | Integração + E2E | `23_businesses.test.sql`, `commercial.spec.ts` | ✅ |
+| Páginas de marca, loja e serviço | Fluxo completo | Criar (tipo obrigatório), dados, item com erro e correção, promoção, convite aceito, publicar como página, visitante vê, ocultar → 404 | E2E | `commercial.spec.ts` | ✅ |
+| Páginas de marca, loja e serviço | API direta | Demo não edita, não cadastra item, não publica como a loja, não lista membros | Segurança (E2E) | `commercial.spec.ts` | ✅ |
 | Planos e assinaturas | Só admin escreve; benefício verificado no banco | — | pgTAP + E2E | — | ⬜ Fase 6 |
 | Professores gratuitos | Nenhum recurso de professor depende de plano | — | pgTAP + E2E | — | ⬜ Fase 6 |
 | Detecção comercial | Score explicável, sem punição automática, recurso | — | Vitest + pgTAP + E2E | — | ⬜ Fase 7 |

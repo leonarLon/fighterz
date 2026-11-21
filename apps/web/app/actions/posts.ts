@@ -5,7 +5,7 @@ import { commentSchema, createPostSchema, reportSchema, type CreatePostInput } f
 import { createClient } from "@/lib/supabase/server";
 import { requireUser } from "@/lib/auth";
 import { fromZodError, text, type FormState } from "@/lib/form-state";
-import { loadExplore, loadHomeFeed, loadProfilePosts, loadSavedPosts, type Page } from "@/lib/posts";
+import { loadBusinessPosts, loadExplore, loadHomeFeed, loadProfilePosts, loadSavedPosts, type Page } from "@/lib/posts";
 import { routes } from "@/lib/routes";
 
 type Result = { ok: true } | { ok: false; message: string };
@@ -24,7 +24,7 @@ export async function createPost(input: CreatePostInput): Promise<{ ok: true; id
   const data = parsed.data;
 
   const supabase = await createClient();
-  const { error } = await supabase.rpc("create_post", {
+  const args = {
     p_id: data.id,
     p_caption: data.caption,
     p_visibility: data.visibility,
@@ -40,7 +40,12 @@ export async function createPost(input: CreatePostInput): Promise<{ ok: true; id
       size: m.size,
       alt: m.alt ?? "",
     })),
-  });
+  };
+  const { error } = data.businessId
+    ? await supabase.rpc("create_page_post", { ...args, p_business: data.businessId })
+    : await supabase.rpc("create_post", args);
+  if (error?.message === "not_business_manager") return { ok: false, message: "Você não gerencia essa página." };
+  if (error?.message === "business_not_active") return { ok: false, message: "A página está oculta. Publique a página antes." };
   if (error) return failure(error, "Não foi possível publicar. Tente novamente.");
 
   revalidatePath(routes.feed);
@@ -155,6 +160,10 @@ export async function loadMoreHomeFeed(cursor: string): Promise<Page> {
 
 export async function loadMoreProfilePosts(authorId: string, cursor: string): Promise<Page> {
   return loadProfilePosts(await createClient(), authorId, cursor);
+}
+
+export async function loadMoreBusinessPosts(businessId: string, cursor: string): Promise<Page> {
+  return loadBusinessPosts(await createClient(), businessId, cursor);
 }
 
 export async function loadMoreSaved(cursor: string): Promise<Page> {

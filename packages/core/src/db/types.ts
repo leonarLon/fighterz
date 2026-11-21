@@ -127,6 +127,32 @@ isOneToOne: false
       referencedColumns: ["id"]
     }
                   ]
+                },"academy_photos": {
+                  Row: {
+                    "academy_id": string,"caption": string | null,"created_at": string,"created_by": string | null,"height": number | null,"id": string,"path": string,"position": number,"width": number | null
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "academy_id": string,"caption"?: string | null,"created_at"?: string,"created_by"?: string | null,"height"?: number | null,"id"?: string,"path": string,"position"?: number,"width"?: number | null
+                  }
+                  Update: {
+                    "academy_id"?: string,"caption"?: string | null,"created_at"?: string,"created_by"?: string | null,"height"?: number | null,"id"?: string,"path"?: string,"position"?: number,"width"?: number | null
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "academy_photos_academy_id_fkey"
+      columns: ["academy_id"]
+isOneToOne: false
+      referencedRelation: "academies"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "academy_photos_created_by_fkey"
+      columns: ["created_by"]
+isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    }
+                  ]
                 },"academy_unit_access": {
                   Row: {
                     "academy_id": string,"accepted": boolean,"access_hours": string | null,"id": string,"kind": Database["public"]['Enums']["unit_access_kind"],"martial_art_ids": (string)[],"notes": string | null,"plans": (string)[],"price_cents": number | null,"price_status": Database["public"]['Enums']["price_status"] | null,"restrictions": string | null,"unit_id": string,"updated_at": string,"updated_by": string | null
@@ -252,6 +278,98 @@ isOneToOne: false
     },{
       foreignKeyName: "blocked_users_blocker_id_fkey"
       columns: ["blocker_id"]
+isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"business_items": {
+                  Row: {
+                    "business_id": string,"created_at": string,"description": string | null,"id": string,"image_path": string | null,"is_active": boolean,"kind": Database["public"]['Enums']["catalog_item_kind"],"name": string,"position": number,"price_cents": number | null,"price_status": Database["public"]['Enums']["price_status"],"updated_at": string,"url": string | null
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "business_id": string,"created_at"?: string,"description"?: string | null,"id"?: string,"image_path"?: string | null,"is_active"?: boolean,"kind"?: Database["public"]['Enums']["catalog_item_kind"],"name": string,"position"?: number,"price_cents"?: number | null,"price_status"?: Database["public"]['Enums']["price_status"],"updated_at"?: string,"url"?: string | null
+                  }
+                  Update: {
+                    "business_id"?: string,"created_at"?: string,"description"?: string | null,"id"?: string,"image_path"?: string | null,"is_active"?: boolean,"kind"?: Database["public"]['Enums']["catalog_item_kind"],"name"?: string,"position"?: number,"price_cents"?: number | null,"price_status"?: Database["public"]['Enums']["price_status"],"updated_at"?: string,"url"?: string | null
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "business_items_business_id_fkey"
+      columns: ["business_id"]
+isOneToOne: false
+      referencedRelation: "businesses"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"business_members": {
+                  Row: {
+                    "business_id": string,"created_at": string,"invited_by": string | null,"role": Database["public"]['Enums']["business_role"],"status": Database["public"]['Enums']["business_member_status"],"user_id": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "business_id": string,"created_at"?: string,"invited_by"?: string | null,"role": Database["public"]['Enums']["business_role"],"status"?: Database["public"]['Enums']["business_member_status"],"user_id": string
+                  }
+                  Update: {
+                    "business_id"?: string,"created_at"?: string,"invited_by"?: string | null,"role"?: Database["public"]['Enums']["business_role"],"status"?: Database["public"]['Enums']["business_member_status"],"user_id"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "business_members_business_id_fkey"
+      columns: ["business_id"]
+isOneToOne: false
+      referencedRelation: "businesses"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "business_members_invited_by_fkey"
+      columns: ["invited_by"]
+isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "business_members_user_id_fkey"
+      columns: ["user_id"]
+isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"business_promotions": {
+                  Row: {
+                    "business_id": string,"coupon_code": string | null,"created_at": string,"description": string | null,"ends_on": string | null,"id": string,"starts_on": string,"title": string,"url": string | null
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "business_id": string,"coupon_code"?: string | null,"created_at"?: string,"description"?: string | null,"ends_on"?: string | null,"id"?: string,"starts_on"?: string,"title": string,"url"?: string | null
+                  }
+                  Update: {
+                    "business_id"?: string,"coupon_code"?: string | null,"created_at"?: string,"description"?: string | null,"ends_on"?: string | null,"id"?: string,"starts_on"?: string,"title"?: string,"url"?: string | null
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "business_promotions_business_id_fkey"
+      columns: ["business_id"]
+isOneToOne: false
+      referencedRelation: "businesses"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"businesses": {
+                  Row: {
+                    "category": Database["public"]['Enums']["business_category"],"city": string | null,"contact_email": string | null,"contact_phone": string | null,"cover_path": string | null,"created_at": string,"created_by": string | null,"description": string | null,"id": string,"instagram": string | null,"is_verified": boolean,"logo_path": string | null,"martial_art_ids": (string)[],"name": string,"search_vector": unknown,"slug": string,"state": string | null,"status": Database["public"]['Enums']["business_status"],"updated_at": string,"website": string | null
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "category": Database["public"]['Enums']["business_category"],"city"?: string | null,"contact_email"?: string | null,"contact_phone"?: string | null,"cover_path"?: string | null,"created_at"?: string,"created_by"?: string | null,"description"?: string | null,"id"?: string,"instagram"?: string | null,"is_verified"?: boolean,"logo_path"?: string | null,"martial_art_ids"?: (string)[],"name": string,"search_vector"?: never,"slug": string,"state"?: string | null,"status"?: Database["public"]['Enums']["business_status"],"updated_at"?: string,"website"?: string | null
+                  }
+                  Update: {
+                    "category"?: Database["public"]['Enums']["business_category"],"city"?: string | null,"contact_email"?: string | null,"contact_phone"?: string | null,"cover_path"?: string | null,"created_at"?: string,"created_by"?: string | null,"description"?: string | null,"id"?: string,"instagram"?: string | null,"is_verified"?: boolean,"logo_path"?: string | null,"martial_art_ids"?: (string)[],"name"?: string,"search_vector"?: never,"slug"?: string,"state"?: string | null,"status"?: Database["public"]['Enums']["business_status"],"updated_at"?: string,"website"?: string | null
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "businesses_created_by_fkey"
+      columns: ["created_by"]
 isOneToOne: false
       referencedRelation: "profiles"
       referencedColumns: ["id"]
@@ -715,14 +833,14 @@ isOneToOne: false
                   ]
                 },"posts": {
                   Row: {
-                    "academy_id": string | null,"author_id": string,"caption": string,"comment_count": number,"created_at": string,"deleted_at": string | null,"external_video_url": string | null,"id": string,"kind": Database["public"]['Enums']["post_kind"],"like_count": number,"location_label": string | null,"martial_art_id": string | null,"moderation_status": Database["public"]['Enums']["moderation_status"],"save_count": number,"search_vector": unknown,"updated_at": string,"visibility": Database["public"]['Enums']["visibility"]
+                    "academy_id": string | null,"author_id": string,"business_id": string | null,"caption": string,"comment_count": number,"created_at": string,"deleted_at": string | null,"external_video_url": string | null,"id": string,"kind": Database["public"]['Enums']["post_kind"],"like_count": number,"location_label": string | null,"martial_art_id": string | null,"moderation_status": Database["public"]['Enums']["moderation_status"],"save_count": number,"search_vector": unknown,"updated_at": string,"visibility": Database["public"]['Enums']["visibility"]
                   }
                   ComputedFields: never
                   Insert: {
-                    "academy_id"?: string | null,"author_id": string,"caption"?: string,"comment_count"?: number,"created_at"?: string,"deleted_at"?: string | null,"external_video_url"?: string | null,"id"?: string,"kind"?: Database["public"]['Enums']["post_kind"],"like_count"?: number,"location_label"?: string | null,"martial_art_id"?: string | null,"moderation_status"?: Database["public"]['Enums']["moderation_status"],"save_count"?: number,"search_vector"?: never,"updated_at"?: string,"visibility"?: Database["public"]['Enums']["visibility"]
+                    "academy_id"?: string | null,"author_id": string,"business_id"?: string | null,"caption"?: string,"comment_count"?: number,"created_at"?: string,"deleted_at"?: string | null,"external_video_url"?: string | null,"id"?: string,"kind"?: Database["public"]['Enums']["post_kind"],"like_count"?: number,"location_label"?: string | null,"martial_art_id"?: string | null,"moderation_status"?: Database["public"]['Enums']["moderation_status"],"save_count"?: number,"search_vector"?: never,"updated_at"?: string,"visibility"?: Database["public"]['Enums']["visibility"]
                   }
                   Update: {
-                    "academy_id"?: string | null,"author_id"?: string,"caption"?: string,"comment_count"?: number,"created_at"?: string,"deleted_at"?: string | null,"external_video_url"?: string | null,"id"?: string,"kind"?: Database["public"]['Enums']["post_kind"],"like_count"?: number,"location_label"?: string | null,"martial_art_id"?: string | null,"moderation_status"?: Database["public"]['Enums']["moderation_status"],"save_count"?: number,"search_vector"?: never,"updated_at"?: string,"visibility"?: Database["public"]['Enums']["visibility"]
+                    "academy_id"?: string | null,"author_id"?: string,"business_id"?: string | null,"caption"?: string,"comment_count"?: number,"created_at"?: string,"deleted_at"?: string | null,"external_video_url"?: string | null,"id"?: string,"kind"?: Database["public"]['Enums']["post_kind"],"like_count"?: number,"location_label"?: string | null,"martial_art_id"?: string | null,"moderation_status"?: Database["public"]['Enums']["moderation_status"],"save_count"?: number,"search_vector"?: never,"updated_at"?: string,"visibility"?: Database["public"]['Enums']["visibility"]
                   }
                   Relationships: [
                     {
@@ -736,6 +854,12 @@ isOneToOne: false
       columns: ["author_id"]
 isOneToOne: false
       referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "posts_business_id_fkey"
+      columns: ["business_id"]
+isOneToOne: false
+      referencedRelation: "businesses"
       referencedColumns: ["id"]
     },{
       foreignKeyName: "posts_martial_art_id_fkey"
@@ -1332,7 +1456,7 @@ isOneToOne: false
                   ]
                 },"post_cards": {
                   Row: {
-                    "academy_id": string | null,"academy_name": string | null,"academy_slug": string | null,"author_avatar_path": string | null,"author_display_name": string,"author_id": string,"author_username": string | null,"caption": string,"comment_count": number,"created_at": string,"id": string,"kind": Database["public"]['Enums']["post_kind"],"like_count": number,"location_label": string | null,"martial_art_id": string | null,"martial_art_name": string | null,"media": Json | null,"mentions": Json | null,"moderation_status": Database["public"]['Enums']["moderation_status"],"save_count": number,"viewer_has_liked": boolean | null,"viewer_has_saved": boolean | null,"visibility": Database["public"]['Enums']["visibility"]
+                    "academy_id": string | null,"academy_name": string | null,"academy_slug": string | null,"author_avatar_path": string | null,"author_display_name": string,"author_id": string,"author_username": string | null,"business_id": string | null,"business_logo_path": string | null,"business_name": string | null,"business_slug": string | null,"caption": string,"comment_count": number,"created_at": string,"id": string,"kind": Database["public"]['Enums']["post_kind"],"like_count": number,"location_label": string | null,"martial_art_id": string | null,"martial_art_name": string | null,"media": Json | null,"mentions": Json | null,"moderation_status": Database["public"]['Enums']["moderation_status"],"save_count": number,"viewer_has_liked": boolean | null,"viewer_has_saved": boolean | null,"visibility": Database["public"]['Enums']["visibility"]
                   }
                   ComputedFields: never
                   Relationships: [
@@ -1347,6 +1471,12 @@ isOneToOne: false
       columns: ["author_id"]
 isOneToOne: false
       referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "posts_business_id_fkey"
+      columns: ["business_id"]
+isOneToOne: false
+      referencedRelation: "businesses"
       referencedColumns: ["id"]
     },{
       foreignKeyName: "posts_martial_art_id_fkey"
@@ -1423,13 +1553,25 @@ isOneToOne: true
                 }
           }
           Functions: {
-            "admin_search_users":
+            "academy_gallery_limit":
+{ Args: { "p_academy": string }; Returns: number
+                           },
+"admin_search_users":
 { Args: { "p_limit"?: number,"p_query"?: string,"p_status"?: Database["public"]['Enums']["account_status"] }; Returns: {
               "created_at": string,"display_name": string,"email": string,"id": string,"open_reports": number,"post_count": number,"roles": (Database["public"]['Enums']["platform_role"])[],"status": Database["public"]['Enums']["account_status"],"suspended_until": string,"suspension_reason": string,"username": string
             }[]
                            },
+"business_catalog_limit":
+{ Args: { "p_business": string }; Returns: number
+                           },
+"business_promotions_limit":
+{ Args: { "p_business": string }; Returns: number
+                           },
 "can_interact_with_post":
 { Args: { "p_post_id": string }; Returns: boolean
+                           },
+"can_manage_cover_path":
+{ Args: { "p_name": string }; Returns: boolean
                            },
 "can_view_event":
 { Args: { "p_event": string }; Returns: boolean
@@ -1455,11 +1597,20 @@ isOneToOne: true
 "confirm_promotion":
 { Args: { "p_confirm": boolean,"p_promotion": string }; Returns: undefined
                            },
+"cover_object_exists":
+{ Args: { "p_path": string }; Returns: boolean
+                           },
 "create_academy":
 { Args: { "p_description"?: string,"p_martial_art_ids"?: (string)[],"p_name": string }; Returns: string
                            },
+"create_business":
+{ Args: { "p_category": Database["public"]['Enums']["business_category"],"p_name": string }; Returns: string
+                           },
 "create_checkin":
 { Args: { "p_academy_id"?: string,"p_class_schedule_id"?: string,"p_duration_min"?: number,"p_martial_art_id"?: string,"p_notes"?: string,"p_share"?: boolean,"p_trained_at": string,"p_visibility"?: Database["public"]['Enums']["visibility"] }; Returns: string
+                           },
+"create_page_post":
+{ Args: { "p_business": string,"p_caption": string,"p_id": string,"p_location_label"?: string,"p_martial_art_id"?: string,"p_media"?: Json,"p_visibility"?: Database["public"]['Enums']["visibility"] }; Returns: string
                            },
 "create_post":
 { Args: { "p_caption": string,"p_id": string,"p_location_label"?: string,"p_martial_art_id"?: string,"p_media"?: Json,"p_visibility"?: Database["public"]['Enums']["visibility"] }; Returns: string
@@ -1491,6 +1642,42 @@ isOneToOne: true
 "get_admin_overview":
 { Args: Record<PropertyKey, never>; Returns: Json
                            },
+"get_business_posts":
+{ Args: { "p_before_created_at"?: string,"p_before_id"?: string,"p_business": string,"p_limit"?: number }; Returns: {
+              "academy_id": string | null,
+"academy_name": string | null,
+"academy_slug": string | null,
+"author_avatar_path": string | null,
+"author_display_name": string,
+"author_id": string,
+"author_username": string | null,
+"business_id": string | null,
+"business_logo_path": string | null,
+"business_name": string | null,
+"business_slug": string | null,
+"caption": string,
+"comment_count": number,
+"created_at": string,
+"id": string,
+"kind": Database["public"]['Enums']["post_kind"],
+"like_count": number,
+"location_label": string | null,
+"martial_art_id": string | null,
+"martial_art_name": string | null,
+"media": Json | null,
+"mentions": Json | null,
+"moderation_status": Database["public"]['Enums']["moderation_status"],
+"save_count": number,
+"viewer_has_liked": boolean | null,
+"viewer_has_saved": boolean | null,
+"visibility": Database["public"]['Enums']["visibility"]
+            }[]
+                          SetofOptions: {
+        from: "*"
+        to: "post_cards"
+        isOneToOne: false
+        isSetofReturn: true
+      } },
 "get_cleanup_queue_count":
 { Args: Record<PropertyKey, never>; Returns: number
                            },
@@ -1503,6 +1690,10 @@ isOneToOne: true
 "author_display_name": string,
 "author_id": string,
 "author_username": string | null,
+"business_id": string | null,
+"business_logo_path": string | null,
+"business_name": string | null,
+"business_slug": string | null,
 "caption": string,
 "comment_count": number,
 "created_at": string,
@@ -1535,6 +1726,10 @@ isOneToOne: true
 "author_display_name": string,
 "author_id": string,
 "author_username": string | null,
+"business_id": string | null,
+"business_logo_path": string | null,
+"business_name": string | null,
+"business_slug": string | null,
 "caption": string,
 "comment_count": number,
 "created_at": string,
@@ -1567,6 +1762,10 @@ isOneToOne: true
 "author_display_name": string,
 "author_id": string,
 "author_username": string | null,
+"business_id": string | null,
+"business_logo_path": string | null,
+"business_name": string | null,
+"business_slug": string | null,
 "caption": string,
 "comment_count": number,
 "created_at": string,
@@ -1653,6 +1852,9 @@ isOneToOne: true
 "immutable_unaccent":
 { Args: { "": string }; Returns: string
                            },
+"invite_business_admin":
+{ Args: { "p_business": string,"p_username": string }; Returns: undefined
+                           },
 "invite_member":
 { Args: { "p_academy": string,"p_role": Database["public"]['Enums']["membership_role"],"p_username": string }; Returns: Database["public"]['Enums']["membership_status"]
                            },
@@ -1670,6 +1872,15 @@ isOneToOne: true
                            },
 "is_blocked_between":
 { Args: { "a": string,"b": string }; Returns: boolean
+                           },
+"is_business_manager":
+{ Args: { "p_business": string }; Returns: boolean
+                           },
+"is_business_owner":
+{ Args: { "p_business": string }; Returns: boolean
+                           },
+"is_business_visible":
+{ Args: { "p_business": string }; Returns: boolean
                            },
 "is_following":
 { Args: { "target": string }; Returns: boolean
@@ -1716,6 +1927,9 @@ isOneToOne: true
 "refresh_current_rank":
 { Args: { "p_uma": string }; Returns: undefined
                            },
+"remove_business_member":
+{ Args: { "p_business": string,"p_user": string }; Returns: undefined
+                           },
 "remove_member":
 { Args: { "p_academy": string,"p_role": Database["public"]['Enums']["membership_role"],"p_user": string }; Returns: undefined
                            },
@@ -1724,6 +1938,9 @@ isOneToOne: true
                            },
 "request_membership":
 { Args: { "p_academy": string,"p_role": Database["public"]['Enums']["membership_role"] }; Returns: Database["public"]['Enums']["membership_status"]
+                           },
+"respond_business_invite":
+{ Args: { "p_accept": boolean,"p_business": string }; Returns: undefined
                            },
 "respond_membership":
 { Args: { "p_academy": string,"p_accept": boolean,"p_role": Database["public"]['Enums']["membership_role"],"p_user": string }; Returns: undefined
@@ -1763,7 +1980,7 @@ isOneToOne: true
                            }
           }
           Enums: {
-            "academy_status": "active"|"hidden"|"suspended","account_status": "active"|"suspended"|"deleted","achievement_type": "competition_result"|"milestone"|"certification"|"other","class_level": "all"|"beginner"|"intermediate"|"advanced"|"kids"|"competition","class_status": "active"|"paused"|"cancelled","coords_source": "manual"|"nominatim","event_interest_kind": "interested"|"saved","event_status": "draft"|"published"|"cancelled","event_type": "championship"|"seminar"|"open_mat"|"graduation"|"workshop"|"special_training"|"other","follow_status": "pending"|"accepted","medal": "gold"|"silver"|"bronze","media_status": "uploading"|"processing"|"ready"|"failed","media_type": "image"|"video","membership_requester": "user"|"academy","membership_role": "owner"|"admin"|"teacher"|"student","membership_status": "pending"|"active"|"rejected"|"left","mention_status": "pending"|"approved"|"rejected","moderation_action": "remove_content"|"restore_content"|"dismiss_reports"|"warn"|"suspend"|"unsuspend"|"ban"|"verify"|"unverify","moderation_status": "visible"|"under_review"|"removed","notification_type": "follow"|"follow_request"|"like"|"comment"|"reply"|"mention"|"class_update"|"event_update"|"promotion_confirmed"|"membership_request"|"moderation"|"promotion_request","platform_role": "moderator"|"admin"|"superadmin","post_kind": "standard"|"checkin"|"achievement"|"event_share","price_status": "paid"|"free"|"undisclosed","rank_track": "adult"|"kids","report_reason": "spam"|"harassment"|"violence"|"nudity"|"minor_safety"|"impersonation"|"misinformation"|"other","report_status": "open"|"in_review"|"resolved"|"dismissed","report_target": "post"|"comment"|"profile"|"academy"|"event","teacher_status": "pending"|"approved"|"rejected"|"revoked","theme_preference": "light"|"dark"|"system","unit_access_kind": "totalpass"|"wellhub"|"day_pass","verification_status": "self_reported"|"teacher_confirmed","visibility": "public"|"followers"|"private"
+            "academy_status": "active"|"hidden"|"suspended","account_status": "active"|"suspended"|"deleted","achievement_type": "competition_result"|"milestone"|"certification"|"other","business_category": "brand"|"store"|"service","business_member_status": "pending"|"active","business_role": "owner"|"admin","business_status": "active"|"hidden"|"suspended","catalog_item_kind": "product"|"service","class_level": "all"|"beginner"|"intermediate"|"advanced"|"kids"|"competition","class_status": "active"|"paused"|"cancelled","coords_source": "manual"|"nominatim","event_interest_kind": "interested"|"saved","event_status": "draft"|"published"|"cancelled","event_type": "championship"|"seminar"|"open_mat"|"graduation"|"workshop"|"special_training"|"other","follow_status": "pending"|"accepted","medal": "gold"|"silver"|"bronze","media_status": "uploading"|"processing"|"ready"|"failed","media_type": "image"|"video","membership_requester": "user"|"academy","membership_role": "owner"|"admin"|"teacher"|"student","membership_status": "pending"|"active"|"rejected"|"left","mention_status": "pending"|"approved"|"rejected","moderation_action": "remove_content"|"restore_content"|"dismiss_reports"|"warn"|"suspend"|"unsuspend"|"ban"|"verify"|"unverify","moderation_status": "visible"|"under_review"|"removed","notification_type": "follow"|"follow_request"|"like"|"comment"|"reply"|"mention"|"class_update"|"event_update"|"promotion_confirmed"|"membership_request"|"moderation"|"promotion_request"|"business_invite","platform_role": "moderator"|"admin"|"superadmin","post_kind": "standard"|"checkin"|"achievement"|"event_share","price_status": "paid"|"free"|"undisclosed","rank_track": "adult"|"kids","report_reason": "spam"|"harassment"|"violence"|"nudity"|"minor_safety"|"impersonation"|"misinformation"|"other","report_status": "open"|"in_review"|"resolved"|"dismissed","report_target": "post"|"comment"|"profile"|"academy"|"event","teacher_status": "pending"|"approved"|"rejected"|"revoked","theme_preference": "light"|"dark"|"system","unit_access_kind": "totalpass"|"wellhub"|"day_pass","verification_status": "self_reported"|"teacher_confirmed","visibility": "public"|"followers"|"private"
           }
           CompositeTypes: {
             [_ in never]: never
@@ -1883,7 +2100,7 @@ export const Constants = {
           }
         },"public": {
           Enums: {
-            "academy_status": ["active", "hidden", "suspended"],"account_status": ["active", "suspended", "deleted"],"achievement_type": ["competition_result", "milestone", "certification", "other"],"class_level": ["all", "beginner", "intermediate", "advanced", "kids", "competition"],"class_status": ["active", "paused", "cancelled"],"coords_source": ["manual", "nominatim"],"event_interest_kind": ["interested", "saved"],"event_status": ["draft", "published", "cancelled"],"event_type": ["championship", "seminar", "open_mat", "graduation", "workshop", "special_training", "other"],"follow_status": ["pending", "accepted"],"medal": ["gold", "silver", "bronze"],"media_status": ["uploading", "processing", "ready", "failed"],"media_type": ["image", "video"],"membership_requester": ["user", "academy"],"membership_role": ["owner", "admin", "teacher", "student"],"membership_status": ["pending", "active", "rejected", "left"],"mention_status": ["pending", "approved", "rejected"],"moderation_action": ["remove_content", "restore_content", "dismiss_reports", "warn", "suspend", "unsuspend", "ban", "verify", "unverify"],"moderation_status": ["visible", "under_review", "removed"],"notification_type": ["follow", "follow_request", "like", "comment", "reply", "mention", "class_update", "event_update", "promotion_confirmed", "membership_request", "moderation", "promotion_request"],"platform_role": ["moderator", "admin", "superadmin"],"post_kind": ["standard", "checkin", "achievement", "event_share"],"price_status": ["paid", "free", "undisclosed"],"rank_track": ["adult", "kids"],"report_reason": ["spam", "harassment", "violence", "nudity", "minor_safety", "impersonation", "misinformation", "other"],"report_status": ["open", "in_review", "resolved", "dismissed"],"report_target": ["post", "comment", "profile", "academy", "event"],"teacher_status": ["pending", "approved", "rejected", "revoked"],"theme_preference": ["light", "dark", "system"],"unit_access_kind": ["totalpass", "wellhub", "day_pass"],"verification_status": ["self_reported", "teacher_confirmed"],"visibility": ["public", "followers", "private"]
+            "academy_status": ["active", "hidden", "suspended"],"account_status": ["active", "suspended", "deleted"],"achievement_type": ["competition_result", "milestone", "certification", "other"],"business_category": ["brand", "store", "service"],"business_member_status": ["pending", "active"],"business_role": ["owner", "admin"],"business_status": ["active", "hidden", "suspended"],"catalog_item_kind": ["product", "service"],"class_level": ["all", "beginner", "intermediate", "advanced", "kids", "competition"],"class_status": ["active", "paused", "cancelled"],"coords_source": ["manual", "nominatim"],"event_interest_kind": ["interested", "saved"],"event_status": ["draft", "published", "cancelled"],"event_type": ["championship", "seminar", "open_mat", "graduation", "workshop", "special_training", "other"],"follow_status": ["pending", "accepted"],"medal": ["gold", "silver", "bronze"],"media_status": ["uploading", "processing", "ready", "failed"],"media_type": ["image", "video"],"membership_requester": ["user", "academy"],"membership_role": ["owner", "admin", "teacher", "student"],"membership_status": ["pending", "active", "rejected", "left"],"mention_status": ["pending", "approved", "rejected"],"moderation_action": ["remove_content", "restore_content", "dismiss_reports", "warn", "suspend", "unsuspend", "ban", "verify", "unverify"],"moderation_status": ["visible", "under_review", "removed"],"notification_type": ["follow", "follow_request", "like", "comment", "reply", "mention", "class_update", "event_update", "promotion_confirmed", "membership_request", "moderation", "promotion_request", "business_invite"],"platform_role": ["moderator", "admin", "superadmin"],"post_kind": ["standard", "checkin", "achievement", "event_share"],"price_status": ["paid", "free", "undisclosed"],"rank_track": ["adult", "kids"],"report_reason": ["spam", "harassment", "violence", "nudity", "minor_safety", "impersonation", "misinformation", "other"],"report_status": ["open", "in_review", "resolved", "dismissed"],"report_target": ["post", "comment", "profile", "academy", "event"],"teacher_status": ["pending", "approved", "rejected", "revoked"],"theme_preference": ["light", "dark", "system"],"unit_access_kind": ["totalpass", "wellhub", "day_pass"],"verification_status": ["self_reported", "teacher_confirmed"],"visibility": ["public", "followers", "private"]
           }
         }
 } as const

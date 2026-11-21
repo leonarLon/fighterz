@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { Building2, CalendarDays, CalendarSearch, Flame, GraduationCap, Lock, Medal, Search, UserRoundSearch } from "lucide-react";
+import { Building2, CalendarDays, CalendarSearch, Flame, GraduationCap, Lock, Medal, Search, Store, UserRoundSearch } from "lucide-react";
 import { loadMoreExplore } from "@/app/actions/posts";
 import { Avatar } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
@@ -25,12 +25,13 @@ export default async function ExplorePage({ searchParams }: { searchParams: Prom
   return (
     <>
       <PageHeader title="Explorar" description="Encontre pessoas e veja o que está em alta na comunidade." />
-      <nav aria-label="Descobrir" className="mb-6 grid grid-cols-3 gap-2 sm:grid-cols-5">
+      <nav aria-label="Descobrir" className="mb-6 grid grid-cols-3 gap-2 sm:grid-cols-6">
         {[
           { href: routes.journey, label: "Minha jornada", icon: Medal },
           { href: routes.events, label: "Eventos", icon: CalendarDays },
           { href: routes.classes, label: "Aulas", icon: CalendarSearch },
           { href: routes.academies, label: "Academias", icon: Building2 },
+          { href: routes.businesses, label: "Lojas e serviços", icon: Store },
           { href: routes.teacherArea, label: "Sou professor", icon: GraduationCap },
         ].map(({ href, label, icon: Icon }) => (
           <Link key={href} href={href} className="flex min-h-16 flex-col items-center justify-center gap-1 rounded-lg border border-border bg-surface text-sm font-semibold hover:bg-bg">

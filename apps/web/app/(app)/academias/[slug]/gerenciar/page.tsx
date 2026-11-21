@@ -6,7 +6,10 @@ import { loadAcademy } from "@/lib/academies";
 import { requireUser } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 import { routes } from "@/lib/routes";
+import { Card } from "@/components/ui/card";
 import { PageHeader } from "@/components/ui/page-header";
+import { CoverImageUpload } from "@/components/media/cover-image-upload";
+import { GalleryManager } from "@/components/media/gallery-manager";
 import { AcademyInfoSection, ClassesSection, TeamSection, UnitsSection } from "./manage-sections";
 
 type Props = { params: Promise<{ slug: string }> };
@@ -23,7 +26,7 @@ export default async function ManageAcademyPage({ params }: Props) {
 
   return (
     <>
-      <PageHeader title={data.academy.name} description="Gerencie dados, unidades, grade de aulas e equipe." />
+      <PageHeader title={data.academy.name} description="Gerencie dados, imagens, unidades, grade de aulas e equipe." />
       <p className="-mt-4 mb-6">
         <Link href={routes.academy(data.academy.slug)} className="inline-flex items-center gap-1.5 text-sm font-semibold text-accent hover:underline">
           <ExternalLink aria-hidden className="size-4" /> Ver página pública
@@ -31,6 +34,17 @@ export default async function ManageAcademyPage({ params }: Props) {
       </p>
       <div className="space-y-6">
         <AcademyInfoSection data={data} arts={arts ?? []} />
+        <Card>
+          <h2 className="mb-1 font-display text-2xl font-semibold">Logo, banner e galeria</h2>
+          <p className="mb-4 text-sm text-muted">Aparecem na página pública da academia.</p>
+          <div className="space-y-6">
+            <div className="space-y-6">
+              <CoverImageUpload entity="academy" entityId={data.academy.id} slot="logo" path={data.academy.logo_path} name={data.academy.name} />
+              <CoverImageUpload entity="academy" entityId={data.academy.id} slot="banner" path={data.academy.cover_path} name={data.academy.name} />
+            </div>
+            <GalleryManager academyId={data.academy.id} photos={data.photos} limit={data.galleryLimit} />
+          </div>
+        </Card>
         <UnitsSection data={data} />
         <ClassesSection data={data} />
         <TeamSection data={data} />
