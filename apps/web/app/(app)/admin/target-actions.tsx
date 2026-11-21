@@ -2,7 +2,7 @@
 
 import { useState, useTransition } from "react";
 import type { ReportTarget } from "@figtherz/core";
-import { moderateContent, setAcademyVerified } from "@/app/actions/admin";
+import { moderateContent, setAcademyVerified, setBusinessVerified } from "@/app/actions/admin";
 import { Button } from "@/components/ui/button";
 import { InputField } from "@/components/ui/field";
 
@@ -71,7 +71,7 @@ export function TargetActions({
             variant="secondary"
             aria-pressed={isVerified}
             disabled={pending}
-            onClick={() => run(() => setAcademyVerified(targetId, !isVerified), () => setVerified((v) => !v))}
+            onClick={() => run(() => (targetType === "business" ? setBusinessVerified : setAcademyVerified)(targetId, !isVerified), () => setVerified((v) => !v))}
           >
             {isVerified ? "Remover selo de verificada" : "Marcar como verificada"}
           </Button>

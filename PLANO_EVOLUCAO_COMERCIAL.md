@@ -104,6 +104,6 @@ Todas aditivas (nenhuma coluna existente é apagada). Toda view nova com `revoke
 | Páginas de marca, loja e serviço | ✅ | ✅ | ✅ (publicado 21/11) | ✅ | ✅ pgTAP 23 | ✅ | ✅ RLS + API | ✅ suíte completa | ✅ | ✅ |
 | Planos e assinaturas | ✅ | ✅ | ✅ (publicado 22/11) | ✅ | ✅ pgTAP 24 | ✅ | ✅ RLS + API | ✅ suíte completa | ✅ | ✅ |
 | Professores gratuitos | ✅ | ✅ | ✅ (sem mudança) | — | ✅ pgTAP 24 | ✅ | ✅ | ✅ suíte completa | ✅ | ✅ |
-| Detecção de publicidade indevida | ✅ | ✅ | ✅ (local) | ✅ | ✅ pgTAP 25 | ✅ | ✅ RLS + API | ✅ suíte completa | ✅ | ⬜ aceite + produção |
-| Painel administrativo | ✅ | ✅ | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ |
+| Detecção de publicidade indevida | ✅ | ✅ | ✅ (publicado 22/11) | ✅ | ✅ pgTAP 25 | ✅ | ✅ RLS + API | ✅ suíte completa | ✅ | ✅ |
+| Painel administrativo | ✅ | ✅ | ✅ (local) | — | ✅ pgTAP 26 | ✅ | ✅ papéis | ✅ suíte completa | ✅ | ⬜ aceite + produção |
 | Cobertura e documentação | ✅ | ✅ | ⬜ | — | — | — | — | — | ⬜ | ⬜ |

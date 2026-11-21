@@ -14,7 +14,7 @@ const ACTION_LABELS: Record<string, string> = {
   suspend: "Suspendeu conta",
   unsuspend: "Reativou conta",
   ban: "Baniu conta",
-  verify: "Verificou academia",
+  verify: "Deu selo de verificada",
   unverify: "Removeu verificação",
 };
 
@@ -24,7 +24,21 @@ const TARGET_LABELS: Record<string, string> = {
   profile: "perfil",
   academy: "academia",
   event: "evento",
+  business: "página comercial",
 };
+
+// Auditoria administrativa: nome das tabelas em português.
+const AUDIT_TARGETS: Record<string, string> = {
+  user_roles: "papéis",
+  martial_arts: "modalidades",
+  martial_art_ranks: "graduações",
+  platform_settings: "configurações",
+  teacher_profiles: "professores",
+  plans: "planos",
+  plan_features: "benefícios de plano",
+  subscriptions: "assinaturas",
+};
+const AUDIT_ACTIONS: Record<string, string> = { insert: "Criou", update: "Alterou", delete: "Apagou" };
 
 /** Registros append-only: moderação (moderador+) e auditoria administrativa (admin). */
 export default async function AdminHistoryPage() {
@@ -77,11 +91,11 @@ export default async function AdminHistoryPage() {
           <h2 id="auditoria" className="mb-3 font-display text-2xl font-semibold">
             Auditoria administrativa
           </h2>
-          <p className="mb-3 text-sm text-muted">Papéis, aprovações de professor, modalidades e configurações.</p>
+          <p className="mb-3 text-sm text-muted">Papéis, aprovações de professor, modalidades, configurações, planos e assinaturas.</p>
           <ol className="divide-y divide-border rounded-lg border border-border bg-surface">
             {(audit.data ?? []).map((a) => (
               <li key={a.id} className="px-4 py-2 text-sm">
-                <span className="font-semibold">{a.action}</span> em {a.target_type}
+                <span className="font-semibold">{AUDIT_ACTIONS[a.action] ?? a.action}</span> {AUDIT_TARGETS[a.target_type] ?? a.target_type}
                 <span className="text-[13px] text-muted"> · {formatDateTime(a.created_at)}</span>
               </li>
             ))}

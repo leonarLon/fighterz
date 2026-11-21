@@ -18,6 +18,7 @@ export default async function AdminLayout({ children }: { children: ReactNode })
     { href: routes.adminUsers, label: "Usuários" },
     ...(access.admin ? [{ href: routes.adminTeachers, label: "Professores", badge: o.pending_teachers }] : []),
     { href: routes.adminAcademies, label: "Academias" },
+    { href: routes.adminBusinesses, label: "Páginas" },
     { href: routes.adminEvents, label: "Eventos" },
     ...(access.admin
       ? [

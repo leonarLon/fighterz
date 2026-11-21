@@ -101,6 +101,14 @@ export async function setAcademyVerified(academyId: string, verified: boolean): 
   return { ok: true, message: verified ? "Academia verificada." : "Selo removido." };
 }
 
+export async function setBusinessVerified(businessId: string, verified: boolean): Promise<Result> {
+  await requireUser();
+  const supabase = await createClient();
+  const { error } = await supabase.rpc("set_business_verified", { p_business: businessId, p_verified: verified });
+  if (error) return { ok: false, message: message(error, "Não foi possível alterar o selo.") };
+  return { ok: true, message: verified ? "Página verificada." : "Selo removido." };
+}
+
 // ---------------------------------------------------------------------------
 // Modalidades e graduações (RLS: só admin escreve; a auditoria registra por trigger)
 // ---------------------------------------------------------------------------

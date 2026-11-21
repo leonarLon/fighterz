@@ -31,6 +31,7 @@ const TARGET_LABELS: Record<ReportTarget, string> = {
   profile: "Perfil",
   academy: "Academia",
   event: "Evento",
+  business: "Página comercial",
 };
 
 export const STATE_LABELS: Record<string, string> = {
@@ -51,6 +52,7 @@ const REMOVE_LABEL: Partial<Record<ReportTarget, string>> = {
   comment: "Remover comentário",
   academy: "Suspender academia",
   event: "Cancelar evento",
+  business: "Suspender página",
 };
 
 export function QueueItem({ item, closed, isAdmin }: { item: QueueEntry; closed: boolean; isAdmin: boolean }) {

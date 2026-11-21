@@ -19,12 +19,15 @@ export default async function AdminOverviewPage() {
     { label: "Ocultos aguardando revisão", value: o.under_review, href: routes.adminReports },
     ...(access.admin ? [{ label: "Pedidos de professor", value: o.pending_teachers, href: routes.adminTeachers }] : []),
     { label: "Contas suspensas", value: o.suspended_users, href: `${routes.adminUsers}?status=suspended` },
+    { label: "Publicidade em perfis pessoais (revisões e recursos)", value: o.open_commercial, href: routes.adminCommercial },
   ];
   const numbers = [
     { label: "Usuários", value: o.users },
     { label: "Novos em 7 dias", value: o.new_users_7d },
     { label: "Posts nas últimas 24 h", value: o.posts_24h },
     { label: "Academias", value: o.academies },
+    { label: "Páginas comerciais", value: o.businesses },
+    ...(access.admin ? [{ label: "Assinaturas ativas", value: o.active_subscriptions }] : []),
     { label: "Eventos por vir", value: o.upcoming_events },
   ];
 

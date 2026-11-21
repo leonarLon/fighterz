@@ -12,6 +12,7 @@ import { BeltDivider } from "@/components/ui/belt";
 import { ButtonLink } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { EmptyState } from "@/components/ui/empty-state";
+import { ReportButton } from "@/components/report/report-button";
 
 type Props = { params: Promise<{ slug: string }> };
 
@@ -109,6 +110,17 @@ export default async function BusinessPage({ params }: Props) {
             </li>
           )}
         </ul>
+        {!isManager && (
+          <div className="mt-4">
+            <ReportButton
+              targetType="business"
+              targetId={business.id}
+              title="Denunciar página"
+              loggedIn={Boolean(data.viewerId)}
+              returnTo={routes.business(business.slug)}
+            />
+          </div>
+        )}
         <BeltDivider className="mt-6" />
       </Card>
 

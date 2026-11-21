@@ -26,6 +26,7 @@ export const routes = {
   adminUsers: "/admin/usuarios",
   adminTeachers: "/admin/professores",
   adminAcademies: "/admin/academias",
+  adminBusinesses: "/admin/paginas",
   adminEvents: "/admin/eventos",
   adminMartialArts: "/admin/modalidades",
   adminHistory: "/admin/historico",
