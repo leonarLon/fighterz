@@ -36,6 +36,8 @@ const copy: Record<string, { text: string; icon: typeof Heart }> = {
   promotion_request: { text: "pediu que você confirme uma graduação", icon: Medal },
   promotion_confirmed: { text: "confirmou sua graduação", icon: BadgeCheck },
   event_update: { text: "atualizou um evento que você marcou interesse", icon: CalendarDays },
+  commercial_warning: { text: "registrou publicidade no seu perfil pessoal. Veja os motivos e, se quiser, recorra", icon: ShieldCheck },
+  appeal_decided: { text: "respondeu ao seu recurso", icon: ShieldCheck },
   business_invite: { text: "convidou você para administrar uma página comercial", icon: Building2 },
 };
 
@@ -74,6 +76,7 @@ function targetOf(item: NotificationItem): string {
   if (item.type === "moderation") return routes.teacherArea;
   if (item.type === "promotion_request") return `${routes.teacherArea}#graduacoes-pendentes`;
   if (item.type === "promotion_confirmed") return routes.journey;
+  if (item.type === "commercial_warning" || item.type === "appeal_decided") return routes.commercialReviews;
   if (item.type === "business_invite") return `${routes.businesses}#convites`;
   if (item.event) return routes.event(item.event.id);
   if (item.actor) return routes.profile(item.actor.username);
@@ -85,7 +88,8 @@ function Row({ item }: { item: NotificationItem }) {
   const [pending, startTransition] = useTransition();
   const meta = metaOf(item);
   // Moderação nunca mostra quem decidiu.
-  const actorName = item.type === "moderation" ? "Equipe Fighterz" : (item.actor?.displayName ?? "Alguém");
+  const staff = item.type === "moderation" || item.type === "commercial_warning" || item.type === "appeal_decided";
+  const actorName = staff ? "Equipe Fighterz" : (item.actor?.displayName ?? "Alguém");
   const Icon = meta.icon;
   const target = targetOf(item);
 

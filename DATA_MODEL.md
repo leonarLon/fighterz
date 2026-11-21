@@ -137,6 +137,12 @@ Modalidades: `academy_martial_arts(academy_id, martial_art_id)`.
 - `subscription_events`: histórico append-only (criada, mudança de situação, troca de plano/validade, expirada), com motivo e ator.
 - `entitlement(kind, id, key)` = maior entre o padrão e o plano da assinatura ativa e vigente. Expiração diária por pg_cron (`expire_subscriptions`).
 
+**commercial_signals / commercial_risk / commercial_reviews / commercial_appeals** (migration 25: publicidade em perfil pessoal, sem IA)
+- `commercial_signals(user_id, post_id, code, points, excerpt)`: um registro por regra que disparou num post pessoal (posts de página não entram). A pessoa vê os próprios; moderação vê todos.
+- `commercial_risk(user_id, score)`: 0–100, só moderação lê. Recalculado por post novo, mudança de bio e rotina diária (pg_cron 3h30 UTC).
+- `commercial_reviews`: `status open|dismissed|warned|actioned|reverted`, `score`, `reasons` (foto dos sinais), decisão com motivo. Uma aberta por pessoa; após decisão, só conteúdo novo reabre.
+- `commercial_appeals`: um recurso por revisão (`message` 10–1000), `status open|accepted|rejected`, resposta. Aceito desfaz a revisão e restaura os posts removidos.
+
 Índices: GiST(location), btree(state, city, neighborhood) com `unaccent(lower())`.
 
 **academy_memberships**

@@ -1,10 +1,13 @@
 "use client";
 
 import { useEffect, useId, useRef, useState } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Film, ImagePlus, X } from "lucide-react";
 import {
   CAPTION_MAX,
+  COMMERCIAL_HINT_SCORE,
+  commercialScore,
   MAX_IMAGES_PER_POST,
   POST_MEDIA_BUCKET,
   VISIBILITIES,
@@ -12,6 +15,7 @@ import {
   postMediaPath,
 } from "@figtherz/core";
 import { createPost } from "@/app/actions/posts";
+import { routes } from "@/lib/routes";
 import { createClient } from "@/lib/supabase/client";
 import { ImageError, prepareImage } from "@/lib/image-processing";
 import { VideoError, prepareVideo } from "@/lib/video-processing";
@@ -173,6 +177,20 @@ export function Composer({
           className="block min-h-24 w-full rounded-md border border-border bg-surface px-3 py-2"
         />
       </FieldShell>
+      {/* Aviso, nunca bloqueio: as mesmas regras públicas da detecção (Fase 7). */}
+      {!businessId && commercialScore(caption) >= COMMERCIAL_HINT_SCORE && (
+        <p role="note" className="rounded-md border border-warning/40 px-3 py-2 text-sm">
+          Parece divulgação comercial (preço, cupom ou link de venda). No Fighterz, venda vai numa página comercial gratuita, não no perfil
+          pessoal.{" "}
+          {pages.length > 0 ? (
+            <>Escolha a página em &quot;Publicar como&quot;.</>
+          ) : (
+            <Link href={routes.newBusiness} className="font-semibold text-accent hover:underline">
+              Criar página comercial
+            </Link>
+          )}
+        </p>
+      )}
 
       <div>
         <p className="mb-2 text-sm font-semibold">

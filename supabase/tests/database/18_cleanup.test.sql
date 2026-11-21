@@ -17,6 +17,8 @@ insert into public.post_media (post_id, position, storage_path) values (:'old_po
 
 update public.posts set deleted_at = now() where id in (:'old_post', :'new_post');
 -- deleted_at é sempre o horário do servidor (trigger); o teste envelhece a linha direto, sem o trigger.
+-- A detecção comercial (Fase 7) roda em trigger diferido: dispara agora para liberar o ALTER TABLE.
+set constraints all immediate;
 alter table public.posts disable trigger posts_before_update;
 update public.posts set deleted_at = now() - interval '31 days' where id = :'old_post';
 alter table public.posts enable trigger posts_before_update;

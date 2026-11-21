@@ -14,6 +14,7 @@ export default async function AdminLayout({ children }: { children: ReactNode })
   const items: AdminNavItem[] = [
     { href: routes.admin, label: "Visão geral" },
     { href: routes.adminReports, label: "Denúncias", badge: o.open_reports },
+    { href: routes.adminCommercial, label: "Publicidade", badge: o.open_commercial },
     { href: routes.adminUsers, label: "Usuários" },
     ...(access.admin ? [{ href: routes.adminTeachers, label: "Professores", badge: o.pending_teachers }] : []),
     { href: routes.adminAcademies, label: "Academias" },

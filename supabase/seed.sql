@@ -463,3 +463,16 @@ begin
   values (v_sub, 'created', 'active', 'Demonstração', v_admin);
 end;
 $$;
+
+-- Detecção comercial (Fase 7): atleta24 divulga vendas no perfil pessoal. Os triggers abrem a revisão
+-- no fim da transação; nada é removido sem a moderação decidir.
+do $$
+declare
+  v_user uuid := (select id from public.profiles where username = 'atleta24');
+begin
+  update public.profiles set bio = 'Vendo nada não, só treino. Encomendas de rash guard: chama no direct!' where id = v_user;
+  insert into public.posts (author_id, caption, visibility, created_at) values
+    (v_user, 'Rash guards novos por R$ 129! Cupom LUTA15 e frete grátis, chama no direct.', 'public', now() - interval '2 days'),
+    (v_user, 'Últimas unidades da faixa personalizada: https://shopee.com.br/faixa-demo compre já', 'public', now() - interval '1 day');
+end;
+$$;
