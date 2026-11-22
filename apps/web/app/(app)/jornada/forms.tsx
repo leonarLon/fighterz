@@ -62,11 +62,14 @@ export function PromotionForm({
   userMartialArtId,
   ranks,
   academies,
+  teachers,
   initial,
 }: {
   userMartialArtId: string;
   ranks: RankOption[];
   academies: Option[];
+  /** Professores com vínculo ativo (id = @usuário). Só eles recebem pedido de confirmação. */
+  teachers: Option[];
   /** Com `initial`, o formulário corrige um registro existente. */
   initial?: PromotionInitial;
 }) {
@@ -77,7 +80,7 @@ export function PromotionForm({
         degree: String(initial.degree),
         promotedOn: initial.promotedOn,
         academyId: initial.academyId ?? "",
-        teacherUsername: initial.teacherUsername ? `@${initial.teacherUsername}` : "",
+        teacherUsername: initial.teacherUsername ?? "",
         notes: initial.notes ?? "",
       }
     : undefined);
@@ -85,6 +88,11 @@ export function PromotionForm({
   const [rankId, setRankId] = useState(v?.rankId ?? "");
   const max = ranks.find((r) => r.id === rankId)?.maxDegrees ?? 0;
   const id = (name: string) => `${name}-${(initial?.id ?? userMartialArtId).slice(0, 8)}`;
+  // Registro antigo com professor que não está mais na lista: mantém a opção para não apagar sem querer.
+  const teacherOptions =
+    initial?.teacherUsername && !teachers.some((t) => t.id === initial.teacherUsername)
+      ? [...teachers, { id: initial.teacherUsername, name: `@${initial.teacherUsername} (sem vínculo ativo)` }]
+      : teachers;
 
   return (
     <form action={action} className="space-y-4" noValidate>
@@ -150,16 +158,25 @@ export function PromotionForm({
           ))}
         </SelectField>
       </div>
-      <InputField
+      <SelectField
         id={id("teacherUsername")}
         name="teacherUsername"
         label="Professor que graduou (opcional)"
-        placeholder="@usuario"
-        help="Se for um professor aprovado na plataforma, ele recebe um pedido para confirmar."
-        defaultValue={v?.teacherUsername ?? ""}
+        help={
+          teachers.length > 0
+            ? "O professor escolhido recebe um pedido para confirmar. Só aparecem professores que têm você na lista de alunos."
+            : "Para pedir confirmação, entre na lista de alunos do professor (botão “Sou aluno” na página dele)."
+        }
+        defaultValue={v?.teacherUsername?.replace(/^@/, "") ?? ""}
         errors={e.teacherUsername}
-        autoComplete="off"
-      />
+      >
+        <option value="">Nenhum</option>
+        {teacherOptions.map((t) => (
+          <option key={t.id} value={t.id}>
+            {t.name}
+          </option>
+        ))}
+      </SelectField>
       <TextareaField id={id("notes")} name="notes" label="Observações (opcional)" rows={2} maxLength={500} defaultValue={v?.notes ?? ""} errors={e.notes} />
       <Button type="submit" loading={pending}>
         {initial ? "Salvar correção" : "Registrar graduação"}

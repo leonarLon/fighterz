@@ -84,6 +84,7 @@ Modalidades ensinadas: `teacher_martial_arts(teacher_id, martial_art_id, rank_id
 **teacher_students** (migration 28)
 `teacher_id FK teacher_profiles`, `student_id FK profiles`, `status ('pending','active')`, `requested_by ('teacher','student')`, `created_at`, `accepted_at`. PK(teacher_id, student_id), professor ≠ aluno.
 Aceite mútuo como os vínculos com academias: o professor aprovado convida pelo @usuário (`invite_student`) ou a pessoa pede na página do professor (`request_teacher`); quem não iniciou decide (`respond_student_link`; recusar apaga). Qualquer parte desfaz (`remove_student_link`). Bloquear desfaz o vínculo. Notificações `student_invite`, `student_request`, `student_accepted`. A lista só aparece para as duas partes (view `teacher_student_cards`, `security_invoker`); o total é público.
+Desde a migration 30, o aluno só indica para confirmar graduação (`rank_promotions.teacher_id`) um professor com vínculo ativo, e o professor só confirma enquanto o vínculo existir.
 
 ### 4.2 Modalidades e graduações
 

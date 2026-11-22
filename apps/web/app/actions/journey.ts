@@ -32,6 +32,8 @@ const ERRORS: Record<string, string> = {
   achieved_on_in_future: "A data não pode ser no futuro.",
   started_on_in_future: "O início não pode ser no futuro.",
   not_the_teacher: "Só o professor indicado pode confirmar.",
+  not_your_teacher: "Só dá para pedir confirmação a um professor que tem você na lista de alunos.",
+  not_your_student: "Essa pessoa não está mais na sua lista de alunos.",
 };
 
 function message(error: { code?: string; message?: string } | null, fallback: string) {
@@ -116,7 +118,7 @@ export async function addPromotion(_prev: FormState, formData: FormData): Promis
       return {
         status: "error",
         message: "Revise os campos destacados.",
-        fieldErrors: { teacherUsername: ["Professor não encontrado. Use o @ de um professor aprovado."] },
+        fieldErrors: { teacherUsername: ["Professor não encontrado."] },
         values: v,
       };
     }

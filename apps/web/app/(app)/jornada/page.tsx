@@ -78,6 +78,9 @@ export default async function JourneyPage({ searchParams }: { searchParams: Prom
     username: l.teacher_username ?? "",
     avatarPath: l.teacher_avatar_path,
   }));
+  const teacherOptions = teachers
+    .filter((t) => t.status === "active")
+    .map((t) => ({ id: t.username, name: `${t.name} (@${t.username})` }));
 
   const academies = (memberships ?? []).map((m) => ({
     id: m.academy_id,
@@ -162,6 +165,7 @@ export default async function JourneyPage({ searchParams }: { searchParams: Prom
                                   userMartialArtId={j.id!}
                                   ranks={artRanks.map((r) => ({ id: r.id, name: r.name, maxDegrees: r.max_degrees }))}
                                   academies={academies}
+                                  teachers={teacherOptions}
                                   initial={{
                                     id: p.id!,
                                     rankId: p.rank_id!,
@@ -191,6 +195,7 @@ export default async function JourneyPage({ searchParams }: { searchParams: Prom
                           userMartialArtId={j.id!}
                           ranks={artRanks.map((r) => ({ id: r.id, name: r.name, maxDegrees: r.max_degrees }))}
                           academies={academies}
+                          teachers={teacherOptions}
                         />
                       </div>
                     </details>

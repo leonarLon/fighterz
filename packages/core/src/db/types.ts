@@ -2250,6 +2250,9 @@ isOneToOne: false
 "is_academy_visible":
 { Args: { "p_academy": string }; Returns: boolean
                            },
+"is_active_student_of":
+{ Args: { "p_student": string,"p_teacher": string }; Returns: boolean
+                           },
 "is_approved_teacher":
 { Args: { "p_user": string }; Returns: boolean
                            },

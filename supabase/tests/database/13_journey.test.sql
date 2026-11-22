@@ -11,6 +11,8 @@ select tests.create_user('fake_j') as fake \gset
 insert into public.teacher_profiles (user_id, professional_name) values (:'mestre', 'Mestre J');
 update public.teacher_profiles set status = 'approved' where user_id = :'mestre';
 insert into public.teacher_profiles (user_id, professional_name) values (:'fake', 'Pendente');
+-- Desde a migration 30, só professor com vínculo ativo recebe pedido de confirmação.
+insert into public.teacher_students (teacher_id, student_id, status, requested_by, accepted_at) values (:'mestre', :'atleta', 'active', 'teacher', now());
 
 select id as bjj from public.martial_arts where slug = 'jiu-jitsu' \gset
 select id as mt from public.martial_arts where slug = 'muay-thai' \gset

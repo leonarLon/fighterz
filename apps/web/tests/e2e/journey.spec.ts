@@ -113,6 +113,17 @@ test.describe("aceite da Fase 5: graduação BJJ com graus validados e confirmad
     const user = await createConfirmedUser(athlete.page, "faixa");
     const p = athlete.page;
 
+    // Desde a migration 30, só professor com vínculo ativo recebe o pedido: aluno pede, professor aceita.
+    await p.goto("/professores/atleta2");
+    await p.getByRole("button", { name: "Sou aluno de Professor Diego Ramos" }).click();
+    await expect(p.getByText("Pedido enviado, aguardando o professor")).toBeVisible();
+    const teacher = await newContext(browser);
+    await signInViaUi(teacher.page, "atleta2@figtherz.local", "Figtherz123");
+    await expect(teacher.page).toHaveURL(/\/inicio$/);
+    await teacher.page.goto("/professor#alunos");
+    await teacher.page.getByRole("listitem").filter({ hasText: `@${user.username}` }).getByRole("button", { name: "Aceitar" }).click();
+    await expect(teacher.page.getByText("Vínculo aceito.")).toBeVisible();
+
     await p.goto("/jornada");
     await p.getByLabel("Modalidade", { exact: true }).selectOption({ label: "Jiu-Jitsu Brasileiro" });
     await p.getByRole("button", { name: "Adicionar modalidade" }).click();
@@ -132,17 +143,17 @@ test.describe("aceite da Fase 5: graduação BJJ com graus validados e confirmad
 
     await degree.selectOption("2");
     await form.getByLabel("Data da graduação").fill("2025-03-15");
-    await form.getByLabel("Professor que graduou (opcional)").fill("@atleta2");
+    await form.getByLabel("Professor que graduou (opcional)").selectOption({ label: "Professor Diego Ramos (@atleta2)" });
     await form.getByRole("button", { name: "Registrar graduação" }).click();
     await expect(p.getByText(/^Graduação registrada\. Graduação atual em Jiu-Jitsu Brasileiro: Faixa Azul · 2 graus\. O professor vai receber o pedido de confirmação\.$/)).toBeVisible();
     await expect(p.getByText("Faixa Azul · 2 graus").first()).toBeVisible();
     await expect(p.getByText(/aguardando @atleta2/)).toBeVisible();
 
-    const teacher = await newContext(browser);
-    await signInViaUi(teacher.page, "atleta2@figtherz.local", "Figtherz123");
-    await expect(teacher.page).toHaveURL(/\/inicio$/);
     await teacher.page.goto("/professor");
-    const request = teacher.page.getByRole("listitem").filter({ hasText: `@${user.username}` });
+    const request = teacher.page
+      .getByRole("region", { name: "Graduações para confirmar" })
+      .getByRole("listitem")
+      .filter({ hasText: `@${user.username}` });
     await expect(request).toContainText("Faixa Azul · 2 graus");
     await request.getByRole("button", { name: "Confirmar" }).click();
     await expect(request.getByRole("status")).toHaveText("Graduação confirmada.");
