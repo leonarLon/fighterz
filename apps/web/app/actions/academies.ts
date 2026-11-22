@@ -30,6 +30,7 @@ const ERRORS: Record<string, string> = {
   "42501": "Você não tem permissão para alterar esta unidade.",
   martial_art_not_found: "Modalidade inválida.",
   account_suspended: "Sua conta está suspensa.",
+  academy_status_forbidden: "A academia foi suspensa pela moderação. Só a equipe Fighterz pode reativar.",
 };
 
 function message(error: { code?: string; message?: string } | null, fallback: string) {

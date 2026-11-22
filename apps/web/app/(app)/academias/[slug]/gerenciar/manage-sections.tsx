@@ -66,11 +66,19 @@ export function AcademyInfoSection({ data, arts }: Props) {
         </Button>
       </form>
       <div className="mt-6 flex flex-wrap items-center gap-3 border-t border-border pt-4">
-        <p className="text-sm text-muted">{visible ? "A página está pública." : "A página está oculta para o público."}</p>
-        <Button variant="secondary" loading={visibility.pending} onClick={() => visibility.run(() => setAcademyVisibility(academy.id, !visible))}>
-          {visible ? <EyeOff aria-hidden className="size-4" /> : <Eye aria-hidden className="size-4" />}
-          {visible ? "Ocultar academia" : "Publicar academia"}
-        </Button>
+        {academy.status === "suspended" ? (
+          <p className="text-sm font-medium text-danger">
+            Academia suspensa pela moderação. Ela volta a ser pública só quando a equipe Fighterz reativar.
+          </p>
+        ) : (
+          <>
+            <p className="text-sm text-muted">{visible ? "A página está pública." : "A página está oculta para o público."}</p>
+            <Button variant="secondary" loading={visibility.pending} onClick={() => visibility.run(() => setAcademyVisibility(academy.id, !visible))}>
+              {visible ? <EyeOff aria-hidden className="size-4" /> : <Eye aria-hidden className="size-4" />}
+              {visible ? "Ocultar academia" : "Publicar academia"}
+            </Button>
+          </>
+        )}
         <p aria-live="polite" className="text-[13px] text-muted">{visibility.notice}</p>
       </div>
     </Card>
