@@ -476,3 +476,24 @@ begin
     (v_user, 'Últimas unidades da faixa personalizada: https://shopee.com.br/faixa-demo compre já', 'public', now() - interval '1 day');
 end;
 $$;
+
+-- Alunos de professores (pós-evolução): atleta2 tem a demo e mais 6 alunos ativos, um pedido de aluno
+-- (atleta9, aceitar em /professor) e um convite sem resposta (atleta10). atleta16 tem 3 alunos.
+do $$
+declare
+  v_demo uuid := '00000000-0000-4000-8000-000000000001';
+  v_t2   uuid := (select id from public.profiles where username = 'atleta2');
+  v_t16  uuid := (select id from public.profiles where username = 'atleta16');
+begin
+  insert into public.teacher_students (teacher_id, student_id, status, requested_by, accepted_at)
+  select v_t2, p.id, 'active', 'teacher', now() - interval '30 days'
+  from public.profiles p where p.id = v_demo or p.username in ('atleta3', 'atleta4', 'atleta5', 'atleta8', 'atleta11', 'atleta12');
+  insert into public.teacher_students (teacher_id, student_id, status, requested_by, accepted_at)
+  select v_t16, p.id, 'active', 'student', now() - interval '10 days'
+  from public.profiles p where p.username in ('atleta19', 'atleta20', 'atleta21');
+  insert into public.teacher_students (teacher_id, student_id, status, requested_by)
+  select v_t2, p.id, 'pending', 'student' from public.profiles p where p.username = 'atleta9';
+  insert into public.teacher_students (teacher_id, student_id, status, requested_by)
+  select v_t2, p.id, 'pending', 'teacher' from public.profiles p where p.username = 'atleta10';
+end;
+$$;

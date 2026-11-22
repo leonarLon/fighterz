@@ -7,6 +7,7 @@ import { routes } from "@/lib/routes";
 import { ScheduleGrid, type ScheduleItem } from "@/components/academy/schedule-grid";
 import { Card } from "@/components/ui/card";
 import { PageHeader } from "@/components/ui/page-header";
+import { InviteStudentForm, StudentLinkList, type StudentLink } from "@/components/teacher/student-links";
 import { TeacherMemberships } from "./memberships";
 import { PromotionRequests, type PromotionRequest } from "./promotion-requests";
 import { TeacherForm, type TeacherFormValues } from "./teacher-form";
@@ -48,8 +49,9 @@ export default async function TeacherAreaPage() {
   let schedule: ScheduleItem[] = [];
   let memberships: { academyId: string; slug: string; name: string; status: string; requestedBy: string }[] = [];
   let requests: PromotionRequest[] = [];
+  let students: StudentLink[] = [];
   if (approved) {
-    const [{ data: s }, { data: m }, { data: pr }] = await Promise.all([
+    const [{ data: s }, { data: m }, { data: pr }, { data: st }] = await Promise.all([
       supabase.rpc("get_teacher_schedule", { p_teacher: user.id }),
       supabase
         .from("academy_memberships")
@@ -63,7 +65,17 @@ export default async function TeacherAreaPage() {
         .eq("teacher_id", user.id)
         .eq("verification", "self_reported")
         .order("created_at"),
+      supabase.from("teacher_student_cards").select("*").eq("teacher_id", user.id).order("created_at").limit(500),
     ]);
+    students = (st ?? []).map((l) => ({
+      teacherId: l.teacher_id!,
+      studentId: l.student_id!,
+      status: l.status as StudentLink["status"],
+      requestedBy: l.requested_by as StudentLink["requestedBy"],
+      name: l.student_display_name ?? "",
+      username: l.student_username ?? "",
+      avatarPath: l.student_avatar_path,
+    }));
     requests = (pr ?? []).map((p) => ({
       id: p.id!,
       username: p.user_username ?? "",
@@ -128,6 +140,26 @@ export default async function TeacherAreaPage() {
               Graduações para confirmar
             </h2>
             <PromotionRequests items={requests} />
+          </section>
+          <section aria-labelledby="alunos">
+            <h2 id="alunos" className="font-display text-2xl font-semibold">
+              Alunos
+            </h2>
+            <p className="mb-3 text-muted">
+              {(() => {
+                const n = students.filter((l) => l.status === "active").length;
+                return `${n} ${n === 1 ? "aluno" : "alunos"} na sua lista. O total aparece no seu perfil; a lista só você e cada aluno veem.`;
+              })()}
+            </p>
+            <Card className="space-y-4">
+              <InviteStudentForm />
+              <StudentLinkList
+                key={students.map((l) => `${l.studentId}:${l.status}`).join(",")}
+                side="teacher"
+                items={students}
+                empty={<p className="text-muted">Nenhum aluno ainda. Convide pelo @usuário ou peça para seus alunos tocarem em “Sou aluno” na sua página.</p>}
+              />
+            </Card>
           </section>
           <section aria-labelledby="vinculos">
             <h2 id="vinculos" className="mb-3 font-display text-2xl font-semibold">

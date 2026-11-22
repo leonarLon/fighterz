@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useTransition } from "react";
 import Link from "next/link";
-import { AtSign, BadgeCheck, Building2, CalendarDays, Heart, Medal, MessageCircle, Reply, ShieldCheck, UserPlus, UserRoundPlus } from "lucide-react";
+import { AtSign, BadgeCheck, Building2, CalendarDays, GraduationCap, Heart, Medal, MessageCircle, Reply, ShieldCheck, UserPlus, UserRoundPlus } from "lucide-react";
 import { timeAgo } from "@figtherz/core";
 import { markNotificationsRead, respondFollowRequest, respondMention } from "@/app/actions/social";
 import { routes } from "@/lib/routes";
@@ -39,6 +39,9 @@ const copy: Record<string, { text: string; icon: typeof Heart }> = {
   commercial_warning: { text: "registrou publicidade no seu perfil pessoal. Veja os motivos e, se quiser, recorra", icon: ShieldCheck },
   appeal_decided: { text: "respondeu ao seu recurso", icon: ShieldCheck },
   business_invite: { text: "convidou você para administrar uma página comercial", icon: Building2 },
+  student_invite: { text: "convidou você para a lista de alunos", icon: GraduationCap },
+  student_request: { text: "pediu para constar como seu aluno", icon: GraduationCap },
+  student_accepted: { text: "aceitou o vínculo de professor e aluno", icon: GraduationCap },
 };
 
 export function NotificationList({ items }: { items: NotificationItem[] }) {
@@ -78,6 +81,8 @@ function targetOf(item: NotificationItem): string {
   if (item.type === "promotion_confirmed") return routes.journey;
   if (item.type === "commercial_warning" || item.type === "appeal_decided") return routes.commercialReviews;
   if (item.type === "business_invite") return `${routes.businesses}#convites`;
+  if (item.type === "student_invite") return `${routes.journey}#professores`;
+  if (item.type === "student_request") return `${routes.teacherArea}#alunos`;
   if (item.event) return routes.event(item.event.id);
   if (item.actor) return routes.profile(item.actor.username);
   return routes.notifications;

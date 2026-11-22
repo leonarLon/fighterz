@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { CalendarCheck, ChevronLeft, ChevronRight, Dumbbell, Medal, Pencil, Plus, Trophy } from "lucide-react";
+import { CalendarCheck, ChevronLeft, ChevronRight, Dumbbell, GraduationCap, Medal, Pencil, Plus, Trophy } from "lucide-react";
 import {
   ACHIEVEMENT_TYPE_LABELS,
   MEDAL_LABELS,
@@ -25,6 +25,7 @@ import { EmptyState } from "@/components/ui/empty-state";
 import { FormMessage } from "@/components/ui/form-message";
 import { PageHeader } from "@/components/ui/page-header";
 import { RankBelt } from "@/components/journey/rank-belt";
+import { StudentLinkList, type StudentLink } from "@/components/teacher/student-links";
 import { AddArtForm, AchievementForm, PromotionForm } from "./forms";
 import { DeleteButton } from "./delete-button";
 
@@ -51,6 +52,7 @@ export default async function JourneyPage({ searchParams }: { searchParams: Prom
     { data: achievements },
     { data: monthCheckins },
     { data: recent },
+    { data: teacherLinks },
   ] = await Promise.all([
     supabase.from("journey_cards").select("*").eq("user_id", user.id).order("sort_order"),
     supabase.from("promotion_cards").select("*").eq("user_id", user.id).order("promoted_on", { ascending: false }),
@@ -65,7 +67,17 @@ export default async function JourneyPage({ searchParams }: { searchParams: Prom
       .gte("trained_at", from.toISOString())
       .lt("trained_at", to.toISOString()),
     supabase.from("checkin_cards").select("*").eq("user_id", user.id).order("trained_at", { ascending: false }).limit(10),
+    supabase.from("teacher_student_cards").select("*").eq("student_id", user.id).order("created_at").limit(100),
   ]);
+  const teachers: StudentLink[] = (teacherLinks ?? []).map((l) => ({
+    teacherId: l.teacher_id!,
+    studentId: l.student_id!,
+    status: l.status as StudentLink["status"],
+    requestedBy: l.requested_by as StudentLink["requestedBy"],
+    name: l.teacher_name ?? "",
+    username: l.teacher_username ?? "",
+    avatarPath: l.teacher_avatar_path,
+  }));
 
   const academies = (memberships ?? []).map((m) => ({
     id: m.academy_id,
@@ -201,6 +213,29 @@ export default async function JourneyPage({ searchParams }: { searchParams: Prom
               </div>
             </details>
           )}
+        </section>
+
+        {/* ------------------------------------------------ professores */}
+        <section aria-labelledby="professores" className="scroll-mt-20">
+          <h2 id="professores" className="mb-1 flex items-center gap-2 font-display text-2xl font-semibold">
+            <GraduationCap aria-hidden className="size-6 text-accent" /> Meus professores
+          </h2>
+          <p className="mb-3 text-muted">
+            Professores que têm você na lista de alunos. Para entrar na lista de alguém, abra a página do professor e toque em “Sou aluno”.
+          </p>
+          <StudentLinkList
+            side="student"
+            items={teachers}
+            empty={
+              <p className="text-sm text-muted">
+                Nenhum professor ainda.{" "}
+                <Link href={routes.classes} className="font-semibold text-accent hover:underline">
+                  Encontre aulas e professores
+                </Link>
+                .
+              </p>
+            }
+          />
         </section>
 
         {/* ------------------------------------------------ treinos */}

@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { Award, ExternalLink, Mail, Phone, Ticket } from "lucide-react";
-import { formatAddress } from "@figtherz/core";
+import { Award, ExternalLink, GraduationCap, Mail, Phone, Ticket } from "lucide-react";
+import { compactCount, formatAddress } from "@figtherz/core";
 import { createClient } from "@/lib/supabase/server";
 import { routes } from "@/lib/routes";
 import { ScheduleGrid, type ScheduleItem } from "@/components/academy/schedule-grid";
@@ -11,6 +11,8 @@ import { Avatar } from "@/components/ui/avatar";
 import { BeltDivider } from "@/components/ui/belt";
 import { ButtonLink } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { StudentRequestButton } from "@/components/teacher/student-links";
+import { getViewer } from "@/lib/viewer";
 
 type Props = { params: Promise<{ username: string }> };
 
@@ -30,7 +32,25 @@ export default async function TeacherPage({ params }: Props) {
   const teacher = await loadTeacher((await params).username);
   if (!teacher || !teacher.user_id) notFound();
   const supabase = await createClient();
-  const { data: schedule } = await supabase.rpc("get_teacher_schedule", { p_teacher: teacher.user_id });
+  const viewer = await getViewer();
+  const [{ data: schedule }, { data: link }] = await Promise.all([
+    supabase.rpc("get_teacher_schedule", { p_teacher: teacher.user_id }),
+    viewer && viewer.id !== teacher.user_id
+      ? supabase.from("teacher_students").select("status, requested_by").eq("teacher_id", teacher.user_id).eq("student_id", viewer.id).maybeSingle()
+      : Promise.resolve({ data: null }),
+  ]);
+  const studentState = !viewer
+    ? "anon"
+    : viewer.id === teacher.user_id
+      ? "self"
+      : !link
+        ? "none"
+        : link.status === "active"
+          ? "active"
+          : link.requested_by === "teacher"
+            ? "invited"
+            : "pending";
+  const studentCount = teacher.student_count ?? 0;
   const classes = schedule ?? [];
 
   const academies = new Map<string, { slug: string; name: string }>();
@@ -65,6 +85,11 @@ export default async function TeacherPage({ params }: Props) {
                 @{teacher.username}
               </Link>
               {teacher.experience_years != null && ` · ${teacher.experience_years} anos de experiência`}
+            </p>
+            <p className="mt-1 inline-flex items-center gap-1.5 text-sm">
+              <GraduationCap aria-hidden className="size-4 text-accent" />
+              <span className="font-semibold tabular-nums">{compactCount(studentCount)}</span>
+              <span className="text-muted">{studentCount === 1 ? "aluno" : "alunos"}</span>
             </p>
           </div>
         </div>
@@ -126,6 +151,15 @@ export default async function TeacherPage({ params }: Props) {
             ))}
           </ul>
         )}
+        <div className="mt-5">
+          <StudentRequestButton
+            teacherId={teacher.user_id}
+            teacherName={teacher.professional_name ?? ""}
+            viewerId={viewer?.id ?? null}
+            initial={studentState}
+            signInHref={`${routes.signIn}?next=${encodeURIComponent(routes.teacher(teacher.username ?? ""))}`}
+          />
+        </div>
         <BeltDivider className="mt-6" />
       </Card>
 

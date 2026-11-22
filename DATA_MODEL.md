@@ -79,6 +79,11 @@ Função `has_role(role)` `security definer stable` usada nas políticas.
 **teacher_profiles** (1:0..1)
 `user_id PK FK`, `professional_name`, `bio`, `experience_years`, `lineage text` (ex.: "linhagem"), `access_plans text` (≤ 500, planos aceitos onde dá aula, migration 21), `certifications jsonb` (lista de {título, emissor, ano}), `contact_email`, `contact_phone`, `show_contact bool default false`, `social_links jsonb` (validado: só URLs https), `status enum('pending','approved','rejected','revoked')`, `reviewed_by`, `reviewed_at`, `review_notes`.
 Modalidades ensinadas: `teacher_martial_arts(teacher_id, martial_art_id, rank_id)` PK composta.
+`student_count` (migration 28): total público de alunos ativos, mantido por trigger e exposto no fim da view `teacher_cards`.
+
+**teacher_students** (migration 28)
+`teacher_id FK teacher_profiles`, `student_id FK profiles`, `status ('pending','active')`, `requested_by ('teacher','student')`, `created_at`, `accepted_at`. PK(teacher_id, student_id), professor ≠ aluno.
+Aceite mútuo como os vínculos com academias: o professor aprovado convida pelo @usuário (`invite_student`) ou a pessoa pede na página do professor (`request_teacher`); quem não iniciou decide (`respond_student_link`; recusar apaga). Qualquer parte desfaz (`remove_student_link`). Bloquear desfaz o vínculo. Notificações `student_invite`, `student_request`, `student_accepted`. A lista só aparece para as duas partes (view `teacher_student_cards`, `security_invoker`); o total é público.
 
 ### 4.2 Modalidades e graduações
 
@@ -267,6 +272,7 @@ unique(reporter_id, target_type, target_id) where status in ('open','in_review')
 | posts | `public`: todos (menos bloqueios); `followers`: seguidores aceitos; `private`: autor; `removed`: autor e moderador | autor = `auth.uid()` + rate limit | autor (campos limitados) | autor (soft) / moderador |
 | post_media | herda do post | autor do post | autor | autor |
 | likes / saved / comments | herda visibilidade do post | `user_id = auth.uid()` e post visível e não bloqueado | autor do comentário | autor; autor do post pode apagar comentários no seu post |
+| teacher_students | só as duas partes (total público em `teacher_profiles.student_count`) | só RPC | só RPC (quem não iniciou aceita) | qualquer parte (RPC) |
 | follows | público para `accepted`; `pending` só as duas partes | follower = uid | seguido aceita | qualquer parte |
 | notifications | destinatário | só triggers (`security definer`) | destinatário (`read_at`) | destinatário |
 | training_checkins / achievements / rank_promotions | conforme `visibility` + `user_settings` | dono | dono; professor só confirma via RPC | dono |

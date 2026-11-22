@@ -2,7 +2,7 @@ import { Suspense } from "react";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { Camera, Dumbbell, Lock, MapPin, Medal, Newspaper, Pencil, SquarePen, Trophy } from "lucide-react";
+import { Camera, Dumbbell, GraduationCap, Lock, MapPin, Medal, Newspaper, Pencil, SquarePen, Trophy } from "lucide-react";
 import { compactCount } from "@figtherz/core";
 import { loadMoreProfilePosts } from "@/app/actions/posts";
 import { ButtonLink } from "@/components/ui/button";
@@ -38,6 +38,9 @@ export default async function PublicProfilePage({ params }: Props) {
   const supabase = await createClient();
   const isOwner = viewer?.id === profile.id;
 
+  // Professor aprovado mostra o total de alunos (público, como os seguidores).
+  const { data: teacherCard } = await supabase.from("teacher_cards").select("student_count").eq("user_id", profile.id).maybeSingle();
+
   let followState: "none" | "pending" | "accepted" = "none";
   let blockedByMe = false;
   if (viewer && !isOwner) {
@@ -56,6 +59,9 @@ export default async function PublicProfilePage({ params }: Props) {
     { label: plural(profile.follower_count, "seguidor", "seguidores"), value: profile.follower_count, href: routes.followers(profile.username) },
     { label: "seguindo", value: profile.following_count, href: routes.following(profile.username) },
   ];
+  const teacherStat = teacherCard
+    ? { label: plural(teacherCard.student_count ?? 0, "aluno", "alunos"), value: teacherCard.student_count ?? 0, href: routes.teacher(profile.username) }
+    : null;
 
   return (
     <div className="space-y-6">
@@ -117,6 +123,15 @@ export default async function PublicProfilePage({ params }: Props) {
               )}
             </li>
           ))}
+          {teacherStat && (
+            <li>
+              <Link href={teacherStat.href} className="inline-flex min-h-11 items-center gap-1 hover:underline">
+                <GraduationCap aria-hidden className="size-4 text-accent" />
+                <span className="font-semibold tabular-nums">{compactCount(teacherStat.value)}</span>
+                <span className="text-muted">{teacherStat.label}</span>
+              </Link>
+            </li>
+          )}
         </ul>
 
         <div className="mt-5">

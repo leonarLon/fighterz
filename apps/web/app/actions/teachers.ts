@@ -1,7 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { teacherProfileSchema } from "@figtherz/core";
+import { inviteSchema, teacherProfileSchema } from "@figtherz/core";
 import { createClient } from "@/lib/supabase/server";
 import { requireUser } from "@/lib/auth";
 import { fromZodError, text, type FormState } from "@/lib/form-state";
@@ -65,4 +65,76 @@ export async function reviewTeacher(userId: string, status: "approved" | "reject
   // Sem revalidar: o item mostra o resultado; a fila se atualiza na próxima visita.
   if (error) return { ok: false as const, message: error.code === "42501" ? "Apenas administradores." : "Não foi possível revisar." };
   return { ok: true as const };
+}
+
+// ---------------------------------------------------------------------------
+// Alunos do professor (aceite mútuo: quem não iniciou decide)
+// ---------------------------------------------------------------------------
+type Result = { ok: true; message?: string } | { ok: false; message: string };
+
+const STUDENT_ERRORS: Record<string, string> = {
+  P0429: "Muitas tentativas em pouco tempo. Tente de novo mais tarde.",
+  teacher_not_approved: "Só professores com perfil aprovado têm alunos.",
+  teacher_not_found: "Professor não encontrado.",
+  user_not_found: "Usuário não encontrado.",
+  cannot_add_self: "Você não pode ser seu próprio aluno.",
+  link_not_found: "Esse vínculo não existe mais.",
+  forbidden: "Você não tem permissão para isso.",
+  account_suspended: "Sua conta está suspensa.",
+};
+
+function studentError(error: { code?: string; message?: string }, fallback: string) {
+  return STUDENT_ERRORS[error.message ?? ""] ?? STUDENT_ERRORS[error.code ?? ""] ?? fallback;
+}
+
+const studentInviteSchema = inviteSchema.pick({ username: true });
+
+/** Professor convida um aluno pelo @usuário. A pessoa precisa aceitar (ou já tinha pedido). */
+export async function inviteStudent(_prev: FormState, formData: FormData): Promise<FormState> {
+  await requireUser();
+  const values = { username: text(formData, "username") };
+  const parsed = studentInviteSchema.safeParse(values);
+  if (!parsed.success) return fromZodError(parsed.error, values);
+  const supabase = await createClient();
+  const { data, error } = await supabase.rpc("invite_student", { p_username: parsed.data.username });
+  if (error) return { status: "error", message: studentError(error, "Não foi possível enviar o convite."), values };
+  revalidatePath(routes.teacherArea);
+  return {
+    status: "success",
+    message:
+      data === "active"
+        ? `@${parsed.data.username} agora é seu aluno.`
+        : `Convite enviado. @${parsed.data.username} precisa aceitar para entrar na sua lista.`,
+  };
+}
+
+/** Pessoa pede para constar como aluno do professor. */
+export async function requestTeacher(teacherId: string): Promise<Result & { status?: "pending" | "active" }> {
+  await requireUser();
+  const supabase = await createClient();
+  const { data, error } = await supabase.rpc("request_teacher", { p_teacher: teacherId });
+  if (error) return { ok: false, message: studentError(error, "Não foi possível enviar o pedido.") };
+  const status = data === "active" ? "active" : "pending";
+  return {
+    ok: true,
+    status,
+    message: status === "active" ? "Pronto: você está na lista de alunos." : "Pedido enviado. O professor precisa confirmar.",
+  };
+}
+
+/** Sem revalidar: a linha mostra o resultado localmente (o item sai da lista). */
+export async function respondStudentLink(teacherId: string, studentId: string, accept: boolean): Promise<Result> {
+  await requireUser();
+  const supabase = await createClient();
+  const { error } = await supabase.rpc("respond_student_link", { p_teacher: teacherId, p_student: studentId, p_accept: accept });
+  if (error) return { ok: false, message: studentError(error, "Não foi possível responder.") };
+  return { ok: true, message: accept ? "Vínculo aceito." : "Pedido recusado." };
+}
+
+export async function removeStudentLink(teacherId: string, studentId: string): Promise<Result> {
+  await requireUser();
+  const supabase = await createClient();
+  const { error } = await supabase.rpc("remove_student_link", { p_teacher: teacherId, p_student: studentId });
+  if (error) return { ok: false, message: studentError(error, "Não foi possível desfazer o vínculo.") };
+  return { ok: true, message: "Vínculo desfeito." };
 }

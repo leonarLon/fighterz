@@ -1299,14 +1299,14 @@ isOneToOne: false
                   ]
                 },"teacher_profiles": {
                   Row: {
-                    "access_plans": string | null,"bio": string | null,"certifications": NonNullable<Json>,"contact_email": string | null,"contact_phone": string | null,"created_at": string,"experience_years": number | null,"lineage": string | null,"professional_name": string,"review_notes": string | null,"reviewed_at": string | null,"reviewed_by": string | null,"show_contact": boolean,"social_links": NonNullable<Json>,"status": Database["public"]['Enums']["teacher_status"],"updated_at": string,"user_id": string
+                    "access_plans": string | null,"bio": string | null,"certifications": NonNullable<Json>,"contact_email": string | null,"contact_phone": string | null,"created_at": string,"experience_years": number | null,"lineage": string | null,"professional_name": string,"review_notes": string | null,"reviewed_at": string | null,"reviewed_by": string | null,"show_contact": boolean,"social_links": NonNullable<Json>,"status": Database["public"]['Enums']["teacher_status"],"student_count": number,"updated_at": string,"user_id": string
                   }
                   ComputedFields: never
                   Insert: {
-                    "access_plans"?: string | null,"bio"?: string | null,"certifications"?: NonNullable<Json>,"contact_email"?: string | null,"contact_phone"?: string | null,"created_at"?: string,"experience_years"?: number | null,"lineage"?: string | null,"professional_name": string,"review_notes"?: string | null,"reviewed_at"?: string | null,"reviewed_by"?: string | null,"show_contact"?: boolean,"social_links"?: NonNullable<Json>,"status"?: Database["public"]['Enums']["teacher_status"],"updated_at"?: string,"user_id": string
+                    "access_plans"?: string | null,"bio"?: string | null,"certifications"?: NonNullable<Json>,"contact_email"?: string | null,"contact_phone"?: string | null,"created_at"?: string,"experience_years"?: number | null,"lineage"?: string | null,"professional_name": string,"review_notes"?: string | null,"reviewed_at"?: string | null,"reviewed_by"?: string | null,"show_contact"?: boolean,"social_links"?: NonNullable<Json>,"status"?: Database["public"]['Enums']["teacher_status"],"student_count"?: number,"updated_at"?: string,"user_id": string
                   }
                   Update: {
-                    "access_plans"?: string | null,"bio"?: string | null,"certifications"?: NonNullable<Json>,"contact_email"?: string | null,"contact_phone"?: string | null,"created_at"?: string,"experience_years"?: number | null,"lineage"?: string | null,"professional_name"?: string,"review_notes"?: string | null,"reviewed_at"?: string | null,"reviewed_by"?: string | null,"show_contact"?: boolean,"social_links"?: NonNullable<Json>,"status"?: Database["public"]['Enums']["teacher_status"],"updated_at"?: string,"user_id"?: string
+                    "access_plans"?: string | null,"bio"?: string | null,"certifications"?: NonNullable<Json>,"contact_email"?: string | null,"contact_phone"?: string | null,"created_at"?: string,"experience_years"?: number | null,"lineage"?: string | null,"professional_name"?: string,"review_notes"?: string | null,"reviewed_at"?: string | null,"reviewed_by"?: string | null,"show_contact"?: boolean,"social_links"?: NonNullable<Json>,"status"?: Database["public"]['Enums']["teacher_status"],"student_count"?: number,"updated_at"?: string,"user_id"?: string
                   }
                   Relationships: [
                     {
@@ -1321,6 +1321,38 @@ isOneToOne: false
 isOneToOne: true
       referencedRelation: "profiles"
       referencedColumns: ["id"]
+    }
+                  ]
+                },"teacher_students": {
+                  Row: {
+                    "accepted_at": string | null,"created_at": string,"requested_by": string,"status": string,"student_id": string,"teacher_id": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "accepted_at"?: string | null,"created_at"?: string,"requested_by": string,"status"?: string,"student_id": string,"teacher_id": string
+                  }
+                  Update: {
+                    "accepted_at"?: string | null,"created_at"?: string,"requested_by"?: string,"status"?: string,"student_id"?: string,"teacher_id"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "teacher_students_student_id_fkey"
+      columns: ["student_id"]
+isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "teacher_students_teacher_id_fkey"
+      columns: ["teacher_id"]
+isOneToOne: false
+      referencedRelation: "teacher_cards"
+      referencedColumns: ["user_id"]
+    },{
+      foreignKeyName: "teacher_students_teacher_id_fkey"
+      columns: ["teacher_id"]
+isOneToOne: false
+      referencedRelation: "teacher_profiles"
+      referencedColumns: ["user_id"]
     }
                   ]
                 },"training_checkins": {
@@ -1804,7 +1836,7 @@ isOneToOne: false
                   ]
                 },"teacher_cards": {
                   Row: {
-                    "access_plans": string | null,"avatar_path": string | null,"bio": string | null,"certifications": NonNullable<Json>,"city": string | null,"contact_email": string | null,"contact_phone": string | null,"display_name": string,"experience_years": number | null,"lineage": string | null,"martial_arts": Json | null,"professional_name": string,"social_links": NonNullable<Json>,"state": string | null,"user_id": string,"username": string | null
+                    "access_plans": string | null,"avatar_path": string | null,"bio": string | null,"certifications": NonNullable<Json>,"city": string | null,"contact_email": string | null,"contact_phone": string | null,"display_name": string,"experience_years": number | null,"lineage": string | null,"martial_arts": Json | null,"professional_name": string,"social_links": NonNullable<Json>,"state": string | null,"student_count": number,"user_id": string,"username": string | null
                   }
                   ComputedFields: never
                   Relationships: [
@@ -1814,6 +1846,32 @@ isOneToOne: false
 isOneToOne: true
       referencedRelation: "profiles"
       referencedColumns: ["id"]
+    }
+                  ]
+                },"teacher_student_cards": {
+                  Row: {
+                    "accepted_at": string | null,"created_at": string,"requested_by": string,"status": string,"student_avatar_path": string | null,"student_display_name": string,"student_id": string,"student_username": string | null,"teacher_avatar_path": string | null,"teacher_id": string,"teacher_name": string | null,"teacher_username": string | null
+                  }
+                  ComputedFields: never
+                  Relationships: [
+                    {
+      foreignKeyName: "teacher_students_student_id_fkey"
+      columns: ["student_id"]
+isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "teacher_students_teacher_id_fkey"
+      columns: ["teacher_id"]
+isOneToOne: false
+      referencedRelation: "teacher_cards"
+      referencedColumns: ["user_id"]
+    },{
+      foreignKeyName: "teacher_students_teacher_id_fkey"
+      columns: ["teacher_id"]
+isOneToOne: false
+      referencedRelation: "teacher_profiles"
+      referencedColumns: ["user_id"]
     }
                   ]
                 }
@@ -1835,6 +1893,9 @@ isOneToOne: true
                            },
 "admin_set_subscription_status":
 { Args: { "p_reason": string,"p_status": Database["public"]['Enums']["subscription_status"],"p_subscription": string }; Returns: undefined
+                           },
+"assert_caller_active":
+{ Args: Record<PropertyKey, never>; Returns: string
                            },
 "backfill_commercial_signals":
 { Args: Record<PropertyKey, never>; Returns: number
@@ -2177,6 +2238,9 @@ isOneToOne: true
 "invite_member":
 { Args: { "p_academy": string,"p_role": Database["public"]['Enums']["membership_role"],"p_username": string }; Returns: Database["public"]['Enums']["membership_status"]
                            },
+"invite_student":
+{ Args: { "p_username": string }; Returns: string
+                           },
 "is_academy_manager":
 { Args: { "p_academy": string }; Returns: boolean
                            },
@@ -2258,11 +2322,17 @@ isOneToOne: true
 "remove_member":
 { Args: { "p_academy": string,"p_role": Database["public"]['Enums']["membership_role"],"p_user": string }; Returns: undefined
                            },
+"remove_student_link":
+{ Args: { "p_student": string,"p_teacher": string }; Returns: undefined
+                           },
 "report_target_owner":
 { Args: { "p_id": string,"p_type": Database["public"]['Enums']["report_target"] }; Returns: string
                            },
 "request_membership":
 { Args: { "p_academy": string,"p_role": Database["public"]['Enums']["membership_role"] }; Returns: Database["public"]['Enums']["membership_status"]
+                           },
+"request_teacher":
+{ Args: { "p_teacher": string }; Returns: string
                            },
 "require_platform_admin":
 { Args: Record<PropertyKey, never>; Returns: undefined
@@ -2272,6 +2342,9 @@ isOneToOne: true
                            },
 "respond_membership":
 { Args: { "p_academy": string,"p_accept": boolean,"p_role": Database["public"]['Enums']["membership_role"],"p_user": string }; Returns: undefined
+                           },
+"respond_student_link":
+{ Args: { "p_accept": boolean,"p_student": string,"p_teacher": string }; Returns: undefined
                            },
 "review_teacher":
 { Args: { "p_notes"?: string,"p_status": Database["public"]['Enums']["teacher_status"],"p_user": string }; Returns: undefined
@@ -2311,7 +2384,7 @@ isOneToOne: true
                            }
           }
           Enums: {
-            "academy_status": "active"|"hidden"|"suspended","account_status": "active"|"suspended"|"deleted","achievement_type": "competition_result"|"milestone"|"certification"|"other","appeal_status": "open"|"accepted"|"rejected","business_category": "brand"|"store"|"service","business_member_status": "pending"|"active","business_role": "owner"|"admin","business_status": "active"|"hidden"|"suspended","catalog_item_kind": "product"|"service","class_level": "all"|"beginner"|"intermediate"|"advanced"|"kids"|"competition","class_status": "active"|"paused"|"cancelled","commercial_review_status": "open"|"dismissed"|"warned"|"actioned"|"reverted","coords_source": "manual"|"nominatim","event_interest_kind": "interested"|"saved","event_status": "draft"|"published"|"cancelled","event_type": "championship"|"seminar"|"open_mat"|"graduation"|"workshop"|"special_training"|"other","follow_status": "pending"|"accepted","medal": "gold"|"silver"|"bronze","media_status": "uploading"|"processing"|"ready"|"failed","media_type": "image"|"video","membership_requester": "user"|"academy","membership_role": "owner"|"admin"|"teacher"|"student","membership_status": "pending"|"active"|"rejected"|"left","mention_status": "pending"|"approved"|"rejected","moderation_action": "remove_content"|"restore_content"|"dismiss_reports"|"warn"|"suspend"|"unsuspend"|"ban"|"verify"|"unverify","moderation_status": "visible"|"under_review"|"removed","notification_type": "follow"|"follow_request"|"like"|"comment"|"reply"|"mention"|"class_update"|"event_update"|"promotion_confirmed"|"membership_request"|"moderation"|"promotion_request"|"business_invite"|"commercial_warning"|"appeal_decided","plan_audience": "academy"|"business"|"both","platform_role": "moderator"|"admin"|"superadmin","post_kind": "standard"|"checkin"|"achievement"|"event_share","price_status": "paid"|"free"|"undisclosed","rank_track": "adult"|"kids","report_reason": "spam"|"harassment"|"violence"|"nudity"|"minor_safety"|"impersonation"|"misinformation"|"other","report_status": "open"|"in_review"|"resolved"|"dismissed","report_target": "post"|"comment"|"profile"|"academy"|"event"|"business","subscription_status": "active"|"suspended"|"cancelled"|"expired","teacher_status": "pending"|"approved"|"rejected"|"revoked","theme_preference": "light"|"dark"|"system","unit_access_kind": "totalpass"|"wellhub"|"day_pass","verification_status": "self_reported"|"teacher_confirmed","visibility": "public"|"followers"|"private"
+            "academy_status": "active"|"hidden"|"suspended","account_status": "active"|"suspended"|"deleted","achievement_type": "competition_result"|"milestone"|"certification"|"other","appeal_status": "open"|"accepted"|"rejected","business_category": "brand"|"store"|"service","business_member_status": "pending"|"active","business_role": "owner"|"admin","business_status": "active"|"hidden"|"suspended","catalog_item_kind": "product"|"service","class_level": "all"|"beginner"|"intermediate"|"advanced"|"kids"|"competition","class_status": "active"|"paused"|"cancelled","commercial_review_status": "open"|"dismissed"|"warned"|"actioned"|"reverted","coords_source": "manual"|"nominatim","event_interest_kind": "interested"|"saved","event_status": "draft"|"published"|"cancelled","event_type": "championship"|"seminar"|"open_mat"|"graduation"|"workshop"|"special_training"|"other","follow_status": "pending"|"accepted","medal": "gold"|"silver"|"bronze","media_status": "uploading"|"processing"|"ready"|"failed","media_type": "image"|"video","membership_requester": "user"|"academy","membership_role": "owner"|"admin"|"teacher"|"student","membership_status": "pending"|"active"|"rejected"|"left","mention_status": "pending"|"approved"|"rejected","moderation_action": "remove_content"|"restore_content"|"dismiss_reports"|"warn"|"suspend"|"unsuspend"|"ban"|"verify"|"unverify","moderation_status": "visible"|"under_review"|"removed","notification_type": "follow"|"follow_request"|"like"|"comment"|"reply"|"mention"|"class_update"|"event_update"|"promotion_confirmed"|"membership_request"|"moderation"|"promotion_request"|"business_invite"|"commercial_warning"|"appeal_decided"|"student_invite"|"student_request"|"student_accepted","plan_audience": "academy"|"business"|"both","platform_role": "moderator"|"admin"|"superadmin","post_kind": "standard"|"checkin"|"achievement"|"event_share","price_status": "paid"|"free"|"undisclosed","rank_track": "adult"|"kids","report_reason": "spam"|"harassment"|"violence"|"nudity"|"minor_safety"|"impersonation"|"misinformation"|"other","report_status": "open"|"in_review"|"resolved"|"dismissed","report_target": "post"|"comment"|"profile"|"academy"|"event"|"business","subscription_status": "active"|"suspended"|"cancelled"|"expired","teacher_status": "pending"|"approved"|"rejected"|"revoked","theme_preference": "light"|"dark"|"system","unit_access_kind": "totalpass"|"wellhub"|"day_pass","verification_status": "self_reported"|"teacher_confirmed","visibility": "public"|"followers"|"private"
           }
           CompositeTypes: {
             [_ in never]: never
@@ -2431,7 +2504,7 @@ export const Constants = {
           }
         },"public": {
           Enums: {
-            "academy_status": ["active", "hidden", "suspended"],"account_status": ["active", "suspended", "deleted"],"achievement_type": ["competition_result", "milestone", "certification", "other"],"appeal_status": ["open", "accepted", "rejected"],"business_category": ["brand", "store", "service"],"business_member_status": ["pending", "active"],"business_role": ["owner", "admin"],"business_status": ["active", "hidden", "suspended"],"catalog_item_kind": ["product", "service"],"class_level": ["all", "beginner", "intermediate", "advanced", "kids", "competition"],"class_status": ["active", "paused", "cancelled"],"commercial_review_status": ["open", "dismissed", "warned", "actioned", "reverted"],"coords_source": ["manual", "nominatim"],"event_interest_kind": ["interested", "saved"],"event_status": ["draft", "published", "cancelled"],"event_type": ["championship", "seminar", "open_mat", "graduation", "workshop", "special_training", "other"],"follow_status": ["pending", "accepted"],"medal": ["gold", "silver", "bronze"],"media_status": ["uploading", "processing", "ready", "failed"],"media_type": ["image", "video"],"membership_requester": ["user", "academy"],"membership_role": ["owner", "admin", "teacher", "student"],"membership_status": ["pending", "active", "rejected", "left"],"mention_status": ["pending", "approved", "rejected"],"moderation_action": ["remove_content", "restore_content", "dismiss_reports", "warn", "suspend", "unsuspend", "ban", "verify", "unverify"],"moderation_status": ["visible", "under_review", "removed"],"notification_type": ["follow", "follow_request", "like", "comment", "reply", "mention", "class_update", "event_update", "promotion_confirmed", "membership_request", "moderation", "promotion_request", "business_invite", "commercial_warning", "appeal_decided"],"plan_audience": ["academy", "business", "both"],"platform_role": ["moderator", "admin", "superadmin"],"post_kind": ["standard", "checkin", "achievement", "event_share"],"price_status": ["paid", "free", "undisclosed"],"rank_track": ["adult", "kids"],"report_reason": ["spam", "harassment", "violence", "nudity", "minor_safety", "impersonation", "misinformation", "other"],"report_status": ["open", "in_review", "resolved", "dismissed"],"report_target": ["post", "comment", "profile", "academy", "event", "business"],"subscription_status": ["active", "suspended", "cancelled", "expired"],"teacher_status": ["pending", "approved", "rejected", "revoked"],"theme_preference": ["light", "dark", "system"],"unit_access_kind": ["totalpass", "wellhub", "day_pass"],"verification_status": ["self_reported", "teacher_confirmed"],"visibility": ["public", "followers", "private"]
+            "academy_status": ["active", "hidden", "suspended"],"account_status": ["active", "suspended", "deleted"],"achievement_type": ["competition_result", "milestone", "certification", "other"],"appeal_status": ["open", "accepted", "rejected"],"business_category": ["brand", "store", "service"],"business_member_status": ["pending", "active"],"business_role": ["owner", "admin"],"business_status": ["active", "hidden", "suspended"],"catalog_item_kind": ["product", "service"],"class_level": ["all", "beginner", "intermediate", "advanced", "kids", "competition"],"class_status": ["active", "paused", "cancelled"],"commercial_review_status": ["open", "dismissed", "warned", "actioned", "reverted"],"coords_source": ["manual", "nominatim"],"event_interest_kind": ["interested", "saved"],"event_status": ["draft", "published", "cancelled"],"event_type": ["championship", "seminar", "open_mat", "graduation", "workshop", "special_training", "other"],"follow_status": ["pending", "accepted"],"medal": ["gold", "silver", "bronze"],"media_status": ["uploading", "processing", "ready", "failed"],"media_type": ["image", "video"],"membership_requester": ["user", "academy"],"membership_role": ["owner", "admin", "teacher", "student"],"membership_status": ["pending", "active", "rejected", "left"],"mention_status": ["pending", "approved", "rejected"],"moderation_action": ["remove_content", "restore_content", "dismiss_reports", "warn", "suspend", "unsuspend", "ban", "verify", "unverify"],"moderation_status": ["visible", "under_review", "removed"],"notification_type": ["follow", "follow_request", "like", "comment", "reply", "mention", "class_update", "event_update", "promotion_confirmed", "membership_request", "moderation", "promotion_request", "business_invite", "commercial_warning", "appeal_decided", "student_invite", "student_request", "student_accepted"],"plan_audience": ["academy", "business", "both"],"platform_role": ["moderator", "admin", "superadmin"],"post_kind": ["standard", "checkin", "achievement", "event_share"],"price_status": ["paid", "free", "undisclosed"],"rank_track": ["adult", "kids"],"report_reason": ["spam", "harassment", "violence", "nudity", "minor_safety", "impersonation", "misinformation", "other"],"report_status": ["open", "in_review", "resolved", "dismissed"],"report_target": ["post", "comment", "profile", "academy", "event", "business"],"subscription_status": ["active", "suspended", "cancelled", "expired"],"teacher_status": ["pending", "approved", "rejected", "revoked"],"theme_preference": ["light", "dark", "system"],"unit_access_kind": ["totalpass", "wellhub", "day_pass"],"verification_status": ["self_reported", "teacher_confirmed"],"visibility": ["public", "followers", "private"]
           }
         }
 } as const
