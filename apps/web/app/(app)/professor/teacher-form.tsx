@@ -64,7 +64,10 @@ export function TeacherForm({ arts, initial, isNew }: { arts: Art[]; initial: Te
       />
 
       <fieldset aria-describedby={e.martialArts ? "arts-error" : undefined}>
-        <legend className="mb-2 text-sm font-semibold">Modalidades que você ensina</legend>
+        <legend className="mb-1 text-sm font-semibold">Modalidades que você ensina</legend>
+        <p className="mb-2 text-[13px] text-muted">
+          Nas modalidades com faixa, só aparecem graduações a partir da faixa preta (ou equivalente). Boxe, MMA, Luta Olímpica e Outra não exigem graduação.
+        </p>
         {/* Valores enviados a partir do estado: o React reinicia o formulário depois de cada envio e
             caixas/seleções controladas podem voltar ao padrão no DOM (perderiam a escolha após um erro). */}
         {Object.entries(selected).map(([artId, rankId]) => (
@@ -97,13 +100,13 @@ export function TeacherForm({ arts, initial, isNew }: { arts: Art[]; initial: Te
                 </label>
                 {checked && art.ranks.length > 0 && (
                   <label className="flex items-center gap-2 text-sm">
-                    <span className="sr-only">Sua graduação em {art.name}</span>
+                    <span className="sr-only">Sua graduação em {art.name} (obrigatória)</span>
                     <select
                       value={selected[art.id]}
                       onChange={(ev) => setSelected((cur) => ({ ...cur, [art.id]: ev.target.value }))}
                       className="min-h-9 rounded-md border border-border bg-surface px-2"
                     >
-                      <option value="">Graduação (opcional)</option>
+                      <option value="">Escolha sua graduação</option>
                       {art.ranks.map((r) => (
                         <option key={r.id} value={r.id}>
                           {r.name}
@@ -151,7 +154,7 @@ export function TeacherForm({ arts, initial, isNew }: { arts: Art[]; initial: Te
         </span>
       </label>
       <Button type="submit" loading={pending}>
-        {isNew ? "Enviar pedido" : "Salvar perfil profissional"}
+        {isNew ? "Ativar perfil de professor" : "Salvar perfil profissional"}
       </Button>
     </form>
   );

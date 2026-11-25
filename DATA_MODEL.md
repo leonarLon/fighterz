@@ -79,6 +79,7 @@ Função `has_role(role)` `security definer stable` usada nas políticas.
 **teacher_profiles** (1:0..1)
 `user_id PK FK`, `professional_name`, `bio`, `experience_years`, `lineage text` (ex.: "linhagem"), `access_plans text` (≤ 500, planos aceitos onde dá aula, migration 21), `certifications jsonb` (lista de {título, emissor, ano}), `contact_email`, `contact_phone`, `show_contact bool default false`, `social_links jsonb` (validado: só URLs https), `status enum('pending','approved','rejected','revoked')`, `reviewed_by`, `reviewed_at`, `review_notes`.
 Modalidades ensinadas: `teacher_martial_arts(teacher_id, martial_art_id, rank_id)` PK composta.
+Desde a migration 31 o `status` é calculado: `approved` quando há ao menos uma modalidade em `teacher_martial_arts` com faixa preta ou equivalente (`martial_arts.teacher_min_ordinal`) ou sem graduação; `revoked` só o admin aplica e não se desfaz sozinho.
 `student_count` (migration 28): total público de alunos ativos, mantido por trigger e exposto no fim da view `teacher_cards`.
 
 **teacher_students** (migration 28)
@@ -267,7 +268,7 @@ unique(reporter_id, target_type, target_id) where status in ('open','in_review')
 | profiles | todos (dados públicos), exceto bloqueadores. Perfil privado mostra só o cabeçalho | via trigger de signup | dono | via exclusão de conta |
 | user_settings | dono | trigger | dono | — |
 | user_roles | dono vê os próprios; admin vê todos | superadmin | superadmin | superadmin |
-| teacher_profiles | `approved` para todos; dono e admin veem sempre | dono (status forçado `pending`) | dono (sem alterar status); admin altera status | dono |
+| teacher_profiles | `approved` para todos; dono e admin veem sempre | dono (nasce `pending`; vira `approved` pelo critério de graduação) | dono (sem alterar status); admin revoga/reativa | dono |
 | academies / units / class_schedules | todos se `active` | usuário autenticado (vira owner) | owner/admin da academia | owner |
 | academy_memberships | membros da academia + o próprio usuário; `active` teacher é público | usuário (pedido) ou admin da academia (convite) | a outra parte aprova | qualquer das partes |
 | posts | `public`: todos (menos bloqueios); `followers`: seguidores aceitos; `private`: autor; `removed`: autor e moderador | autor = `auth.uid()` + rate limit | autor (campos limitados) | autor (soft) / moderador |

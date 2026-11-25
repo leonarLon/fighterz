@@ -757,14 +757,14 @@ isOneToOne: false
                   ]
                 },"martial_arts": {
                   Row: {
-                    "created_at": string,"description": string | null,"has_ranks": boolean,"id": string,"is_active": boolean,"name": string,"slug": string,"sort_order": number,"updated_at": string
+                    "created_at": string,"description": string | null,"has_ranks": boolean,"id": string,"is_active": boolean,"name": string,"slug": string,"sort_order": number,"teacher_min_ordinal": number | null,"updated_at": string
                   }
                   ComputedFields: never
                   Insert: {
-                    "created_at"?: string,"description"?: string | null,"has_ranks"?: boolean,"id"?: string,"is_active"?: boolean,"name": string,"slug": string,"sort_order"?: number,"updated_at"?: string
+                    "created_at"?: string,"description"?: string | null,"has_ranks"?: boolean,"id"?: string,"is_active"?: boolean,"name": string,"slug": string,"sort_order"?: number,"teacher_min_ordinal"?: number | null,"updated_at"?: string
                   }
                   Update: {
-                    "created_at"?: string,"description"?: string | null,"has_ranks"?: boolean,"id"?: string,"is_active"?: boolean,"name"?: string,"slug"?: string,"sort_order"?: number,"updated_at"?: string
+                    "created_at"?: string,"description"?: string | null,"has_ranks"?: boolean,"id"?: string,"is_active"?: boolean,"name"?: string,"slug"?: string,"sort_order"?: number,"teacher_min_ordinal"?: number | null,"updated_at"?: string
                   }
                   Relationships: [
                     
@@ -2319,6 +2319,9 @@ isOneToOne: false
 "refresh_current_rank":
 { Args: { "p_uma": string }; Returns: undefined
                            },
+"refresh_teacher_status":
+{ Args: { "p_user": string }; Returns: undefined
+                           },
 "remove_business_member":
 { Args: { "p_business": string,"p_user": string }; Returns: undefined
                            },
@@ -2381,6 +2384,15 @@ isOneToOne: false
                            },
 "suspend_user":
 { Args: { "p_days": number,"p_reason": string,"p_user": string }; Returns: undefined
+                           },
+"teacher_art_qualifies":
+{ Args: { "p_art": string,"p_rank": string }; Returns: boolean
+                           },
+"teacher_min_rank_ordinal":
+{ Args: { "p_art": string }; Returns: number
+                           },
+"teacher_qualifies":
+{ Args: { "p_user": string }; Returns: boolean
                            },
 "unsuspend_user":
 { Args: { "p_reason"?: string,"p_user": string }; Returns: undefined

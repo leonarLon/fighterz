@@ -149,7 +149,7 @@ test.describe("planos e assinaturas", () => {
     await signInViaUi(page, "atleta2@figtherz.local", "Figtherz123");
     await expect(page).toHaveURL(/\/inicio$/);
     await page.goto("/professor");
-    await expect(page.getByText("Perfil profissional aprovado.")).toBeVisible();
+    await expect(page.getByText("Perfil de professor ativo.")).toBeVisible();
     await expect(page.getByRole("main")).not.toContainText(/assinatura|plano pago/i);
     await page.goto("/professores/atleta2");
     await expect(page.getByRole("heading", { name: "Grade unificada" })).toBeVisible();

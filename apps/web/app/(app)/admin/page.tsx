@@ -17,7 +17,6 @@ export default async function AdminOverviewPage() {
     { label: "Alvos com denúncias abertas", value: o.open_reports, href: routes.adminReports },
     { label: "Envolvendo segurança de menores", value: o.priority_reports, href: routes.adminReports, urgent: true },
     { label: "Ocultos aguardando revisão", value: o.under_review, href: routes.adminReports },
-    ...(access.admin ? [{ label: "Pedidos de professor", value: o.pending_teachers, href: routes.adminTeachers }] : []),
     { label: "Contas suspensas", value: o.suspended_users, href: `${routes.adminUsers}?status=suspended` },
     { label: "Publicidade em perfis pessoais (revisões e recursos)", value: o.open_commercial, href: routes.adminCommercial },
   ];

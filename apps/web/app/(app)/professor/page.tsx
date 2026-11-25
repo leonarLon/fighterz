@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { BadgeCheck, Clock, ExternalLink, XCircle } from "lucide-react";
+import { BadgeCheck, ExternalLink, Info, XCircle } from "lucide-react";
+import { teacherRankOptions } from "@figtherz/core";
 import { requireUser } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 import { routes } from "@/lib/routes";
@@ -20,15 +21,19 @@ export default async function TeacherAreaPage() {
   const [{ data: profile }, { data: me }, { data: arts }, { data: ranks }, { data: taught }] = await Promise.all([
     supabase.from("teacher_profiles").select("*").eq("user_id", user.id).maybeSingle(),
     supabase.from("profiles").select("username").eq("id", user.id).single(),
-    supabase.from("martial_arts").select("id, name").order("sort_order"),
+    supabase.from("martial_arts").select("id, name, has_ranks, teacher_min_ordinal").order("sort_order"),
     supabase.from("martial_art_ranks").select("id, name, martial_art_id, ordinal").eq("track", "adult").order("ordinal"),
     supabase.from("teacher_martial_arts").select("martial_art_id, rank_id").eq("teacher_id", user.id),
   ]);
 
+  // Só as graduações que permitem ser professor (faixa preta ou equivalente); o banco confere de novo.
   const artOptions = (arts ?? []).map((a) => ({
     id: a.id,
     name: a.name,
-    ranks: (ranks ?? []).filter((r) => r.martial_art_id === a.id).map((r) => ({ id: r.id, name: r.name })),
+    ranks: teacherRankOptions(
+      { hasRanks: a.has_ranks, teacherMinOrdinal: a.teacher_min_ordinal },
+      (ranks ?? []).filter((r) => r.martial_art_id === a.id),
+    ).map((r) => ({ id: r.id, name: r.name })),
   }));
   const certs = (profile?.certifications as { title: string; issuer: string | null; year: number | null }[] | undefined) ?? [];
   const initial: TeacherFormValues = {
@@ -103,25 +108,25 @@ export default async function TeacherAreaPage() {
         <div className="mb-6">
           {profile.status === "approved" && (
             <p role="status" className="flex flex-wrap items-center gap-2 rounded-md border border-success/40 px-3 py-2.5 text-sm font-medium text-success">
-              <BadgeCheck aria-hidden className="size-4" /> Perfil profissional aprovado.
+              <BadgeCheck aria-hidden className="size-4" /> Perfil de professor ativo.
               <Link href={routes.teacher(me?.username ?? "")} className="inline-flex items-center gap-1 underline">
                 Ver página pública <ExternalLink aria-hidden className="size-3.5" />
               </Link>
             </p>
           )}
-          {profile.status === "pending" && (
-            <p role="status" className="flex items-center gap-2 rounded-md border border-warning/40 px-3 py-2.5 text-sm font-medium text-warning">
-              <Clock aria-hidden className="size-4" /> Pedido em análise por um administrador.
+          {(profile.status === "pending" || profile.status === "rejected") && (
+            <p role="status" className="flex items-start gap-2 rounded-md border border-warning/40 px-3 py-2.5 text-sm font-medium text-warning">
+              <Info aria-hidden className="mt-0.5 size-4 shrink-0" />
+              Perfil ainda não ativo. Para ser professor, marque pelo menos uma modalidade em que você é faixa preta (ou equivalente).
+              Modalidades sem graduação, como Boxe e MMA, não exigem faixa.
             </p>
           )}
-          {(profile.status === "rejected" || profile.status === "revoked") && (
+          {profile.status === "revoked" && (
             <div role="status" className="rounded-md border border-danger/40 px-3 py-2.5 text-sm text-danger">
               <p className="flex items-center gap-2 font-medium">
-                <XCircle aria-hidden className="size-4" />
-                {profile.status === "rejected" ? "Pedido recusado." : "Perfil profissional revogado."}
+                <XCircle aria-hidden className="size-4" /> Perfil profissional revogado pela equipe Fighterz.
               </p>
               {profile.review_notes && <p className="mt-1">Motivo: {profile.review_notes}</p>}
-              {profile.status === "rejected" && <p className="mt-1">Ajuste as informações e salve para reenviar.</p>}
             </div>
           )}
         </div>
@@ -174,7 +179,8 @@ export default async function TeacherAreaPage() {
         <h2 className="mb-1 font-display text-2xl font-semibold">{profile ? "Perfil profissional" : "Quero ser professor"}</h2>
         {!profile && (
           <p className="mb-4 text-muted">
-            Professores aprovados ganham página própria, entram na grade das academias e mostram todas as aulas num só lugar.
+            Professores ganham página própria, entram na grade das academias, têm lista de alunos e confirmam graduações.
+            Basta ser faixa preta (ou equivalente) em pelo menos uma modalidade: o perfil é ativado na hora, sem fila de aprovação.
           </p>
         )}
         <TeacherForm arts={artOptions} initial={initial} isNew={!profile} />

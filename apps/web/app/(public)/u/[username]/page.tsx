@@ -143,6 +143,10 @@ export default async function PublicProfilePage({ params }: Props) {
               <ButtonLink href={routes.profileEdit} variant="secondary">
                 <Pencil aria-hidden className="size-4" /> Editar perfil
               </ButtonLink>
+              {/* Professor ativo vai à área dele; quem ainda não é, ao cadastro (faixa preta ou equivalente). */}
+              <ButtonLink href={routes.teacherArea} variant="secondary">
+                <GraduationCap aria-hidden className="size-4" /> {teacherCard ? "Área do professor" : "Sou professor"}
+              </ButtonLink>
             </div>
           ) : viewer ? (
             <ProfileActions

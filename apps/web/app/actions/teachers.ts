@@ -1,7 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { inviteSchema, teacherProfileSchema } from "@figtherz/core";
+import { inviteSchema, teacherProfileSchema, teacherRankOptions } from "@figtherz/core";
 import { createClient } from "@/lib/supabase/server";
 import { requireUser } from "@/lib/auth";
 import { fromZodError, text, type FormState } from "@/lib/form-state";
@@ -25,6 +25,32 @@ export async function saveTeacherProfile(_prev: FormState, formData: FormData): 
   const d = parsed.data;
 
   const supabase = await createClient();
+
+  // Critério de professor (faixa preta ou equivalente): confere antes de mexer nas modalidades, para não
+  // apagar as atuais e falhar no meio. O banco confere de novo (rank_below_teacher_min).
+  const [{ data: artRows }, { data: rankRows }] = await Promise.all([
+    supabase.from("martial_arts").select("id, has_ranks, teacher_min_ordinal").in("id", d.martialArts.map((m) => m.martialArtId)),
+    supabase.from("martial_art_ranks").select("id, martial_art_id, ordinal, name").eq("track", "adult").in("martial_art_id", d.martialArts.map((m) => m.martialArtId)),
+  ]);
+  const invalid = d.martialArts.some((m) => {
+    const art = artRows?.find((a) => a.id === m.martialArtId);
+    if (!art) return true;
+    if (!art.has_ranks) return false;
+    const allowed = teacherRankOptions(
+      { hasRanks: art.has_ranks, teacherMinOrdinal: art.teacher_min_ordinal },
+      (rankRows ?? []).filter((r) => r.martial_art_id === art.id),
+    );
+    return !allowed.some((r) => r.id === m.rankId);
+  });
+  if (invalid) {
+    return {
+      status: "error",
+      message: "Revise os campos destacados.",
+      fieldErrors: { martialArts: ["Nas modalidades com faixa, escolha sua graduação (faixa preta ou equivalente)."] },
+      values,
+    };
+  }
+
   const row = {
     professional_name: d.professionalName,
     bio: d.bio,
@@ -48,12 +74,20 @@ export async function saveTeacherProfile(_prev: FormState, formData: FormData): 
   const { error: artsError } = await supabase
     .from("teacher_martial_arts")
     .insert(d.martialArts.map((m) => ({ teacher_id: user.id, martial_art_id: m.martialArtId, rank_id: m.rankId })));
-  if (artsError) return { status: "error", message: "Perfil salvo, mas houve erro nas modalidades. Revise as graduações.", values };
+  if (artsError) return { status: "error", message: "Perfil salvo, mas houve erro nas modalidades. Revise as graduações (faixa preta ou equivalente).", values };
 
   revalidatePath(routes.teacherArea);
+  const { data: saved } = await supabase.from("teacher_profiles").select("status").eq("user_id", user.id).single();
   return {
     status: "success",
-    message: existing ? "Perfil profissional atualizado." : "Pedido enviado! Um administrador vai analisar seu perfil.",
+    message:
+      saved?.status === "approved"
+        ? existing
+          ? "Perfil de professor atualizado."
+          : "Pronto! Seu perfil de professor já está ativo."
+        : saved?.status === "revoked"
+          ? "Perfil salvo. Ele continua revogado pela equipe Fighterz."
+          : "Perfil salvo, mas ainda não ativo: marque uma modalidade em que você é faixa preta (ou equivalente).",
     values,
   };
 }

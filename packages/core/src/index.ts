@@ -15,6 +15,7 @@ export * from './domain/money';
 export * from './domain/commercial';
 export * from './schemas/academy';
 export * from './domain/journey';
+export * from './domain/teacher';
 export * from './schemas/journey';
 export * from './schemas/business';
 export * from './schemas/plans';

@@ -23,7 +23,8 @@ function items(username: string): Item[] {
   ];
 }
 
-// Menu lateral (desktop) também leva a aulas, academias e à área do professor (DESIGN_SYSTEM.md §6).
+// Menu lateral (desktop) também leva a aulas e academias; a área do professor só aparece para professores
+// (quem ainda não é encontra "Sou professor" no próprio perfil).
 const secondary: Item[] = [
   { href: routes.journey, label: "Minha jornada", icon: Medal },
   { href: routes.events, label: "Eventos", icon: CalendarDays },
@@ -37,7 +38,17 @@ function isActive(pathname: string, href: string) {
   return pathname === href || pathname.startsWith(`${href}/`);
 }
 
-export function SideNav({ username, displayName, avatarPath }: { username: string; displayName: string; avatarPath: string | null }) {
+export function SideNav({
+  username,
+  displayName,
+  avatarPath,
+  isTeacher,
+}: {
+  username: string;
+  displayName: string;
+  avatarPath: string | null;
+  isTeacher: boolean;
+}) {
   const pathname = usePathname();
   return (
     <nav
@@ -73,7 +84,7 @@ export function SideNav({ username, displayName, avatarPath }: { username: strin
         })}
       </ul>
       <ul className="mt-6 space-y-1 border-t border-border pt-4">
-        {secondary.map(({ href, label, icon: Icon }) => (
+        {secondary.filter((item) => isTeacher || item.href !== routes.teacherArea).map(({ href, label, icon: Icon }) => (
           <li key={href}>
             <Link
               href={href}

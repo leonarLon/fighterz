@@ -135,34 +135,49 @@ test.describe("gestão de academia e vínculos", () => {
     await Promise.all([owner.context.close(), teacher.context.close(), visitor.context.close()]);
   });
 
-  test("pedido de professor e aprovação pelo admin", async ({ browser }) => {
+  test("professor ativado pelo critério de faixa preta; admin revoga e reativa", async ({ browser }) => {
     const candidate = await newContext(browser);
     const candidateUser = await createConfirmedUser(candidate.page, "cand");
     const professionalName = `Professor E2E ${Date.now().toString(36)}`;
-    await candidate.page.goto("/professor");
+
+    // "Sou professor" fica no próprio perfil.
+    await candidate.page.goto(`/u/${candidateUser.username}`);
+    await candidate.page.getByRole("link", { name: "Sou professor" }).click();
+    await expect(candidate.page).toHaveURL(/\/professor$/);
+
     await candidate.page.getByLabel("Nome profissional").fill(professionalName);
     await candidate.page.getByLabel("Muay Thai").check();
     await candidate.page.getByLabel("Planos aceitos onde dou aula (opcional)").fill("Arena Norte aceita TotalPass e Wellhub Gold");
-    await candidate.page.getByRole("button", { name: "Enviar pedido" }).click();
-    await expect(candidate.page.getByText("Pedido enviado!")).toBeVisible();
+    // Sem graduação numa modalidade com faixa: não ativa.
+    await candidate.page.getByRole("button", { name: "Ativar perfil de professor" }).click();
+    await expect(candidate.page.getByText("Nas modalidades com faixa, escolha sua graduação (faixa preta ou equivalente).")).toBeVisible();
+    // Só aparecem graduações a partir do Kruang Preto.
+    const rank = candidate.page.getByLabel("Sua graduação em Muay Thai (obrigatória)");
+    await expect(rank.locator("option")).toHaveText(["Escolha sua graduação", "Kruang Preto"]);
+    await rank.selectOption({ label: "Kruang Preto" });
+    await candidate.page.getByRole("button", { name: "Ativar perfil de professor" }).click();
+    await expect(candidate.page.getByText("Pronto! Seu perfil de professor já está ativo.")).toBeVisible();
     await candidate.page.reload();
-    await expect(candidate.page.getByText("Pedido em análise por um administrador.")).toBeVisible();
+    await expect(candidate.page.getByText("Perfil de professor ativo.")).toBeVisible();
+    await expect(candidate.page.getByLabel("Planos aceitos onde dou aula (opcional)")).toHaveValue("Arena Norte aceita TotalPass e Wellhub Gold");
 
-    // Usuário comum não acessa a fila
+    // Usuário comum não acessa a lista do admin
     await candidate.page.goto("/admin/professores");
     await expect(candidate.page.getByRole("heading", { name: "Página não encontrada" })).toBeVisible();
 
+    // Admin revoga (com motivo) e reativa.
     const admin = await newContext(browser);
     await signInViaUi(admin.page, "admin@figtherz.local", "Figtherz123");
     await expect(admin.page).toHaveURL(/\/inicio$/);
-    await admin.page.goto("/admin/professores");
+    await admin.page.goto(`/admin/professores?q=${encodeURIComponent(professionalName)}`);
     const card = admin.page.locator("li", { has: admin.page.getByRole("heading", { name: professionalName }) });
-    await card.getByRole("button", { name: "Aprovar" }).click();
-    await expect(card.getByRole("status")).toHaveText("Aprovado.");
-
+    await card.getByLabel("Motivo da revogação").fill("Teste automatizado de revogação");
+    await card.getByRole("button", { name: `Revogar perfil de ${professionalName}` }).click();
+    await expect(card.getByRole("status")).toHaveText("Perfil revogado.");
     await candidate.page.goto("/professor");
-    await expect(candidate.page.getByText("Perfil profissional aprovado.")).toBeVisible();
-    await expect(candidate.page.getByLabel("Planos aceitos onde dou aula (opcional)")).toHaveValue("Arena Norte aceita TotalPass e Wellhub Gold");
+    await expect(candidate.page.getByText("Perfil profissional revogado pela equipe Fighterz.")).toBeVisible();
+    await card.getByRole("button", { name: `Reativar perfil de ${professionalName}` }).click();
+    await expect(card.getByRole("status")).toHaveText("Perfil reativado.");
 
     // Visitante vê os planos citados no perfil público do professor
     const visitor = await newContext(browser);
