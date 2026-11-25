@@ -32,14 +32,15 @@ test.describe("academias e aulas (visitante, sem login)", () => {
     await expect(page.getByText("Rua das Flores, 120 - Centro - Curitiba/PR - CEP 80020-000")).toBeVisible();
     const route = page.getByRole("link", { name: "Abrir rota" }).first();
     await expect(route).toHaveAttribute("href", /openstreetmap\.org\/directions\?to=-25\.431,-49\.271|geo:|maps\.apple\.com/);
-    await expect(page.getByRole("region", { name: "Professores" }).getByRole("link", { name: /Diego Ramos/ })).toBeVisible();
+    await expect(page.getByRole("region", { name: "Professores", exact: true }).getByRole("link", { name: /Diego Ramos/ })).toBeVisible();
   });
 
   test("professor com 3 academias tem grade unificada pública", async ({ page }) => {
     await page.goto("/professores/atleta2");
     await expect(page.getByRole("heading", { name: "Professor Diego Ramos" })).toBeVisible();
     await expect(page.getByRole("heading", { name: "Grade unificada" })).toBeVisible();
-    await expect(page.getByText(/Aulas em 3 academias/)).toBeVisible();
+    // 3 academias com vínculo (a grade própria dele também usa a Tatame Central, então continuam 3 locais).
+    await expect(page.getByText(/Aulas em 3 locais/)).toBeVisible();
     for (const name of ["Tatame Central", "Equipe Raiz Combate", "Dojo Horizonte"]) {
       await expect(page.getByRole("link", { name }).first()).toBeVisible();
     }

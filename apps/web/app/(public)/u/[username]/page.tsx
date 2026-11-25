@@ -16,6 +16,8 @@ import { loadProfilePosts } from "@/lib/posts";
 import type { Viewer } from "@/lib/post-types";
 import { getViewer } from "@/lib/viewer";
 import { routes } from "@/lib/routes";
+import { NextClassCard, type WeeklySlot } from "@/components/teacher/next-class";
+import { slotFromAcademyClass, slotFromTeacherClass } from "@/lib/teacher-schedule";
 import { JourneyCard } from "./journey-card";
 import { loadProfile } from "./load-profile";
 import { ProfileActions } from "./profile-actions";
@@ -40,6 +42,15 @@ export default async function PublicProfilePage({ params }: Props) {
 
   // Professor aprovado mostra o total de alunos (público, como os seguidores).
   const { data: teacherCard } = await supabase.from("teacher_cards").select("student_count").eq("user_id", profile.id).maybeSingle();
+  // Professor: próxima aula (grade própria + academias com vínculo ativo).
+  let teacherSlots: WeeklySlot[] = [];
+  if (teacherCard) {
+    const [{ data: own }, { data: academyClasses }] = await Promise.all([
+      supabase.from("teacher_class_cards").select("*").eq("teacher_id", profile.id),
+      supabase.rpc("get_teacher_schedule", { p_teacher: profile.id }),
+    ]);
+    teacherSlots = [...(own ?? []).map(slotFromTeacherClass), ...(academyClasses ?? []).map(slotFromAcademyClass)];
+  }
 
   let followState: "none" | "pending" | "accepted" = "none";
   let blockedByMe = false;
@@ -106,6 +117,8 @@ export default async function PublicProfilePage({ params }: Props) {
             </p>
           )
         )}
+
+        {teacherSlots.length > 0 && <NextClassCard slots={teacherSlots} compact teacherHref={routes.teacher(profile.username)} />}
 
         <ul className="mt-5 flex flex-wrap gap-x-6 gap-y-1">
           {stats.map(({ label, value, href }) => (

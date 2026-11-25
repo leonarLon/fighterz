@@ -8,6 +8,7 @@ import { createClient } from "@/lib/supabase/server";
 import { routes } from "@/lib/routes";
 import { AddressActions } from "@/components/academy/address-actions";
 import { ScheduleGrid } from "@/components/academy/schedule-grid";
+import { scheduleItemFromTeacherClass } from "@/lib/teacher-schedule";
 import { UnitAccessInfo } from "@/components/academy/unit-access-info";
 import { LeafletMap } from "@/components/map/map";
 import { PageBanner, PageLogo } from "@/components/media/page-banner";
@@ -33,11 +34,23 @@ export default async function AcademyPage({ params }: Props) {
   if (!data) notFound();
   const { academy, units, classes, members, martialArts, isManager, viewerId } = data;
 
+  const supabase = await createClient();
   let isApprovedTeacher = false;
   if (viewerId) {
-    const { data: approved } = await (await createClient()).rpc("is_approved_teacher", { p_user: viewerId });
+    const { data: approved } = await supabase.rpc("is_approved_teacher", { p_user: viewerId });
     isApprovedTeacher = Boolean(approved);
   }
+  // Aulas que os professores confirmados pela academia cadastraram na grade própria deles (migration 32).
+  const { data: teacherOwn } = await supabase
+    .from("teacher_class_cards")
+    .select("*")
+    .eq("academy_id", academy.id)
+    .eq("academy_confirmed", true);
+  const teacherItems = (teacherOwn ?? []).map((c) => ({
+    ...scheduleItemFromTeacherClass(c),
+    teacher_username: c.teacher_username,
+    teacher_display_name: c.teacher_name,
+  }));
 
   const visibleUnits = units.filter((u) => u.is_active);
   const teachers = members.filter((m) => m.role === "teacher" && m.status === "active");
@@ -143,6 +156,16 @@ export default async function AcademyPage({ params }: Props) {
         </h2>
         <ScheduleGrid items={classes.filter((c) => isManager || c.status !== "cancelled")} />
       </section>
+
+      {teacherItems.length > 0 && (
+        <section aria-labelledby="grade-professores">
+          <h2 id="grade-professores" className="font-display text-2xl font-semibold">
+            Aulas informadas pelos professores
+          </h2>
+          <p className="mb-3 text-muted">Cadastradas pelos professores que a academia confirmou na equipe.</p>
+          <ScheduleGrid items={teacherItems} />
+        </section>
+      )}
 
       <section aria-labelledby="unidades">
         <h2 id="unidades" className="mb-3 font-display text-2xl font-semibold">

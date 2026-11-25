@@ -1259,6 +1259,44 @@ isOneToOne: false
       referencedColumns: ["id"]
     }
                   ]
+                },"teacher_classes": {
+                  Row: {
+                    "accepts_trial": boolean,"created_at": string,"ends_at": string,"id": string,"level": Database["public"]['Enums']["class_level"],"martial_art_id": string,"notes": string | null,"place_id": string,"starts_at": string,"teacher_id": string,"updated_at": string,"weekday": number
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "accepts_trial"?: boolean,"created_at"?: string,"ends_at": string,"id"?: string,"level"?: Database["public"]['Enums']["class_level"],"martial_art_id": string,"notes"?: string | null,"place_id": string,"starts_at": string,"teacher_id": string,"updated_at"?: string,"weekday": number
+                  }
+                  Update: {
+                    "accepts_trial"?: boolean,"created_at"?: string,"ends_at"?: string,"id"?: string,"level"?: Database["public"]['Enums']["class_level"],"martial_art_id"?: string,"notes"?: string | null,"place_id"?: string,"starts_at"?: string,"teacher_id"?: string,"updated_at"?: string,"weekday"?: number
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "teacher_classes_martial_art_id_fkey"
+      columns: ["martial_art_id"]
+isOneToOne: false
+      referencedRelation: "martial_arts"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "teacher_classes_place_id_fkey"
+      columns: ["place_id"]
+isOneToOne: false
+      referencedRelation: "teacher_places"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "teacher_classes_teacher_id_fkey"
+      columns: ["teacher_id"]
+isOneToOne: false
+      referencedRelation: "teacher_cards"
+      referencedColumns: ["user_id"]
+    },{
+      foreignKeyName: "teacher_classes_teacher_id_fkey"
+      columns: ["teacher_id"]
+isOneToOne: false
+      referencedRelation: "teacher_profiles"
+      referencedColumns: ["user_id"]
+    }
+                  ]
                 },"teacher_martial_arts": {
                   Row: {
                     "martial_art_id": string,"rank_id": string | null,"teacher_id": string
@@ -1295,6 +1333,44 @@ isOneToOne: false
 isOneToOne: false
       referencedRelation: "teacher_profiles"
       referencedColumns: ["user_id"]
+    }
+                  ]
+                },"teacher_places": {
+                  Row: {
+                    "academy_id": string | null,"city": string,"complement": string | null,"created_at": string,"id": string,"latitude": number | null,"location": unknown,"longitude": number | null,"name": string,"neighborhood": string | null,"number": string | null,"postal_code": string | null,"reference_point": string | null,"state": string,"street": string | null,"teacher_id": string,"unit_id": string | null,"updated_at": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "academy_id"?: string | null,"city": string,"complement"?: string | null,"created_at"?: string,"id"?: string,"latitude"?: number | null,"location"?: never,"longitude"?: number | null,"name": string,"neighborhood"?: string | null,"number"?: string | null,"postal_code"?: string | null,"reference_point"?: string | null,"state": string,"street"?: string | null,"teacher_id": string,"unit_id"?: string | null,"updated_at"?: string
+                  }
+                  Update: {
+                    "academy_id"?: string | null,"city"?: string,"complement"?: string | null,"created_at"?: string,"id"?: string,"latitude"?: number | null,"location"?: never,"longitude"?: number | null,"name"?: string,"neighborhood"?: string | null,"number"?: string | null,"postal_code"?: string | null,"reference_point"?: string | null,"state"?: string,"street"?: string | null,"teacher_id"?: string,"unit_id"?: string | null,"updated_at"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "teacher_places_academy_id_fkey"
+      columns: ["academy_id"]
+isOneToOne: false
+      referencedRelation: "academies"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "teacher_places_teacher_id_fkey"
+      columns: ["teacher_id"]
+isOneToOne: false
+      referencedRelation: "teacher_cards"
+      referencedColumns: ["user_id"]
+    },{
+      foreignKeyName: "teacher_places_teacher_id_fkey"
+      columns: ["teacher_id"]
+isOneToOne: false
+      referencedRelation: "teacher_profiles"
+      referencedColumns: ["user_id"]
+    },{
+      foreignKeyName: "teacher_places_unit_id_fkey"
+      columns: ["unit_id"]
+isOneToOne: false
+      referencedRelation: "academy_units"
+      referencedColumns: ["id"]
     }
                   ]
                 },"teacher_profiles": {
@@ -1848,6 +1924,44 @@ isOneToOne: true
       referencedColumns: ["id"]
     }
                   ]
+                },"teacher_class_cards": {
+                  Row: {
+                    "academy_confirmed": boolean | null,"academy_id": string | null,"academy_slug": string | null,"accepts_trial": boolean,"city": string,"complement": string | null,"ends_at": string,"id": string,"latitude": number | null,"level": Database["public"]['Enums']["class_level"],"longitude": number | null,"martial_art_id": string,"martial_art_name": string,"neighborhood": string | null,"notes": string | null,"number": string | null,"place_id": string,"place_name": string,"postal_code": string | null,"reference_point": string | null,"starts_at": string,"state": string,"street": string | null,"teacher_avatar_path": string | null,"teacher_id": string,"teacher_name": string | null,"teacher_username": string | null,"weekday": number
+                  }
+                  ComputedFields: never
+                  Relationships: [
+                    {
+      foreignKeyName: "teacher_classes_martial_art_id_fkey"
+      columns: ["martial_art_id"]
+isOneToOne: false
+      referencedRelation: "martial_arts"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "teacher_classes_place_id_fkey"
+      columns: ["place_id"]
+isOneToOne: false
+      referencedRelation: "teacher_places"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "teacher_classes_teacher_id_fkey"
+      columns: ["teacher_id"]
+isOneToOne: false
+      referencedRelation: "teacher_cards"
+      referencedColumns: ["user_id"]
+    },{
+      foreignKeyName: "teacher_classes_teacher_id_fkey"
+      columns: ["teacher_id"]
+isOneToOne: false
+      referencedRelation: "teacher_profiles"
+      referencedColumns: ["user_id"]
+    },{
+      foreignKeyName: "teacher_places_academy_id_fkey"
+      columns: ["academy_id"]
+isOneToOne: false
+      referencedRelation: "academies"
+      referencedColumns: ["id"]
+    }
+                  ]
                 },"teacher_student_cards": {
                   Row: {
                     "accepted_at": string | null,"created_at": string,"requested_by": string,"status": string,"student_avatar_path": string | null,"student_display_name": string,"student_id": string,"student_username": string | null,"teacher_avatar_path": string | null,"teacher_id": string,"teacher_name": string | null,"teacher_username": string | null
@@ -2371,6 +2485,11 @@ isOneToOne: false
 "search_profiles":
 { Args: { "p_limit"?: number,"p_query": string }; Returns: {
               "avatar_path": string,"city": string,"display_name": string,"id": string,"is_private": boolean,"state": string,"username": string
+            }[]
+                           },
+"search_teacher_classes":
+{ Args: { "p_city"?: string,"p_lat"?: number,"p_level"?: Database["public"]['Enums']["class_level"],"p_limit"?: number,"p_lng"?: number,"p_martial_art"?: string,"p_neighborhood"?: string,"p_period"?: string,"p_radius_km"?: number,"p_trial_only"?: boolean,"p_weekday"?: number }; Returns: {
+              "class": Database["public"]['Views']["teacher_class_cards"]['Row'],"distance_km": number
             }[]
                            },
 "set_academy_verified":

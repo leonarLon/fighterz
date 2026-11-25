@@ -19,6 +19,11 @@ export type ScheduleItem = {
   academy_name?: string;
   academy_slug?: string;
   unit_name?: string;
+  /** Grade própria do professor: local numa academia que ainda não confirmou o professor. */
+  place_pending?: boolean;
+  /** Grade própria do professor: local fora de academia cadastrada (parque, clube…). */
+  place_free?: boolean;
+  notes?: string | null;
 };
 
 /**
@@ -61,6 +66,10 @@ export function ScheduleGrid({ items, showAcademy = false }: { items: ScheduleIt
                     {item.unit_name ? <span className="text-muted"> · {item.unit_name}</span> : null}
                   </p>
                 )}
+                {showAcademy && !item.academy_slug && item.academy_name && (
+                  <p className="text-[13px] font-semibold">{item.academy_name}</p>
+                )}
+                {item.notes && <p className="text-[12px] text-muted">{item.notes}</p>}
                 {!showAcademy && item.teacher_username && (
                   <p className="text-[13px] text-muted">
                     com{" "}
@@ -74,6 +83,9 @@ export function ScheduleGrid({ items, showAcademy = false }: { items: ScheduleIt
                     <span className="inline-flex items-center gap-1 rounded-sm bg-accent-soft px-1.5 py-0.5 text-[12px] font-semibold text-accent">
                       <Sparkles aria-hidden className="size-3" /> Aceita aula experimental
                     </span>
+                  )}
+                  {item.place_pending && (
+                    <span className="rounded-sm border border-warning/50 px-1.5 py-0.5 text-[12px] font-semibold text-warning">Aguardando a academia confirmar</span>
                   )}
                   {item.status === "paused" && (
                     <span className="rounded-sm border border-warning/50 px-1.5 py-0.5 text-[12px] font-semibold text-warning">Pausada</span>

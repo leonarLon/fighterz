@@ -497,3 +497,29 @@ begin
   select v_t2, p.id, 'pending', 'teacher' from public.profiles p where p.username = 'atleta10';
 end;
 $$;
+
+-- Grade própria dos professores (migration 32): atleta16 dá aula num parque (sem academia) e atleta2 tem
+-- um open mat na Tatame Central (vínculo ativo, então aparece como confirmado pela academia).
+do $$
+declare
+  v_t16 uuid := (select id from public.profiles where username = 'atleta16');
+  v_t2  uuid := (select id from public.profiles where username = 'atleta2');
+  v_mt  uuid := (select id from public.martial_arts where slug = 'muay-thai');
+  v_bjj uuid := (select id from public.martial_arts where slug = 'jiu-jitsu');
+  v_parque uuid;
+  v_tatame uuid;
+begin
+  insert into public.teacher_places (teacher_id, name, street, neighborhood, city, state, reference_point, latitude, longitude)
+  values (v_t16, 'Parque Barigui', 'Rua Mateus Leme', 'Bigorrilho', 'Curitiba', 'PR', 'Perto do lago, ao lado da academia ao ar livre', -25.4225, -49.3081)
+  returning id into v_parque;
+  insert into public.teacher_classes (teacher_id, place_id, martial_art_id, level, weekday, starts_at, ends_at, accepts_trial, notes) values
+    (v_t16, v_parque, v_mt, 'all', 6, '08:00', '09:30', true,  'Treino ao ar livre; com chuva, cancela.'),
+    (v_t16, v_parque, v_mt, 'beginner', 2, '06:30', '07:30', true, null);
+
+  insert into public.teacher_places (teacher_id, name, academy_id, city, state)
+  values (v_t2, 'Tatame Central', (select id from public.academies where slug = 'tatame-central'), 'Curitiba', 'PR')
+  returning id into v_tatame;
+  insert into public.teacher_classes (teacher_id, place_id, martial_art_id, level, weekday, starts_at, ends_at, notes) values
+    (v_t2, v_tatame, v_bjj, 'all', 6, '10:00', '12:00', 'Open mat para todas as faixas.');
+end;
+$$;

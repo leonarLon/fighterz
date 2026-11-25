@@ -253,7 +253,10 @@ export function TeamSection({ data }: { data: AcademyData }) {
             {requests.map((m) => (
               <li key={`${m.userId}-${m.role}`} className="flex flex-wrap items-center justify-between gap-2 rounded-md border border-border p-2">
                 <span>
-                  <span className="font-semibold">{m.displayName}</span> <span className="text-muted">@{m.username} · {role(m.role)}</span>
+                  <span className="font-semibold">{m.displayName}</span>{" "}
+                  <span className="text-muted">
+                    @{m.username} · {m.role === "teacher" ? "Professor: diz que dá aula aqui. Aprove para confirmar." : role(m.role)}
+                  </span>
                 </span>
                 <span className="flex gap-2">
                   <Button disabled={act.pending} onClick={() => act.run(() => respondMembership(id, m.userId, m.role, true))}>

@@ -12,6 +12,8 @@ import { BeltDivider } from "@/components/ui/belt";
 import { ButtonLink } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { StudentRequestButton } from "@/components/teacher/student-links";
+import { NextClassCard } from "@/components/teacher/next-class";
+import { scheduleItemFromTeacherClass, slotFromAcademyClass, slotFromTeacherClass } from "@/lib/teacher-schedule";
 import { getViewer } from "@/lib/viewer";
 
 type Props = { params: Promise<{ username: string }> };
@@ -33,12 +35,14 @@ export default async function TeacherPage({ params }: Props) {
   if (!teacher || !teacher.user_id) notFound();
   const supabase = await createClient();
   const viewer = await getViewer();
-  const [{ data: schedule }, { data: link }] = await Promise.all([
+  const [{ data: schedule }, { data: link }, { data: own }] = await Promise.all([
     supabase.rpc("get_teacher_schedule", { p_teacher: teacher.user_id }),
     viewer && viewer.id !== teacher.user_id
       ? supabase.from("teacher_students").select("status, requested_by").eq("teacher_id", teacher.user_id).eq("student_id", viewer.id).maybeSingle()
       : Promise.resolve({ data: null }),
+    supabase.from("teacher_class_cards").select("*").eq("teacher_id", teacher.user_id),
   ]);
+  const ownClasses = own ?? [];
   const studentState = !viewer
     ? "anon"
     : viewer.id === teacher.user_id
@@ -68,6 +72,28 @@ export default async function TeacherPage({ params }: Props) {
       });
     }
   }
+  // Locais próprios (fora da grade das academias) também entram no mapa.
+  for (const c of ownClasses) {
+    if (c.latitude != null && c.longitude != null && c.place_id && !markers.has(c.place_id)) {
+      markers.set(c.place_id, {
+        id: c.place_id,
+        lat: c.latitude,
+        lng: c.longitude,
+        title: c.place_name ?? "",
+        subtitle: formatAddress({ street: c.street, number: c.number, complement: c.complement, neighborhood: c.neighborhood, city: c.city ?? "", state: c.state ?? "", postal_code: null }),
+        href: c.academy_slug ? routes.academy(c.academy_slug) : routes.teacher(teacher.username ?? ""),
+      });
+    }
+  }
+  const gridItems = [...(classes as unknown as ScheduleItem[]), ...ownClasses.map(scheduleItemFromTeacherClass)];
+  const slots = [...classes.map(slotFromAcademyClass), ...ownClasses.map(slotFromTeacherClass)];
+  // Locais distintos: a mesma academia (pela grade dela ou pela grade própria) conta uma vez.
+  const placeByKey = new Map<string, string>([...academies.entries()].map(([id, a]) => [id, a.name]));
+  for (const c of ownClasses) {
+    const key = c.academy_id ?? c.place_id ?? "";
+    if (key && !placeByKey.has(key)) placeByKey.set(key, c.place_name ?? "");
+  }
+  const placeNames = new Set([...placeByKey.values()].filter(Boolean));
   const arts = (teacher.martial_arts as { martial_art: string; rank: string | null }[]) ?? [];
   const certifications = (teacher.certifications as { title: string; issuer: string | null; year: number | null }[]) ?? [];
   const links = (teacher.social_links as string[]) ?? [];
@@ -163,16 +189,18 @@ export default async function TeacherPage({ params }: Props) {
         <BeltDivider className="mt-6" />
       </Card>
 
+      <NextClassCard slots={slots} />
+
       <section aria-labelledby="grade-unificada">
         <h2 id="grade-unificada" className="font-display text-2xl font-semibold">
           Grade unificada
         </h2>
         <p className="mb-3 text-muted">
-          {academies.size > 0
-            ? `Aulas em ${academies.size} ${academies.size === 1 ? "academia" : "academias"}: ${[...academies.values()].map((a) => a.name).join(", ")}.`
-            : "Ainda sem aulas cadastradas nas academias."}
+          {placeNames.size > 0
+            ? `Aulas em ${placeNames.size} ${placeNames.size === 1 ? "local" : "locais"}: ${[...placeNames].join(", ")}.`
+            : "Ainda sem aulas cadastradas."}
         </p>
-        <ScheduleGrid items={classes as unknown as ScheduleItem[]} showAcademy />
+        <ScheduleGrid items={gridItems} showAcademy />
       </section>
 
       {markers.size > 0 && (

@@ -10,9 +10,44 @@ import { PostList } from "@/components/post/post-list";
 import { createClient } from "@/lib/supabase/server";
 import { loadExplore } from "@/lib/posts";
 import { getViewer } from "@/lib/viewer";
+import { getCurrentProfile } from "@/lib/auth";
+import { slotFromAcademyClass, slotFromTeacherClass } from "@/lib/teacher-schedule";
+import { UpcomingClasses, type UpcomingItem } from "@/components/teacher/upcoming-classes";
 import { routes } from "@/lib/routes";
 
 export const metadata: Metadata = { title: "Explorar" };
+
+/**
+ * Próximas aulas para o Explorar: grade própria dos professores + grade das academias.
+ * Prioriza a cidade do perfil; sem aulas lá (ou sem cidade), cai para o estado e depois para todas.
+ */
+async function loadUpcoming(supabase: Awaited<ReturnType<typeof createClient>>) {
+  const me = await getCurrentProfile();
+  const scopes: { city: string | null; state: string | null }[] = [
+    ...(me?.city && me.state ? [{ city: me.city, state: me.state }] : []),
+    ...(me?.state ? [{ city: null, state: me.state }] : []),
+    { city: null, state: null },
+  ];
+  for (const scope of scopes) {
+    let own = supabase.from("teacher_class_cards").select("*").limit(300);
+    let academy = supabase.from("class_cards").select("*").eq("status", "active").limit(300);
+    if (scope.state) {
+      own = own.eq("state", scope.state);
+      academy = academy.eq("state", scope.state);
+    }
+    if (scope.city) {
+      own = own.ilike("city", scope.city);
+      academy = academy.ilike("city", scope.city);
+    }
+    const [{ data: o }, { data: a }] = await Promise.all([own, academy]);
+    const items: UpcomingItem[] = [
+      ...(o ?? []).map((c) => ({ ...slotFromTeacherClass(c), teacherName: c.teacher_name, teacherUsername: c.teacher_username })),
+      ...(a ?? []).map((c) => ({ ...slotFromAcademyClass(c), teacherName: c.teacher_display_name, teacherUsername: c.teacher_username })),
+    ];
+    if (items.length > 0 || !scope.state) return { items, city: scope.city };
+  }
+  return { items: [], city: null };
+}
 
 export default async function ExplorePage({ searchParams }: { searchParams: Promise<{ q?: string }> }) {
   const q = ((await searchParams).q ?? "").trim().slice(0, 60);
@@ -21,6 +56,7 @@ export default async function ExplorePage({ searchParams }: { searchParams: Prom
 
   const people = q.length >= 2 ? ((await supabase.rpc("search_profiles", { p_query: q, p_limit: 20 })).data ?? []) : null;
   const popular = people ? null : await loadExplore(supabase);
+  const upcoming = people ? null : await loadUpcoming(supabase);
 
   return (
     <>
@@ -59,6 +95,8 @@ export default async function ExplorePage({ searchParams }: { searchParams: Prom
         </div>
         <Button type="submit">Buscar</Button>
       </form>
+
+      {upcoming && <UpcomingClasses items={upcoming.items} city={upcoming.city} />}
 
       {people && (
         <section aria-labelledby="pessoas">

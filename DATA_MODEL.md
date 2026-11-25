@@ -85,6 +85,7 @@ Desde a migration 31 o `status` é calculado: `approved` quando há ao menos uma
 **teacher_students** (migration 28)
 `teacher_id FK teacher_profiles`, `student_id FK profiles`, `status ('pending','active')`, `requested_by ('teacher','student')`, `created_at`, `accepted_at`. PK(teacher_id, student_id), professor ≠ aluno.
 Aceite mútuo como os vínculos com academias: o professor aprovado convida pelo @usuário (`invite_student`) ou a pessoa pede na página do professor (`request_teacher`); quem não iniciou decide (`respond_student_link`; recusar apaga). Qualquer parte desfaz (`remove_student_link`). Bloquear desfaz o vínculo. Notificações `student_invite`, `student_request`, `student_accepted`. A lista só aparece para as duas partes (view `teacher_student_cards`, `security_invoker`); o total é público.
+**teacher_places / teacher_classes** (migration 32): grade própria do professor. Local = academia cadastrada (`academy_id`/`unit_id`, endereço copiado da unidade) ou lugar livre (endereço, `location` gerada de lat/lng). Aula = local, modalidade, nível, dia da semana, início/fim, experimental, observação. Público lê as de professor aprovado; só o dono escreve. A confirmação da academia é o vínculo `academy_memberships` de professor ativo (view `teacher_class_cards.academy_confirmed`).
 Desde a migration 30, o aluno só indica para confirmar graduação (`rank_promotions.teacher_id`) um professor com vínculo ativo, e o professor só confirma enquanto o vínculo existir.
 
 ### 4.2 Modalidades e graduações
@@ -274,6 +275,7 @@ unique(reporter_id, target_type, target_id) where status in ('open','in_review')
 | posts | `public`: todos (menos bloqueios); `followers`: seguidores aceitos; `private`: autor; `removed`: autor e moderador | autor = `auth.uid()` + rate limit | autor (campos limitados) | autor (soft) / moderador |
 | post_media | herda do post | autor do post | autor | autor |
 | likes / saved / comments | herda visibilidade do post | `user_id = auth.uid()` e post visível e não bloqueado | autor do comentário | autor; autor do post pode apagar comentários no seu post |
+| teacher_places / teacher_classes | todos, se o professor está aprovado e ativo; dono sempre | dono (professor aprovado) | dono | dono |
 | teacher_students | só as duas partes (total público em `teacher_profiles.student_count`) | só RPC | só RPC (quem não iniciou aceita) | qualquer parte (RPC) |
 | follows | público para `accepted`; `pending` só as duas partes | follower = uid | seguido aceita | qualquer parte |
 | notifications | destinatário | só triggers (`security definer`) | destinatário (`read_at`) | destinatário |

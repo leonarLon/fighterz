@@ -177,3 +177,52 @@ export const unitAccessSchema = z
   });
 
 export type UnitAccessInput = z.infer<typeof unitAccessSchema>;
+
+// ---------------------------------------------------------------------------
+// Grade própria do professor (migration 32)
+// ---------------------------------------------------------------------------
+export const teacherPlaceSchema = z
+  .discriminatedUnion('kind', [
+    // Academia já cadastrada: o endereço vem da unidade (o banco copia).
+    z.object({
+      kind: z.literal('academy'),
+      academyId: z.uuid('Escolha a academia.'),
+      unitId: z.union([z.uuid(), z.literal('')]).optional().transform((value) => value || null),
+    }),
+    z.object({
+      kind: z.literal('other'),
+      name: z.string().trim().min(2, 'Dê um nome ao local (ex.: Parque Barigui, Academia X).').max(120),
+      postalCode: z
+        .string()
+        .optional()
+        .transform((value) => (value ? normalizeCep(value) ?? 'invalid' : null))
+        .refine((value) => value !== 'invalid', 'CEP deve ter 8 dígitos.'),
+      street: optional(120, 'Máximo de 120 caracteres.'),
+      number: optional(20, 'Máximo de 20 caracteres.'),
+      complement: optional(80, 'Máximo de 80 caracteres.'),
+      neighborhood: optional(80, 'Máximo de 80 caracteres.'),
+      city: z.string().trim().min(2, 'Informe a cidade.').max(80),
+      state: z.enum(BRAZILIAN_STATES, 'Escolha o estado.'),
+      referencePoint: optional(160, 'Máximo de 160 caracteres.'),
+      latitude: z.coerce.number().min(-90).max(90).optional().nullable(),
+      longitude: z.coerce.number().min(-180).max(180).optional().nullable(),
+    }),
+  ])
+  .refine((data) => data.kind === 'academy' || (data.latitude == null) === (data.longitude == null), {
+    path: ['latitude'],
+    error: 'Informe latitude e longitude juntas, ou deixe as duas vazias.',
+  });
+
+export const teacherClassSchema = z
+  .object({
+    placeId: z.uuid('Escolha o local.'),
+    martialArtId: z.uuid('Escolha a modalidade.'),
+    level: z.enum(CLASS_LEVELS),
+    // Vários dias de uma vez: "segunda, quarta e sexta, 19h" vira três aulas.
+    weekdays: z.array(z.coerce.number().int().min(0).max(6)).min(1, 'Escolha pelo menos um dia.').max(7),
+    startsAt: time,
+    endsAt: time,
+    acceptsTrial: z.boolean(),
+    notes: optional(300, 'Máximo de 300 caracteres.'),
+  })
+  .refine((data) => data.endsAt > data.startsAt, { path: ['endsAt'], error: 'O fim precisa ser depois do início.' });

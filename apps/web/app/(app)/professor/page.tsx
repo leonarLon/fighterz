@@ -9,6 +9,7 @@ import { ScheduleGrid, type ScheduleItem } from "@/components/academy/schedule-g
 import { Card } from "@/components/ui/card";
 import { PageHeader } from "@/components/ui/page-header";
 import { InviteStudentForm, StudentLinkList, type StudentLink } from "@/components/teacher/student-links";
+import { MySchedule, type OwnClass, type Place } from "./my-schedule";
 import { TeacherMemberships } from "./memberships";
 import { PromotionRequests, type PromotionRequest } from "./promotion-requests";
 import { TeacherForm, type TeacherFormValues } from "./teacher-form";
@@ -55,6 +56,45 @@ export default async function TeacherAreaPage() {
   let memberships: { academyId: string; slug: string; name: string; status: string; requestedBy: string }[] = [];
   let requests: PromotionRequest[] = [];
   let students: StudentLink[] = [];
+  let places: Place[] = [];
+  let ownClasses: OwnClass[] = [];
+  let academyOptions: { id: string; name: string; city: string | null }[] = [];
+  if (approved) {
+    const [{ data: pl }, { data: oc }, { data: ac }, { data: activeTeaching }] = await Promise.all([
+      supabase.from("teacher_places").select("id, name, academy_id, street, number, complement, neighborhood, city, state, academies(slug)").eq("teacher_id", user.id).order("created_at"),
+      supabase.from("teacher_class_cards").select("*").eq("teacher_id", user.id),
+      // Academias com endereço cadastrado (o local copia o endereço da unidade).
+      supabase.from("academy_units").select("academy_id, city, academies!inner(id, name, status)").eq("is_active", true).eq("academies.status", "active").order("city").limit(1000),
+      supabase.from("academy_memberships").select("academy_id").eq("user_id", user.id).eq("role", "teacher").eq("status", "active"),
+    ]);
+    const confirmedAcademies = new Set((activeTeaching ?? []).map((m) => m.academy_id));
+    places = (pl ?? []).map((p) => ({
+      id: p.id,
+      name: p.name,
+      academyId: p.academy_id,
+      academySlug: (p.academies as unknown as { slug: string } | null)?.slug ?? null,
+      confirmed: p.academy_id != null && confirmedAcademies.has(p.academy_id),
+      address: { street: p.street, number: p.number, complement: p.complement, neighborhood: p.neighborhood, city: p.city, state: p.state },
+    }));
+    ownClasses = (oc ?? []).map((c) => ({
+      id: c.id!,
+      placeId: c.place_id!,
+      weekday: c.weekday!,
+      starts_at: c.starts_at!,
+      ends_at: c.ends_at!,
+      level: c.level!,
+      martialArtName: c.martial_art_name ?? "",
+      acceptsTrial: c.accepts_trial ?? false,
+      notes: c.notes,
+    }));
+    const seen = new Map<string, { id: string; name: string; city: string | null }>();
+    for (const u of ac ?? []) {
+      const a = u.academies as unknown as { id: string; name: string };
+      if (!seen.has(a.id)) seen.set(a.id, { id: a.id, name: a.name, city: u.city });
+    }
+    academyOptions = [...seen.values()].sort((x, y) => x.name.localeCompare(y.name, "pt-BR"));
+  }
+  const taughtArts = (arts ?? []).filter((a) => (taught ?? []).some((t) => t.martial_art_id === a.id)).map((a) => ({ id: a.id, name: a.name }));
   if (approved) {
     const [{ data: s }, { data: m }, { data: pr }, { data: st }] = await Promise.all([
       supabase.rpc("get_teacher_schedule", { p_teacher: user.id }),
@@ -134,11 +174,22 @@ export default async function TeacherAreaPage() {
 
       {approved && (
         <div className="mb-6 space-y-6">
-          <section aria-labelledby="minha-grade">
-            <h2 id="minha-grade" className="mb-3 font-display text-2xl font-semibold">
+          <section aria-labelledby="minha-grade" className="scroll-mt-20">
+            <h2 id="minha-grade" className="font-display text-2xl font-semibold">
               Minha grade
             </h2>
-            <ScheduleGrid items={schedule} showAcademy />
+            <p className="mb-3 text-muted">
+              Informe onde, em que dias e horários você dá aula. A grade aparece no seu perfil, na busca de aulas e no Explorar,
+              com a próxima aula em destaque para seus alunos.
+            </p>
+            <MySchedule places={places} classes={ownClasses} arts={taughtArts} academies={academyOptions} />
+            {schedule.length > 0 && (
+              <div className="mt-6">
+                <h3 className="mb-1 font-display text-xl font-semibold">Aulas na grade das academias</h3>
+                <p className="mb-3 text-sm text-muted">Cadastradas pelas academias em que você tem vínculo. Só a academia altera.</p>
+                <ScheduleGrid items={schedule} showAcademy />
+              </div>
+            )}
           </section>
           <section aria-labelledby="graduacoes-pendentes">
             <h2 id="graduacoes-pendentes" className="mb-3 font-display text-2xl font-semibold">
